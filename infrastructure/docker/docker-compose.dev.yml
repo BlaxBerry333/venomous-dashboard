@@ -1,0 +1,141 @@
+services:
+  # ====================================================================================================
+  # Application: dashboard
+  # ====================================================================================================
+  dashboard:
+    container_name: dashboard
+    build:
+      context: ../../dashboard
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../dashboard:/app
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # API Gateway: api-gateway
+  # ====================================================================================================
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ../../servers/api-gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../servers/api-gateway:/app
+    networks:
+      - venomous-network
+    depends_on:
+      - authorization
+      - notes
+      - media
+      - workflows
+
+  # ====================================================================================================
+  # Headless Service: authorization
+  # ====================================================================================================
+  authorization:
+    container_name: authorization
+    build:
+      context: ../../servers/authorization
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../../servers/authorization:/app
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Headless Service: notes
+  # ====================================================================================================
+  notes:
+    container_name: notes
+    build:
+      context: ../../servers/notes
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../../servers/notes:/app
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Headless Service: media
+  # ====================================================================================================
+  media:
+    container_name: media
+    build:
+      context: ../../servers/media
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../../servers/media:/app
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Headless Service: workflows
+  # ====================================================================================================
+  workflows:
+    container_name: workflows
+    build:
+      context: ../../servers/workflows
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../../servers/workflows:/app
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Database: db
+  # ====================================================================================================
+  db:
+    container_name: db
+    image: postgres:15
+    ports:
+      - "9100:5432"
+    environment:
+      POSTGRES_DB: venomous_dashboard_db
+      POSTGRES_USER: venomous_dashboard_db
+      POSTGRES_PASSWORD: venomous
+    volumes:
+      - venomous-db-data:/var/lib/postgresql/data
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Cache: redis
+  # ====================================================================================================
+  redis:
+    container_name: redis
+    image: redis:7
+    ports:
+      - "9200:6379"
+    networks:
+      - venomous-network
+
+  # ====================================================================================================
+  # Storage: minio
+  # ====================================================================================================
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9300:9000"
+      - "9301:9001"
+    environment:
+      MINIO_ROOT_USER: venomous_dashboard_minio
+      MINIO_ROOT_PASSWORD: venomous
+    volumes:
+      - venomous-minio-data:/data
+    networks:
+      - venomous-network
+
+networks:
+  venomous-network:
+    driver: bridge
+
+volumes:
+  venomous-db-data:
+  venomous-minio-data:

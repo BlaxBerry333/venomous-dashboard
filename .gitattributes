@@ -1,0 +1,43 @@
+# ====================================================================================================
+# Ignore
+# ====================================================================================================
+
+# Common
+**/.vscode/* linguist-vendored=true
+**/.idea/* linguist-vendored=true
+**/.venv/* linguist-vendored=true
+**/venv/* linguist-vendored=true
+**/env/* linguist-vendored=true
+**/log/* linguist-vendored=true
+**/tmp/* linguist-vendored=true
+
+# Frontend
+**/node_modules/* linguist-vendored=true
+**/package-lock.json linguist-generated=true
+**/yarn.lock linguist-generated=true
+**/.next/* linguist-generated=true
+
+# Ruby、Rails
+**/Gemfile.lock linguist-generated=true
+**/.bundle/* linguist-vendored=true
+
+# Python、Django
+*.pyc linguist-vendored=true
+**/__pycache__/* linguist-vendored=true
+**/db.sqlite3 linguist-vendored=true
+
+# Rust
+**/Cargo.lock linguist-generated=true
+**/target/* linguist-vendored=true
+
+# Markdown
+*.md linguist-documentation=true
+
+
+# ====================================================================================================
+# # Ensure
+# ====================================================================================================
+
+# Others
+Makefile linguist-language=Makefile
+*Dockerfile* linguist-language=Dockerfile

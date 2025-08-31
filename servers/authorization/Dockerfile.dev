@@ -1,0 +1,23 @@
+# Use an official Rust runtime as a parent image
+FROM rust:1.70
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install cargo-watch for hot-reloading
+RUN cargo install cargo-watch
+
+# Copy Cargo.toml and Cargo.lock to cache dependencies
+COPY Cargo.toml Cargo.lock ./
+
+# Create a dummy lib.rs to build dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release
+RUN rm -rf src
+
+# Copy the rest of the application's code
+COPY . .
+
+# Run the app with cargo-watch for hot-reloading
+# The port will be internal to docker, so no EXPOSE needed unless specified in compose
+CMD ["cargo", "watch", "-x", "run"]

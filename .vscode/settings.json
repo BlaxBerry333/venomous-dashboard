@@ -1,0 +1,21 @@
+{
+    "editor.formatOnSave": true,
+
+    "[javascript][typescript][javascriptreact][typescriptreact][vue][css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    },
+    
+    "cSpell.words": [
+        "__pycache__",
+        "iconify",
+        "prettiercache",
+        "turbopack",
+        "vercel",
+        "venv",
+        "xyflow",
+        "BlaxBerry"
+    ]
+}

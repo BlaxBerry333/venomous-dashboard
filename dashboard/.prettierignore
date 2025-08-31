@@ -1,0 +1,48 @@
+# IDE settings
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test coverage
+coverage/
+
+# Env
+.env*
+
+# Cache directories
+.cache/
+.temp/
+.tmp/
+
+# Static assets
+public/
+assets/
+
+# Minified files
+*.min.js
+*.min.css
+
+# Generated files
+generated/
+.next/
+
+# ESLint、Prettier
+eslint.config.mjs
+.prettierrc.mjs
+.prettiercache
+
+# JSON
+*.json

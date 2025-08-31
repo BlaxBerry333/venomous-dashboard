@@ -1,0 +1,11 @@
+# Compiled binary
+api-gateway
+
+# Logs and temporary files
+*.log
+
+# Git
+.git
+
+# Go vendor directory
+vendor/
