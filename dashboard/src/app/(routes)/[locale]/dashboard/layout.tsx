@@ -3,8 +3,8 @@
 import React from "react";
 
 import { Container, Layout } from "venomous-ui-react/components";
+import { useDesign } from "venomous-ui-react/hooks";
 
-import { useDesign } from "@/client/styles/design";
 import { LanguageSwitcher, Logo, Logout, ThemeModeTrigger } from "@/client/ui";
 
 const DashboardRootLayout = React.memo<React.PropsWithChildren>(({ children }) => {
@@ -12,7 +12,7 @@ const DashboardRootLayout = React.memo<React.PropsWithChildren>(({ children }) =
 
   return (
     <Layout.Provider headerHeight={60}>
-      <Layout.Header style={{ borderBottom: `1px solid ${design.colors.border[3]}` }}>
+      <Layout.Header style={{ borderBottom: `1px solid ${design.BorderColors.tertiary}` }}>
         <Container
           maxBreakpoint="lg"
           style={{

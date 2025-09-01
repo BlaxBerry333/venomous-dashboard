@@ -4,8 +4,8 @@ import Link from "next/link";
 import React from "react";
 
 import { Icon, Menu, Popover, Space, Typography } from "venomous-ui-react/components";
+import { useDesign } from "venomous-ui-react/hooks";
 
-import { useDesign } from "@/client/styles/design";
 import { i18n, useI18nLocale } from "@/utils/i18n/index.client";
 
 const LanguageSwitcher = React.memo(() => {
@@ -25,7 +25,7 @@ const LanguageSwitcher = React.memo(() => {
       contentStyle={{ width: "160px" }}
       renderTrigger={() => (
         <Space.Flex row gap={4} style={{ width: "160px", height: 60, alignItems: "center", cursor: "pointer", padding: "0 16px" }}>
-          <Icon icon={currentLocalOption.icon} width={24} style={{ border: `1px solid ${design.colors.border[3]}` }} />
+          <Icon icon={currentLocalOption.icon} width={24} style={{ border: `1px solid ${design.BorderColors.tertiary}` }} />
           <Typography.Text as="strong" text={currentLocalOption.label} style={{ transform: "translateY(2px)" }} />
         </Space.Flex>
       )}
