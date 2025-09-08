@@ -1,18 +1,18 @@
 import "server-only";
 
 import { i18n } from "./config";
-import type { I18nDictionary, I18nLocale, I18nNamespace, I18nNamespaceDictionary } from "./types";
+import type { Ti18nDictionary, Ti18nLocale, Ti18nNamespace, Ti18nNamespaceDictionary } from "./index.types";
 
-const dictionaries: I18nNamespaceDictionary = i18n.locales.reduce((acc, locale) => {
+const dictionaries: Ti18nNamespaceDictionary = i18n.locales.reduce((acc, locale) => {
   acc[locale] = i18n.namespaces.reduce(
     (nsAcc, namespace) => {
       nsAcc[namespace] = () => import(`./locales/${locale}/${namespace}.json`).then((module) => module.default);
       return nsAcc;
     },
-    {} as Record<I18nNamespace, () => Promise<I18nDictionary[I18nNamespace]>>,
+    {} as Record<Ti18nNamespace, () => Promise<Ti18nDictionary[Ti18nNamespace]>>,
   );
   return acc;
-}, {} as I18nNamespaceDictionary);
+}, {} as Ti18nNamespaceDictionary);
 
 /**
  * Returns the dictionary of translations for a given locale and namespaces.
@@ -20,7 +20,7 @@ const dictionaries: I18nNamespaceDictionary = i18n.locales.reduce((acc, locale) 
  * @param namespaces A readonly array of namespaces to load.
  * @returns A promise that resolves to a dictionary containing the requested namespaces.
  */
-export const getDictionary = async <N extends I18nNamespace>(locale: I18nLocale, namespaces: readonly N[]): Promise<Pick<I18nDictionary, N>> => {
+export const getDictionary = async <N extends Ti18nNamespace>(locale: Ti18nLocale, namespaces: readonly N[]): Promise<Pick<Ti18nDictionary, N>> => {
   const localeDictionaries = dictionaries[locale] ?? dictionaries[i18n.defaultLocale];
 
   const requestedDictionaries = await Promise.all(
@@ -31,5 +31,5 @@ export const getDictionary = async <N extends I18nNamespace>(locale: I18nLocale,
     }),
   );
 
-  return requestedDictionaries.reduce((acc, curr) => ({ ...acc, ...curr }), {}) as Pick<I18nDictionary, N>;
+  return requestedDictionaries.reduce((acc, curr) => ({ ...acc, ...curr }), {}) as Pick<Ti18nDictionary, N>;
 };

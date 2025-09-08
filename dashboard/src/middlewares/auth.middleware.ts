@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { ROUTER_PATHS } from "@/client/routes";
-import { COOKIE_NAME } from "@/server/utils";
+import { COOKIE_NAME } from "@/server/helpers";
 
 const PROTECTED_PATHS = [ROUTER_PATHS.DASHBOARD.ROOT] as const;
 const AUTH_PATHS = [ROUTER_PATHS.AUTH.SIGNIN] as const;

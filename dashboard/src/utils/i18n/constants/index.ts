@@ -1,8 +1,8 @@
 // cSpell:disable
 
-import type { I18nLocale } from "../types";
+import type { Ti18nLocale } from "../index.types";
 
-export const I18N_LOCALES_OPTIONS: Array<{ value: I18nLocale; label: string; flag: string; icon: string }> = [
+export const I18N_LOCALES_OPTIONS: Array<{ value: Ti18nLocale; label: string; flag: string; icon: string }> = [
   {
     value: "en",
     label: "English ( US )",

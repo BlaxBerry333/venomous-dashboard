@@ -4,18 +4,18 @@ A multi-language microservices project for learning and demonstration purposes.
 
 ## Server List
 
-|     Category     |             Service Name              |    Main Skill     |
-| :--------------: | :-----------------------------------: | :---------------: |
-|   Application    |       [dashboard](./dashboard/)       |      Next.js      |
-|   Application    |        [document](./document/)        |         -         |
-|   API Gateway    | [api-gateway](./servers/api-gateway/) |    Go ( Gin )     |
-| Headless Service |   [auth](./servers/authorization/)    |   Rust ( Axum )   |
-| Headless Service |       [notes](./servers/notes/)       |  Ruby ( Rails )   |
-| Headless Service |       [media](./servers/media/)       |      Node.js      |
-| Headless Service |   [workflows](./servers/workflows/)   | Python ( Django ) |
-|     Database     |                  db                   |    PostgresSQL    |
-|      Cache       |                 redis                 |         -         |
-|     Storage      |                 minio                 |         -         |
+|     Category     |             Service Name              |    Main Skill     |                                              |
+| :--------------: | :-----------------------------------: | :---------------: | -------------------------------------------- |
+|   Application    |       [dashboard](./dashboard/)       |      Next.js      | Main user interface.                         |
+|   Application    |        [document](./document/)        |         -         |                                              |
+|   API Gateway    | [api-gateway](./servers/api-gateway/) |    Go ( Gin )     | Single entry point for all backend requests. |
+| Headless Service |   [auth](./servers/authorization/)    |   Rust ( Axum )   | User registration, login, JWT management.    |
+| Headless Service |       [notes](./servers/notes/)       |  Ruby ( Rails )   | Note management service.                     |
+| Headless Service |       [media](./servers/media/)       |      Node.js      | Media and file management service.           |
+| Headless Service |   [workflows](./servers/workflows/)   | Python ( Django ) | Workflow management service.                 |
+|     Database     |                  db                   |    PostgresSQL    | Primary relational database.                 |
+|      Cache       |                 redis                 |       Redis       | Caching layer.                               |
+|     Storage      |                 minio                 |         -         | S3-compatible object storage.                |
 
 ## Directory Structure
 
@@ -31,6 +31,8 @@ A multi-language microservices project for learning and demonstration purposes.
 │   └── ...
 │
 ├── dashboard/                                  # Dashboard Application
+│   ├── docker/
+│   │   └── Dockerfile.[ENV]
 │   └── ...
 │
 ├── document/                                   # Documentation Application

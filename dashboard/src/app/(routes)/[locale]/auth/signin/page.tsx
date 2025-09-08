@@ -8,8 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default async function SigninPage() {
-  // const session = await getSession();
-  // if (session) redirect("/dashboard");
-
   return <AuthSigninForm />;
 }

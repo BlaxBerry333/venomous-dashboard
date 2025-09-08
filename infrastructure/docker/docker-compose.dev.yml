@@ -21,7 +21,7 @@ services:
     container_name: api-gateway
     build:
       context: ../../servers/api-gateway
-      dockerfile: Dockerfile.dev
+      dockerfile: docker/Dockerfile.dev
     ports:
       - "8080:8080"
     volumes:
@@ -30,9 +30,9 @@ services:
       - venomous-network
     depends_on:
       - authorization
-      - notes
-      - media
-      - workflows
+      # - notes
+      # - media
+      # - workflows
 
   # ====================================================================================================
   # Headless Service: authorization
@@ -41,7 +41,7 @@ services:
     container_name: authorization
     build:
       context: ../../servers/authorization
-      dockerfile: Dockerfile.dev
+      dockerfile: docker/Dockerfile.dev
     volumes:
       - ../../servers/authorization:/app
     networks:

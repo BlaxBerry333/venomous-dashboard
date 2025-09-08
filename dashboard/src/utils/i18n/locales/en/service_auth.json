@@ -1,0 +1,33 @@
+{
+  "apiResults": {
+    "SIGNIN_FAILED": "Login failed. Please check your credentials.",
+    "SIGNIN_SUCCESS": "Login successful! Welcome back.",
+    "SIGNUP_FAILED": "Registration failed. Please try again.",
+    "SIGNUP_SUCCESS": "Account created successfully! Welcome aboard.",
+    "TOKEN_VERIFICATION_FAILED": "Authentication failed. Please login again.",
+    "TOKEN_VERIFICATION_SUCCESS": "Authentication successful.",
+    "TOKEN_NOT_FOUND": "Please login to continue.",
+    "TOKEN_INVALID": "Invalid or expired token. Please login again.",
+    "TOKEN_REFRESH_FAILED": "Token refresh failed. Please login again.",
+    "USER_NOT_FOUND": "User not found.",
+    "EMAIL_ALREADY_EXISTS": "This email is already registered. Please use a different email."
+  },
+
+  "uiMessages": {
+    "SIGNIN": "User Signin",
+    "SIGNUP": "User Signup",
+    "ALREADY_HAVE_AN_ACCOUNT": "Already have an account ?",
+    "DO_NOT_HAVE_AN_ACCOUNT": "Don't have an account ?",
+    "CREATE_AN_ACCOUNT": "Create a new account now !",
+    "FORGOT_PASSWORD": "Forgot password ?"
+  },
+
+  "uiForm": {
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password"
+    }
+  }
+}

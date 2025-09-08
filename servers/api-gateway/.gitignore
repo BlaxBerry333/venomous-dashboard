@@ -1,0 +1,31 @@
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when run with the -o flag
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories (remove the comment if you use vendoring)
+# vendor/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# IDE settings
+.vscode/
+.idea/

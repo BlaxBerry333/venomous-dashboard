@@ -1,0 +1,16 @@
+{
+  "REQUIRED": "This field is required",
+  "INVALID": "Invalid input",
+
+  "NAME_TOO_SHORT": "Name must be at least 2 characters long",
+  "NAME_TOO_LONG": "Name must not exceed 50 characters",
+  "NAME_INVALID_CHARS": "Name can only contain letters, Chinese characters and spaces",
+
+  "EMAIL_TOO_LONG": "Email must not exceed 100 characters",
+  "EMAIL_INVALID": "Please enter a valid email address",
+
+  "PASSWORD_TOO_SHORT": "Password must be at least 4 characters long",
+  "PASSWORD_TOO_LONG": "Password must not exceed 128 characters",
+  "PASSWORD_WEAK": "Password must contain uppercase, lowercase and numbers",
+  "CONFIRM_PASSWORD_MISMATCH": "Password confirmation does not match"
+}

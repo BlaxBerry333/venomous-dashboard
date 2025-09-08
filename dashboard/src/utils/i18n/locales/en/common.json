@@ -1,4 +1,17 @@
 {
-    "greeting": "Hello, World!",
-    "submit": "Submit"
+  "buttonText": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "save": "Save",
+    "reset": "Reset",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "undo": "Undo",
+    "redo": "Redo",
+    "execute": "Run"
+  }
 }

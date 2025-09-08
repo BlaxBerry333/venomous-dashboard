@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AuthSignupPageView } from "@/client/features/auth-signup";
+import { AuthSignupForm } from "@/client/features/auth-signup";
 
 export const metadata: Metadata = {
   title: "Signup",
@@ -8,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default async function SignupPage() {
-  return (
-    <div>
-      <AuthSignupPageView />
-    </div>
-  );
+  return <AuthSignupForm />;
 }

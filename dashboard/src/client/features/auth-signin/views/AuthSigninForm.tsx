@@ -1,26 +1,38 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
 import { useMutation } from "@tanstack/react-query";
-import { Button, Form, FormField, Space, Typography } from "venomous-ui-react/components";
+import { Button, Form, FormField, notify, Space, Theme, Typography } from "venomous-ui-react/components";
 
 import { ROUTER_PATHS } from "@/client/routes";
+import { useI18nDictionary, useI18nLocale } from "@/utils/i18n/index.client";
 import { useTRPC } from "@/utils/trpc/index.client";
 
 const AuthSigninForm = React.memo(() => {
+  const { themeColor } = Theme.useThemeColor();
+
   const router = useRouter();
   const trpc = useTRPC();
+  const dictionary = useI18nDictionary();
+  const { currentLocale } = useI18nLocale();
 
   const mutation = useMutation(
     trpc.auth.signin.mutationOptions({
-      onSuccess: (data) => {
-        console.log({ data });
+      onSuccess: () => {
+        notify({
+          type: "success",
+          title: dictionary.service_auth.apiResults.SIGNIN_SUCCESS,
+        });
         router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
       },
       onError: (error) => {
-        console.log({ error });
+        notify({
+          type: "error",
+          title: error.message,
+        });
       },
     }),
   );
@@ -28,7 +40,7 @@ const AuthSigninForm = React.memo(() => {
   const handleSubmit = React.useCallback(async () => {
     await mutation.mutateAsync({
       email: "admin@example.com",
-      password: "password",
+      password: "Admin",
     });
   }, [mutation]);
 
@@ -41,18 +53,23 @@ const AuthSigninForm = React.memo(() => {
       }}
     >
       <Space.Flex column gap={0}>
-        <Typography.Title as="h3" text="Signin" />
-        <Typography.Title as="h5" text="Signin to your account" />
+        <Typography.Title as="h3" text={dictionary.service_auth.uiMessages.SIGNIN} />
+        <Space.Flex row gap={0} style={{ flexWrap: "wrap", alignItems: "center" }}>
+          <Typography.Text text={dictionary.service_auth.uiMessages.DO_NOT_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
+          <Link href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNUP}`} style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}>
+            <Typography.Text text={dictionary.service_auth.uiMessages.CREATE_AN_ACCOUNT} style={{ color: "inherit" }} />
+          </Link>
+        </Space.Flex>
       </Space.Flex>
 
       <Space.Flex column gap={16} style={{ margin: "40px 0" }}>
-        <FormField.Text label="Email" name="email" fullWidth />
-        <FormField.Password label="Password" name="password" fullWidth />
+        <FormField.Text name="email" label={dictionary.service_auth.uiForm.labels.email} fullWidth />
+        <FormField.Password name="password" label={dictionary.service_auth.uiForm.labels.password} fullWidth />
       </Space.Flex>
 
       <Space.Flex row>
-        <Button type="reset" text="Cancel" variant="outlined" semanticColor="error" />
-        <Button type="submit" text="Signin" />
+        <Button type="reset" text={dictionary.common.buttonText.cancel} variant="outlined" semanticColor="error" />
+        <Button type="submit" text={dictionary.common.buttonText.submit} />
       </Space.Flex>
     </Form>
   );

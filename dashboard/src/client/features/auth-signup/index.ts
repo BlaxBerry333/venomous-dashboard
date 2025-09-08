@@ -1,1 +1,1 @@
-export { default as AuthSignupPageView } from "./views/AuthSignupPageView";
+export { default as AuthSignupForm } from "./views/AuthSignupForm";

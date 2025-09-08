@@ -26,7 +26,13 @@
 **/__pycache__/* linguist-vendored=true
 **/db.sqlite3 linguist-vendored=true
 
+# Golang、Gin
+**/go.mod linguist-language=Go
+**/go.sum linguist-generated=true
+**/vendor/* linguist-vendored=true
+
 # Rust
+**/Cargo.toml linguist-language=Rust
 **/Cargo.lock linguist-generated=true
 **/target/* linguist-vendored=true
 

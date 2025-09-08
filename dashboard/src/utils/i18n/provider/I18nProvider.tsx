@@ -2,11 +2,11 @@
 
 import React from "react";
 
-import type { I18nDictionary } from "../types";
+import type { Ti18nDictionary } from "../index.types";
 
-export const I18nContext = React.createContext<I18nDictionary | null>(null);
+export const I18nContext = React.createContext<Ti18nDictionary | null>(null);
 
-const I18nProvider = React.memo<React.PropsWithChildren<{ dictionary: I18nDictionary }>>(({ children, dictionary }) => {
+const I18nProvider = React.memo<React.PropsWithChildren<{ dictionary: Ti18nDictionary }>>(({ children, dictionary }) => {
   return <I18nContext.Provider value={dictionary}>{children}</I18nContext.Provider>;
 });
 

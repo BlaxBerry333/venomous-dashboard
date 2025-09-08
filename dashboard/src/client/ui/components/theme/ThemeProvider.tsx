@@ -11,9 +11,9 @@ const ThemeProvider = React.memo<React.PropsWithChildren>(({ children }) => {
       <Theme.Provider defaultThemeColor={THEME_COLORS.TurquoiseFerDeLance}>
         <Theme.InjectToHTML />
 
-        {children}
+        <div id="root">{children}</div>
 
-        <Notification />
+        <Notification offset={8} />
       </Theme.Provider>
     </NoSSR>
   );

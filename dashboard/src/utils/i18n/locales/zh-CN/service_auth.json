@@ -1,0 +1,33 @@
+{
+  "apiResults": {
+    "SIGNIN_FAILED": "登录失败，请检查您的凭据",
+    "SIGNIN_SUCCESS": "登录成功！欢迎回来",
+    "SIGNUP_FAILED": "注册失败，请重试",
+    "SIGNUP_SUCCESS": "账户创建成功！欢迎加入",
+    "TOKEN_VERIFICATION_FAILED": "身份验证失败，请重新登录",
+    "TOKEN_VERIFICATION_SUCCESS": "身份验证成功",
+    "TOKEN_NOT_FOUND": "请先登录以继续",
+    "TOKEN_INVALID": "令牌无效或已过期，请重新登录",
+    "TOKEN_REFRESH_FAILED": "令牌刷新失败，请重新登录",
+    "USER_NOT_FOUND": "用户不存在",
+    "EMAIL_ALREADY_EXISTS": "该邮箱已被注册，请使用其他邮箱"
+  },
+
+  "uiMessages": {
+    "SIGNIN": "用户登录",
+    "SIGNUP": "用户注册",
+    "ALREADY_HAVE_AN_ACCOUNT": "已经有账号了 ?",
+    "DO_NOT_HAVE_AN_ACCOUNT": "还没有账号 ?",
+    "CREATE_AN_ACCOUNT": "创建一个新账号 !",
+    "FORGOT_PASSWORD": "忘记密码了 ?"
+  },
+
+  "uiForm": {
+    "labels": {
+      "name": "用户名",
+      "email": "登陆邮箱",
+      "password": "登陆密码",
+      "confirmPassword": "密码确认"
+    }
+  }
+}
