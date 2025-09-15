@@ -41,6 +41,11 @@ impl ErrorCode {
     pub const USER_NOT_FOUND: &'static str = "USER_NOT_FOUND";
     pub const ACCOUNT_LOCKED: &'static str = "ACCOUNT_LOCKED";
     pub const JWT_ERROR: &'static str = "JWT_ERROR";
+
+    // Admin-specific error codes
+    pub const INSUFFICIENT_PERMISSIONS: &'static str = "INSUFFICIENT_PERMISSIONS";
+    pub const CANNOT_DISABLE_SELF: &'static str = "CANNOT_DISABLE_SELF";
+    pub const CANNOT_DISABLE_SUPER_ADMIN: &'static str = "CANNOT_DISABLE_SUPER_ADMIN";
 }
 
 /// Common error messages

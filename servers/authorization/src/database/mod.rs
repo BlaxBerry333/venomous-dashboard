@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::models::database::{AuthUser, NewAuthUser, NewUser, NewUserRole, User};
 use crate::schema::{auth_users, roles, user_roles, users};
+use crate::handlers::admin::{GetUsersQuery, SecurityLogsQuery, UserAdminView, SecurityLogEntry};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
@@ -199,5 +200,112 @@ impl Database {
             .execute(&mut conn)?;
 
         Ok(())
+    }
+
+    // ========================================
+    // Admin-specific database operations
+    // ========================================
+
+    /// Get users for admin panel with filtering and pagination
+    pub fn get_users_admin(&self, params: &GetUsersQuery) -> Result<Vec<UserAdminView>> {
+        // TODO: Implement actual database query with proper filtering and pagination
+        // This is a placeholder that returns empty results until real implementation
+        let _ = params; // Suppress unused parameter warning
+        Ok(vec![])
+    }
+
+    /// Count users for admin panel
+    pub fn count_users_admin(&self, params: &GetUsersQuery) -> Result<i64> {
+        // TODO: Implement actual user count query
+        let _ = params; // Suppress unused parameter warning
+        Ok(0)
+    }
+
+    /// Update user status (admin function)
+    pub fn update_user_status(&self, user_id: Uuid, status: &str, admin_id: Uuid, reason: Option<&str>) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        // In a real implementation, you'd have a status column in users table
+        // For now, we'll just log this operation
+        tracing::info!("Admin {} updated user {} status to {}: {:?}", admin_id, user_id, status, reason);
+
+        // This would be the actual update:
+        // diesel::update(users::table.filter(users::id.eq(user_id)))
+        //     .set((
+        //         users::status.eq(status),
+        //         users::updated_at.eq(Utc::now()),
+        //         // Add other status-related fields
+        //     ))
+        //     .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Admin reset user password
+    pub fn admin_reset_user_password(&self, user_id: Uuid, password_hash: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(auth_users::table.filter(auth_users::user_id.eq(user_id)))
+            .set((
+                auth_users::password_hash.eq(password_hash),
+                auth_users::updated_at.eq(Utc::now()),
+                // In a real implementation, you might have a password_reset_required field:
+                // auth_users::password_reset_required.eq(true),
+            ))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Get user roles
+    pub fn get_user_roles(&self, user_id: Uuid) -> Result<Vec<String>> {
+        let mut conn = self.get_connection()?;
+
+        let role_names = user_roles::table
+            .inner_join(roles::table)
+            .filter(user_roles::user_id.eq(user_id))
+            .select(roles::name)
+            .load::<String>(&mut conn)?;
+
+        Ok(role_names)
+    }
+
+    /// Revoke all user sessions (admin function)
+    pub fn revoke_all_user_sessions(&self, user_id: Uuid, reason: &str) -> Result<u32> {
+        // This would require a user_sessions table, which we haven't implemented yet
+        // For now, return a mock count
+        tracing::info!("Revoking all sessions for user {} with reason: {}", user_id, reason);
+        Ok(0)
+    }
+
+    /// Log security event
+    pub fn log_security_event(
+        &self,
+        user_id: Option<Uuid>,
+        event_type: &str,
+        metadata: Option<serde_json::Value>,
+        success: bool,
+        ip_address: Option<&str>,
+    ) -> Result<()> {
+        // This would require a security_events table
+        tracing::info!(
+            "Security event: user_id={:?}, event_type={}, success={}, ip={:?}",
+            user_id, event_type, success, ip_address
+        );
+        Ok(())
+    }
+
+    /// Get security logs for admin panel
+    pub fn get_security_logs(&self, params: &SecurityLogsQuery, offset: u32) -> Result<Vec<SecurityLogEntry>> {
+        // TODO: Implement actual security logs query from security_events table
+        let _ = (params, offset); // Suppress unused parameter warnings
+        Ok(vec![])
+    }
+
+    /// Count security logs
+    pub fn count_security_logs(&self, params: &SecurityLogsQuery) -> Result<i64> {
+        // TODO: Implement actual security logs count query
+        let _ = params; // Suppress unused parameter warning
+        Ok(0)
     }
 }

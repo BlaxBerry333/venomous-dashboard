@@ -1,4 +1,4 @@
-use axum::{routing::post, Router};
+use axum::{routing::{get, post, put, delete}, Router};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
@@ -10,6 +10,13 @@ use venomous_dashboard_authorization::{
     handlers::{
         auth::{logout_handler, signin_handler, signup_handler},
         token::{token_info_handler, token_refresh_handler, token_verify_handler},
+        admin::{
+            get_users_handler,
+            update_user_status_handler,
+            reset_user_password_handler,
+            get_security_logs_handler,
+            revoke_user_sessions_handler
+        },
     },
 };
 
@@ -46,6 +53,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/token-verify", post(token_verify_handler))
         .route("/token-info", post(token_info_handler))
         .route("/token-refresh", post(token_refresh_handler))
+        // Admin routes (require admin authentication)
+        .route("/admin/users", get(get_users_handler))
+        .route("/admin/users/:user_id/status", put(update_user_status_handler))
+        .route("/admin/users/:user_id/reset-password", post(reset_user_password_handler))
+        .route("/admin/security-logs", get(get_security_logs_handler))
+        .route("/admin/sessions/revoke", post(revoke_user_sessions_handler))
         // Add shared state (database connection pool)
         .with_state(database)
         // Add logging middleware
