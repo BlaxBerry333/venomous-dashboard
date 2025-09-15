@@ -42,10 +42,15 @@ services:
     build:
       context: ../../servers/authorization
       dockerfile: docker/Dockerfile.dev
+    environment:
+      DATABASE_URL: "postgresql://venomous_dashboard_db:venomous@db:5432/venomous_dashboard_db"
+      RUST_LOG: info
     volumes:
       - ../../servers/authorization:/app
     networks:
       - venomous-network
+    depends_on:
+      - db
 
   # ====================================================================================================
   # Headless Service: notes
@@ -100,6 +105,7 @@ services:
       POSTGRES_PASSWORD: venomous
     volumes:
       - venomous-db-data:/var/lib/postgresql/data
+      - ../database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - venomous-network
 

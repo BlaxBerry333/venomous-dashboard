@@ -1,9 +1,9 @@
 // ====================================================================================================
-// cookies
+// prisma client
 // ====================================================================================================
-export { COOKIE_NAME, getAccessCookie, removeAccessCookie, setAccessCookie } from "./cookies";
+export { default as prisma } from "./client";
 
 // ====================================================================================================
-// error mapping
+// types
 // ====================================================================================================
-export { mapHttpStatusToTRPCCode, parseAuthServiceError } from "./error-mapping";
+export type { User, UserProfile } from "@/generated/prisma";

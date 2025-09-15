@@ -9,8 +9,16 @@
     "TOKEN_NOT_FOUND": "Please login to continue.",
     "TOKEN_INVALID": "Invalid or expired token. Please login again.",
     "TOKEN_REFRESH_FAILED": "Token refresh failed. Please login again.",
+    "JWT_ERROR": "Token processing error. Please login again.",
     "USER_NOT_FOUND": "User not found.",
-    "EMAIL_ALREADY_EXISTS": "This email is already registered. Please use a different email."
+    "USER_ALREADY_EXISTS": "This email is already registered. Please use a different email.",
+    "ACCOUNT_LOCKED": "Account is locked. Please contact administrator.",
+    "EMAIL_ALREADY_EXISTS": "This email is already registered. Please use a different email.",
+    "WEAK_PASSWORD": "Password must be at least 8 characters with letters and numbers.",
+    "INVALID_CREDENTIALS": "Invalid email or password.",
+    "VALIDATION_ERROR": "Invalid input data. Please check format.",
+    "DATABASE_ERROR": "Database operation failed. Please try again.",
+    "INTERNAL_SERVER_ERROR": "Internal server error. Please try again later."
   },
 
   "uiMessages": {

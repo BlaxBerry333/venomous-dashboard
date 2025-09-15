@@ -14,7 +14,7 @@ export const __USER_BASE_SCHEMA = z.object({
 
   password: z
     .string()
-    .min(4, VALIDATION_MESSAGE_I18N_KEYS.PASSWORD_TOO_SHORT)
+    .min(8, VALIDATION_MESSAGE_I18N_KEYS.PASSWORD_TOO_SHORT)
     .max(128, VALIDATION_MESSAGE_I18N_KEYS.PASSWORD_TOO_LONG)
     .transform((password) => password.trim()),
 

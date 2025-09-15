@@ -39,8 +39,10 @@ const AuthSignupForm = React.memo(() => {
 
   const handleSubmit = React.useCallback(async () => {
     await mutation.mutateAsync({
+      name: "Admin User",
       email: "admin@example.com",
-      password: "Admin",
+      password: "test123456789",
+      confirmPassword: "test123456789",
     });
   }, [mutation]);
 

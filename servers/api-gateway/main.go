@@ -19,7 +19,7 @@ func main() {
 	r := gin.New()
 
 	// Add middleware
-	r.Use(middleware.Logger())
+	r.Use(gin.Logger())
 	r.Use(middleware.CORS())
 	r.Use(gin.Recovery())
 

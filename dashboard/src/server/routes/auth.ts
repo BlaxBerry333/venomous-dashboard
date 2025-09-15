@@ -1,16 +1,16 @@
 import { TRPCError } from "@trpc/server";
 
-import { getAccessCookie, removeAccessCookie, setAccessCookie } from "@/server/helpers";
+import { getAccessCookie, mapHttpStatusToTRPCCode, parseAuthServiceError, removeAccessCookie, setAccessCookie } from "@/server/helpers";
 import { API_ENDPOINTS } from "@/utils/api";
 import { getDictionary, i18n } from "@/utils/i18n/index.serve";
 import { trpc } from "@/utils/trpc/index.server";
-import { AUTH_SIGNIN_SCHEMA } from "@/utils/validation";
+import { AUTH_SIGNIN_SCHEMA, AUTH_SIGNUP_SCHEMA } from "@/utils/validation";
 
 export const AuthAPI = {
   /**
    * Signup
    */
-  signup: trpc.procedure.input(AUTH_SIGNIN_SCHEMA).mutation(async ({ input, ctx }) => {
+  signup: trpc.procedure.input(AUTH_SIGNUP_SCHEMA).mutation(async ({ input, ctx }) => {
     try {
       const dictionary = await getDictionary(ctx.i18nLocale, i18n.namespaces);
 
@@ -21,9 +21,16 @@ export const AuthAPI = {
       });
 
       if (!response.ok) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: dictionary.service_auth.apiResults.SIGNUP_FAILED,
+        const errorCode = await parseAuthServiceError(response, "SIGNUP_FAILED");
+        const errorMessage = dictionary.service_auth.apiResults[errorCode] || dictionary.service_auth.apiResults.SIGNUP_FAILED;
+        const trpcErrorCode = mapHttpStatusToTRPCCode(response.status);
+        return new TRPCError({
+          code: trpcErrorCode,
+          message: errorMessage,
+          cause: {
+            httpStatus: response.status,
+            errorCode: errorCode,
+          },
         });
       }
 
@@ -65,9 +72,16 @@ export const AuthAPI = {
       });
 
       if (!response.ok) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: dictionary.service_auth.apiResults.SIGNIN_FAILED,
+        const errorCode = await parseAuthServiceError(response, "SIGNIN_FAILED");
+        const errorMessage = dictionary.service_auth.apiResults[errorCode] || dictionary.service_auth.apiResults.SIGNIN_FAILED;
+        const trpcErrorCode = mapHttpStatusToTRPCCode(response.status);
+        return new TRPCError({
+          code: trpcErrorCode,
+          message: errorMessage,
+          cause: {
+            httpStatus: response.status,
+            errorCode: errorCode,
+          },
         });
       }
 

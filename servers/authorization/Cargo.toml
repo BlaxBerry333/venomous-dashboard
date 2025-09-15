@@ -4,10 +4,47 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Web framework
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
 tower-http = { version = "0.5", features = ["trace"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Database ORM
+diesel = { version = "=2.2.12", features = ["postgres", "uuid", "chrono", "r2d2"] }
+diesel_migrations = "=2.2.0"
+
+# Connection pooling
+r2d2 = "0.8"
+
+# Data types
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# JWT & Security
+jsonwebtoken = "9.3"
+bcrypt = "0.15"
+
+# Environment & Configuration
+dotenvy = "0.15"
+config = "0.14"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Validation
+validator = { version = "0.18", features = ["derive"] }
+
+# Random generation for tests
+rand = "0.8"
+
+# Force compatible versions to avoid edition2024 issues
+base64ct = "=1.6.0"

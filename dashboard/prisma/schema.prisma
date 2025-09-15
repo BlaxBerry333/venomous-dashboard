@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ====================================================================================================
+// User Management Models
+// ====================================================================================================
+
+/// Core user information (non-sensitive)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  locale    String   @default("en")
+  timezone  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  profile UserProfile?
+
+  @@map("users")
+}
+
+/// Extended user profile information
+model UserProfile {
+  id      String  @id @default(cuid())
+  userId  String  @unique @map("user_id")
+  bio     String?
+  phone   String?
+  company String?
+  website String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
