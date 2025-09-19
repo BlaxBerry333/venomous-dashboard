@@ -10,7 +10,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::database::Database;
-use crate::models::{ApiResponse, ErrorCode, ErrorMessage};
+use crate::models::{ApiResponse, ErrorCode};
 use crate::utils::{JwtService, PasswordService};
 
 /// Request models for admin operations
@@ -25,8 +25,12 @@ pub struct GetUsersQuery {
     pub search: Option<String>,
 }
 
-fn default_page() -> u32 { 1 }
-fn default_limit() -> u32 { 20 }
+fn default_page() -> u32 {
+    1
+}
+fn default_limit() -> u32 {
+    20
+}
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateUserStatusRequest {
@@ -94,8 +98,12 @@ pub struct SecurityLogsResponse {
 }
 
 /// Helper function to extract and verify admin token
-async fn verify_admin_token(headers: &HeaderMap, db: &Database) -> Result<Uuid, (StatusCode, Json<Value>)> {
-    let auth_header = headers.get("authorization")
+async fn verify_admin_token(
+    headers: &HeaderMap,
+    db: &Database,
+) -> Result<Uuid, (StatusCode, Json<Value>)> {
+    let auth_header = headers
+        .get("authorization")
         .and_then(|header| header.to_str().ok())
         .and_then(|header| header.strip_prefix("Bearer "));
 
@@ -156,7 +164,9 @@ async fn verify_admin_token(headers: &HeaderMap, db: &Database) -> Result<Uuid, 
     // Define admin role patterns - these should eventually come from config
     const ADMIN_ROLES: &[&str] = &["admin", "super_admin", "user_admin", "security_admin"];
 
-    let has_admin_role = user_roles.iter().any(|role| ADMIN_ROLES.contains(&role.as_str()));
+    let has_admin_role = user_roles
+        .iter()
+        .any(|role| ADMIN_ROLES.contains(&role.as_str()));
 
     if !has_admin_role {
         return Err((
@@ -181,7 +191,11 @@ pub async fn get_users_handler(
 
     tracing::info!(
         "Admin get users request: page={}, limit={}, status={:?}, role={:?}, search={:?}",
-        params.page, params.limit, params.status, params.role, params.search
+        params.page,
+        params.limit,
+        params.status,
+        params.role,
+        params.search
     );
 
     // Calculate offset
@@ -197,7 +211,8 @@ pub async fn get_users_handler(
         LEFT JOIN user_roles ur ON u.id = ur.user_id
         LEFT JOIN roles r ON ur.role_id = r.id
         WHERE 1=1
-    "#.to_string();
+    "#
+    .to_string();
 
     let mut bind_params = Vec::new();
     let mut param_count = 0;
@@ -280,7 +295,9 @@ pub async fn update_user_status_handler(
 
     tracing::info!(
         "Admin update user status: user_id={}, status={}, reason={:?}",
-        user_id, payload.status, payload.reason
+        user_id,
+        payload.status,
+        payload.reason
     );
 
     let target_user_id: Uuid = match user_id.parse() {
@@ -332,7 +349,12 @@ pub async fn update_user_status_handler(
     };
 
     // Update user status
-    match db.update_user_status(target_user_id, &payload.status, admin_id, payload.reason.as_deref()) {
+    match db.update_user_status(
+        target_user_id,
+        &payload.status,
+        admin_id,
+        payload.reason.as_deref(),
+    ) {
         Ok(_) => {
             // If disabling user, revoke all their sessions
             if payload.status == "disabled" {
@@ -539,7 +561,9 @@ pub async fn revoke_user_sessions_handler(
         }
     };
 
-    let reason = payload.reason.unwrap_or_else(|| "revoked_by_admin".to_string());
+    let reason = payload
+        .reason
+        .unwrap_or_else(|| "revoked_by_admin".to_string());
 
     match db.revoke_all_user_sessions(target_user_id, &reason) {
         Ok(revoked_count) => {

@@ -17,12 +17,12 @@ pub enum JwtError {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: String,      // Subject (user ID)
-    pub email: String,    // User email
-    pub role: String,     // User role
-    pub exp: i64,         // Expiration time (Unix timestamp)
-    pub iat: i64,         // Issued at (Unix timestamp)
-    pub iss: String,      // Issuer
+    pub sub: String,   // Subject (user ID)
+    pub email: String, // User email
+    pub role: String,  // User role
+    pub exp: i64,      // Expiration time (Unix timestamp)
+    pub iat: i64,      // Issued at (Unix timestamp)
+    pub iss: String,   // Issuer
 }
 
 pub struct JwtService;
@@ -42,11 +42,7 @@ impl JwtService {
     }
 
     /// Generate a new JWT token
-    pub fn generate_token(
-        user_id: Uuid,
-        email: &str,
-        role: &str,
-    ) -> Result<String, JwtError> {
+    pub fn generate_token(user_id: Uuid, email: &str, role: &str) -> Result<String, JwtError> {
         let secret = Self::get_secret()?;
         let exp_hours = Self::get_expiration_hours();
 
@@ -96,10 +92,11 @@ impl JwtService {
     /// Extract user ID from token
     pub fn extract_user_id(token: &str) -> Result<Uuid, JwtError> {
         let token_data = Self::validate_token(token)?;
-        let user_id = Uuid::parse_str(&token_data.claims.sub)
-            .map_err(|_| JwtError::InvalidToken(jsonwebtoken::errors::Error::from(
-                jsonwebtoken::errors::ErrorKind::InvalidSubject
-            )))?;
+        let user_id = Uuid::parse_str(&token_data.claims.sub).map_err(|_| {
+            JwtError::InvalidToken(jsonwebtoken::errors::Error::from(
+                jsonwebtoken::errors::ErrorKind::InvalidSubject,
+            ))
+        })?;
         Ok(user_id)
     }
 
@@ -130,10 +127,11 @@ impl JwtService {
         let claims = token_data.claims;
 
         // Generate new token with same user data
-        let user_id = Uuid::parse_str(&claims.sub)
-            .map_err(|_| JwtError::InvalidToken(jsonwebtoken::errors::Error::from(
-                jsonwebtoken::errors::ErrorKind::InvalidSubject
-            )))?;
+        let user_id = Uuid::parse_str(&claims.sub).map_err(|_| {
+            JwtError::InvalidToken(jsonwebtoken::errors::Error::from(
+                jsonwebtoken::errors::ErrorKind::InvalidSubject,
+            ))
+        })?;
 
         Self::generate_token(user_id, &claims.email, &claims.role)
     }

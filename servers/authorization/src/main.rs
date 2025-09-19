@@ -1,4 +1,7 @@
-use axum::{routing::{get, post, put, delete}, Router};
+use axum::{
+    routing::{get, post, put},
+    Router,
+};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
@@ -8,15 +11,12 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use venomous_dashboard_authorization::{
     database::Database,
     handlers::{
+        admin::{
+            get_security_logs_handler, get_users_handler, reset_user_password_handler,
+            revoke_user_sessions_handler, update_user_status_handler,
+        },
         auth::{logout_handler, signin_handler, signup_handler},
         token::{token_info_handler, token_refresh_handler, token_verify_handler},
-        admin::{
-            get_users_handler,
-            update_user_status_handler,
-            reset_user_password_handler,
-            get_security_logs_handler,
-            revoke_user_sessions_handler
-        },
     },
 };
 
@@ -55,8 +55,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/token-refresh", post(token_refresh_handler))
         // Admin routes (require admin authentication)
         .route("/admin/users", get(get_users_handler))
-        .route("/admin/users/:user_id/status", put(update_user_status_handler))
-        .route("/admin/users/:user_id/reset-password", post(reset_user_password_handler))
+        .route(
+            "/admin/users/:user_id/status",
+            put(update_user_status_handler),
+        )
+        .route(
+            "/admin/users/:user_id/reset-password",
+            post(reset_user_password_handler),
+        )
         .route("/admin/security-logs", get(get_security_logs_handler))
         .route("/admin/sessions/revoke", post(revoke_user_sessions_handler))
         // Add shared state (database connection pool)

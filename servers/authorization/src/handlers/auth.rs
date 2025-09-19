@@ -4,7 +4,7 @@ use std::sync::Arc;
 use validator::Validate;
 
 use crate::database::Database;
-use crate::models::{AuthPayload, LogoutPayload, ApiResponse, ErrorCode, ErrorMessage};
+use crate::models::{ApiResponse, AuthPayload, ErrorCode, ErrorMessage, LogoutPayload};
 use crate::utils::{JwtService, PasswordService};
 
 /// Handler for user signup
@@ -256,7 +256,10 @@ pub async fn signin_handler(
     }
 
     // Get user role
-    let role = db.get_user_role(user.id).unwrap_or(Some("user".to_string())).unwrap_or("user".to_string());
+    let role = db
+        .get_user_role(user.id)
+        .unwrap_or(Some("user".to_string()))
+        .unwrap_or("user".to_string());
 
     // Generate JWT token
     let token = match JwtService::generate_token(user.id, &user.email, &role) {

@@ -3,7 +3,9 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::schema::{auth_users, permissions, role_permissions, roles, user_profiles, user_roles, users};
+use crate::schema::{
+    auth_users, permissions, role_permissions, roles, user_profiles, user_roles, users,
+};
 
 /// User model for database
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable)]
@@ -31,7 +33,9 @@ pub struct NewUser {
 }
 
 /// User profile model for database
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations,
+)]
 #[diesel(table_name = user_profiles)]
 #[diesel(belongs_to(User))]
 pub struct UserProfile {
@@ -57,7 +61,9 @@ pub struct NewUserProfile {
 }
 
 /// Auth user model for authentication data
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations,
+)]
 #[diesel(table_name = auth_users)]
 #[diesel(belongs_to(User))]
 pub struct AuthUser {
@@ -122,7 +128,9 @@ pub struct NewPermission {
 }
 
 /// User role association
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations,
+)]
 #[diesel(table_name = user_roles)]
 #[diesel(belongs_to(User))]
 #[diesel(belongs_to(Role))]
@@ -142,7 +150,9 @@ pub struct NewUserRole {
 }
 
 /// Role permission association
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable, Associations,
+)]
 #[diesel(table_name = role_permissions)]
 #[diesel(belongs_to(Role))]
 #[diesel(belongs_to(Permission))]

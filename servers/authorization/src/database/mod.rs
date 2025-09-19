@@ -5,9 +5,9 @@ use diesel::r2d2::{self, ConnectionManager, Pool};
 use std::env;
 use uuid::Uuid;
 
+use crate::handlers::admin::{GetUsersQuery, SecurityLogEntry, SecurityLogsQuery, UserAdminView};
 use crate::models::database::{AuthUser, NewAuthUser, NewUser, NewUserRole, User};
 use crate::schema::{auth_users, roles, user_roles, users};
-use crate::handlers::admin::{GetUsersQuery, SecurityLogsQuery, UserAdminView, SecurityLogEntry};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
@@ -20,7 +20,8 @@ pub struct Database {
 impl Database {
     /// Create new database connection pool
     pub fn new() -> Result<Self> {
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL environment variable must be set");
+        let database_url =
+            env::var("DATABASE_URL").expect("DATABASE_URL environment variable must be set");
 
         let manager = ConnectionManager::<PgConnection>::new(database_url);
         let pool = Pool::builder().max_size(15).build(manager)?;
@@ -222,12 +223,24 @@ impl Database {
     }
 
     /// Update user status (admin function)
-    pub fn update_user_status(&self, user_id: Uuid, status: &str, admin_id: Uuid, reason: Option<&str>) -> Result<()> {
-        let mut conn = self.get_connection()?;
+    pub fn update_user_status(
+        &self,
+        user_id: Uuid,
+        status: &str,
+        admin_id: Uuid,
+        reason: Option<&str>,
+    ) -> Result<()> {
+        let _conn = self.get_connection()?;
 
         // In a real implementation, you'd have a status column in users table
         // For now, we'll just log this operation
-        tracing::info!("Admin {} updated user {} status to {}: {:?}", admin_id, user_id, status, reason);
+        tracing::info!(
+            "Admin {} updated user {} status to {}: {:?}",
+            admin_id,
+            user_id,
+            status,
+            reason
+        );
 
         // This would be the actual update:
         // diesel::update(users::table.filter(users::id.eq(user_id)))
@@ -274,7 +287,11 @@ impl Database {
     pub fn revoke_all_user_sessions(&self, user_id: Uuid, reason: &str) -> Result<u32> {
         // This would require a user_sessions table, which we haven't implemented yet
         // For now, return a mock count
-        tracing::info!("Revoking all sessions for user {} with reason: {}", user_id, reason);
+        tracing::info!(
+            "Revoking all sessions for user {} with reason: {}",
+            user_id,
+            reason
+        );
         Ok(0)
     }
 
@@ -283,20 +300,27 @@ impl Database {
         &self,
         user_id: Option<Uuid>,
         event_type: &str,
-        metadata: Option<serde_json::Value>,
+        _metadata: Option<serde_json::Value>,
         success: bool,
         ip_address: Option<&str>,
     ) -> Result<()> {
         // This would require a security_events table
         tracing::info!(
             "Security event: user_id={:?}, event_type={}, success={}, ip={:?}",
-            user_id, event_type, success, ip_address
+            user_id,
+            event_type,
+            success,
+            ip_address
         );
         Ok(())
     }
 
     /// Get security logs for admin panel
-    pub fn get_security_logs(&self, params: &SecurityLogsQuery, offset: u32) -> Result<Vec<SecurityLogEntry>> {
+    pub fn get_security_logs(
+        &self,
+        params: &SecurityLogsQuery,
+        offset: u32,
+    ) -> Result<Vec<SecurityLogEntry>> {
         // TODO: Implement actual security logs query from security_events table
         let _ = (params, offset); // Suppress unused parameter warnings
         Ok(vec![])

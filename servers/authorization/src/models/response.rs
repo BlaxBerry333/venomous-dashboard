@@ -57,11 +57,13 @@ impl ErrorMessage {
     pub const SIGNUP_FAILED: &'static str = "Failed to create account";
     pub const SIGNIN_FAILED: &'static str = "Failed to sign in";
     pub const INVALID_INPUT_DATA: &'static str = "Invalid input data provided";
-    pub const WEAK_PASSWORD: &'static str = "Password must be at least 8 characters with letters and numbers";
+    pub const WEAK_PASSWORD: &'static str =
+        "Password must be at least 8 characters with letters and numbers";
     pub const USER_ALREADY_EXISTS: &'static str = "User with this email already exists";
     pub const INTERNAL_SERVER_ERROR: &'static str = "Internal server error occurred";
     pub const INVALID_CREDENTIALS: &'static str = "Invalid email or password";
     pub const USER_NOT_FOUND: &'static str = "User not found";
-    pub const ACCOUNT_LOCKED: &'static str = "Account is locked due to too many failed login attempts";
+    pub const ACCOUNT_LOCKED: &'static str =
+        "Account is locked due to too many failed login attempts";
     pub const TOKEN_REFRESH_FAILED: &'static str = "Failed to refresh token";
 }
