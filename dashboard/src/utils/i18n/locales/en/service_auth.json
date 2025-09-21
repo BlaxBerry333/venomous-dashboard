@@ -24,10 +24,13 @@
   "uiMessages": {
     "SIGNIN": "User Signin",
     "SIGNUP": "User Signup",
+    "LOGOUT": "Logout",
     "ALREADY_HAVE_AN_ACCOUNT": "Already have an account ?",
     "DO_NOT_HAVE_AN_ACCOUNT": "Don't have an account ?",
     "CREATE_AN_ACCOUNT": "Create a new account now !",
-    "FORGOT_PASSWORD": "Forgot password ?"
+    "FORGOT_PASSWORD": "Forgot password ?",
+    "RESET_PASSWORD": "Reset Password",
+    "USER_PROFILE": "User Profile"
   },
 
   "uiForm": {

@@ -48,15 +48,14 @@ const AuthSignupForm = React.memo(() => {
 
   return (
     <Form
-      gap={0}
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}
     >
-      <Space.Flex column gap={0}>
+      <Space.Flex column>
         <Typography.Title as="h3" text={dictionary.service_auth.uiMessages.SIGNUP} />
-        <Space.Flex row gap={0} style={{ flexWrap: "wrap", alignItems: "center" }}>
+        <Space.Flex style={{ flexWrap: "wrap", alignItems: "center" }}>
           <Typography.Text text={dictionary.service_auth.uiMessages.ALREADY_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
           <Link href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNIN}`} style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}>
             <Typography.Text text={dictionary.service_auth.uiMessages.SIGNIN} style={{ color: "inherit" }} />
@@ -71,7 +70,7 @@ const AuthSignupForm = React.memo(() => {
         <FormField.Password name="password" label={dictionary.service_auth.uiForm.labels.confirmPassword} fullWidth />
       </Space.Flex>
 
-      <Space.Flex row>
+      <Space.Flex gap={8}>
         <Button type="reset" text={dictionary.common.buttonText.cancel} variant="outlined" semanticColor="error" />
         <Button type="submit" text={dictionary.common.buttonText.submit} />
       </Space.Flex>

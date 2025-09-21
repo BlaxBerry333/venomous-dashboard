@@ -1,12 +1,17 @@
 // ====================================================================================================
-// components
+// themes
 // ====================================================================================================
-export { default as ThemeModeTrigger } from "./components/theme/ThemeModeTrigger";
-export { default as ThemeProvider } from "./components/theme/ThemeProvider";
+export { default as ThemeModeTrigger } from "./theme/ThemeModeTrigger";
+export { default as ThemeProvider } from "./theme/ThemeProvider";
 
 // ====================================================================================================
 // layouts
 // ====================================================================================================
-export { default as LanguageSwitcher } from "./layouts/LanguageSwitcher";
+export { default as LanguageSwitcherPopover } from "./layouts/LanguageSwitcherPopover";
 export { default as Logo } from "./layouts/Logo";
-export { default as Logout } from "./layouts/Logout";
+
+// ====================================================================================================
+// custom components
+// ====================================================================================================
+export { default as CustomModal } from "./custom/CustomModal";
+export { default as CustomPopover } from "./custom/CustomPopover";

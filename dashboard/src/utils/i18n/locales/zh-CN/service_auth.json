@@ -24,10 +24,13 @@
   "uiMessages": {
     "SIGNIN": "用户登录",
     "SIGNUP": "用户注册",
+    "LOGOUT": "退出登录",
     "ALREADY_HAVE_AN_ACCOUNT": "已经有账号了 ?",
     "DO_NOT_HAVE_AN_ACCOUNT": "还没有账号 ?",
     "CREATE_AN_ACCOUNT": "创建一个新账号 !",
-    "FORGOT_PASSWORD": "忘记密码了 ?"
+    "FORGOT_PASSWORD": "忘记密码了 ?",
+    "RESET_PASSWORD": "重置密码",
+    "USER_PROFILE": "用户信息"
   },
 
   "uiForm": {
