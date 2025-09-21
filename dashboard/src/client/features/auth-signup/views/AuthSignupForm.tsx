@@ -10,6 +10,7 @@ import { Button, Form, FormField, notify, Space, Theme, Typography } from "venom
 import { ROUTER_PATHS } from "@/client/routes";
 import { useI18nDictionary, useI18nLocale } from "@/utils/i18n/index.client";
 import { useTRPC } from "@/utils/trpc/index.client";
+import { extractTRPCErrorInfo } from "@/utils/trpc/types";
 
 const AuthSignupForm = React.memo(() => {
   const { themeColor } = Theme.useThemeColor();
@@ -24,14 +25,17 @@ const AuthSignupForm = React.memo(() => {
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionary.service_auth.apiResults.SIGNUP_SUCCESS,
+          title: dictionary.service_auth.apiResults.SIGNUP_SUCCESS.title,
+          description: dictionary.service_auth.apiResults.SIGNUP_SUCCESS.description,
         });
         router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
       },
       onError: (error) => {
+        const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: error.message,
+          title: dictionary.service_auth?.apiResults?.[errorCode],
+          description: errorMessage,
         });
       },
     }),
@@ -41,8 +45,8 @@ const AuthSignupForm = React.memo(() => {
     await mutation.mutateAsync({
       name: "Admin User",
       email: "admin@example.com",
-      password: "test123456789",
-      confirmPassword: "test123456789",
+      password: "admin123456789",
+      confirmPassword: "admin123456789",
     });
   }, [mutation]);
 

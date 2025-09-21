@@ -47,3 +47,8 @@
 # Others
 Makefile linguist-language=Makefile
 *Dockerfile* linguist-language=Dockerfile
+
+# Shell Scripts
+*.sh linguist-language=Shell
+**/*.sh linguist-language=Shell
+**/manage.sh linguist-language=Shell

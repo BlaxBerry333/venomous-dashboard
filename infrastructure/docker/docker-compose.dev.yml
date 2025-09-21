@@ -20,33 +20,33 @@ services:
   api-gateway:
     container_name: api-gateway
     build:
-      context: ../../servers/api-gateway
+      context: ../../services/api-gateway
       dockerfile: docker/Dockerfile.dev
     ports:
       - "8080:8080"
     volumes:
-      - ../../servers/api-gateway:/app
+      - ../../services/api-gateway:/app
     networks:
       - venomous-network
     depends_on:
-      - authorization
+      - auth
       # - notes
       # - media
       # - workflows
 
   # ====================================================================================================
-  # Headless Service: authorization
+  # Headless Service: auth
   # ====================================================================================================
-  authorization:
-    container_name: authorization
+  auth:
+    container_name: auth
     build:
-      context: ../../servers/authorization
+      context: ../../services/auth
       dockerfile: docker/Dockerfile.dev
     environment:
-      DATABASE_URL: "postgresql://venomous_dashboard_db:venomous@db:5432/venomous_dashboard_db"
+      DATABASE_URL: "postgresql://venomous_dashboard_db:venomous@db:5432/venomous_auth_db"
       RUST_LOG: info
     volumes:
-      - ../../servers/authorization:/app
+      - ../../services/auth:/app
     networks:
       - venomous-network
     depends_on:
@@ -58,10 +58,10 @@ services:
   notes:
     container_name: notes
     build:
-      context: ../../servers/notes
+      context: ../../services/notes
       dockerfile: Dockerfile.dev
     volumes:
-      - ../../servers/notes:/app
+      - ../../services/notes:/app
     networks:
       - venomous-network
 
@@ -71,10 +71,10 @@ services:
   media:
     container_name: media
     build:
-      context: ../../servers/media
+      context: ../../services/media
       dockerfile: Dockerfile.dev
     volumes:
-      - ../../servers/media:/app
+      - ../../services/media:/app
     networks:
       - venomous-network
 
@@ -84,10 +84,10 @@ services:
   workflows:
     container_name: workflows
     build:
-      context: ../../servers/workflows
+      context: ../../services/workflows
       dockerfile: Dockerfile.dev
     volumes:
-      - ../../servers/workflows:/app
+      - ../../services/workflows:/app
     networks:
       - venomous-network
 
@@ -105,7 +105,7 @@ services:
       POSTGRES_PASSWORD: venomous
     volumes:
       - venomous-db-data:/var/lib/postgresql/data
-      - ../database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ../database/db-init.sh:/docker-entrypoint-initdb.d/db-init.sh
     networks:
       - venomous-network
 

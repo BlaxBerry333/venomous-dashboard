@@ -34,7 +34,7 @@ pub async fn signup_handler(
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::error(
                 ErrorCode::WEAK_PASSWORD,
-                ErrorMessage::WEAK_PASSWORD,
+                ErrorMessage::PASSWORD_TOO_WEAK,
             )),
         ));
     }
@@ -46,7 +46,7 @@ pub async fn signup_handler(
                 StatusCode::CONFLICT,
                 Json(ApiResponse::error(
                     ErrorCode::USER_ALREADY_EXISTS,
-                    ErrorMessage::USER_ALREADY_EXISTS,
+                    ErrorMessage::EMAIL_ALREADY_REGISTERED,
                 )),
             ));
         }
@@ -57,7 +57,7 @@ pub async fn signup_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -72,7 +72,7 @@ pub async fn signup_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::INTERNAL_SERVER_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -87,7 +87,7 @@ pub async fn signup_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -100,19 +100,21 @@ pub async fn signup_handler(
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(ApiResponse::error(
                 ErrorCode::DATABASE_ERROR,
-                ErrorMessage::INTERNAL_SERVER_ERROR,
+                ErrorMessage::SERVER_ERROR_OCCURRED,
             )),
         ));
     }
 
-    // Assign default role
-    if let Err(e) = db.assign_user_role(user.id, "user") {
-        tracing::warn!("Warning: Could not assign default role to user: {}", e);
-        // Don't fail the signup for role assignment failure
-    }
+    // Role is now set directly in the user table during creation
+
+    // Get user role for JWT
+    let role = match db.get_user_role(user.id) {
+        Ok(r) => r.unwrap_or("user".to_string()),
+        Err(_) => "user".to_string(),
+    };
 
     // Generate JWT token
-    let token = match JwtService::generate_token(user.id, &user.email, "user") {
+    let token = match JwtService::generate_token(user.id, &user.email, &role) {
         Ok(token) => token,
         Err(e) => {
             tracing::error!("JWT generation error: {}", e);
@@ -120,7 +122,7 @@ pub async fn signup_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::JWT_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -128,7 +130,7 @@ pub async fn signup_handler(
 
     tracing::info!("User {} successfully signed up", payload.email);
 
-    Ok(Json(json!({
+    Ok(Json(ApiResponse::success(json!({
         "token": token,
         "user": {
             "id": user.id,
@@ -136,7 +138,7 @@ pub async fn signup_handler(
             "name": user.name,
             "created_at": user.created_at
         }
-    })))
+    }))))
 }
 
 /// Handler for user signin
@@ -170,7 +172,7 @@ pub async fn signin_handler(
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
                     ErrorCode::INVALID_CREDENTIALS,
-                    ErrorMessage::INVALID_CREDENTIALS,
+                    ErrorMessage::CREDENTIALS_INVALID,
                 )),
             ));
         }
@@ -180,7 +182,7 @@ pub async fn signin_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -194,7 +196,7 @@ pub async fn signin_handler(
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
                     ErrorCode::INVALID_CREDENTIALS,
-                    ErrorMessage::INVALID_CREDENTIALS,
+                    ErrorMessage::CREDENTIALS_INVALID,
                 )),
             ));
         }
@@ -204,22 +206,56 @@ pub async fn signin_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
     };
 
-    // Check if account is locked
-    if auth_user.failed_login_attempts >= 5 {
-        tracing::warn!("Account locked for user: {}", payload.email);
-        return Err((
-            StatusCode::LOCKED,
-            Json(ApiResponse::error(
-                ErrorCode::ACCOUNT_LOCKED,
-                ErrorMessage::ACCOUNT_LOCKED,
-            )),
-        ));
+    // Check if account is locked (with automatic unlock logic)
+    match db.is_account_locked(&payload.email) {
+        Ok(true) => {
+            // Account is still locked, check remaining time
+            let remaining_time = db.get_account_lock_remaining_time(&payload.email)
+                .unwrap_or(None);
+
+            match remaining_time {
+                Some(duration) => {
+                    let minutes_remaining = duration.num_minutes().max(1); // At least 1 minute
+                    tracing::warn!("Account locked for user: {} (unlock in {} minutes)", payload.email, minutes_remaining);
+                    return Err((
+                        StatusCode::LOCKED,
+                        Json(ApiResponse::error(
+                            ErrorCode::ACCOUNT_LOCKED,
+                            &format!("{}", ErrorMessage::ACCOUNT_LOCKED_WITH_COUNTDOWN.replace("{}", &minutes_remaining.to_string())),
+                        )),
+                    ));
+                }
+                None => {
+                    tracing::warn!("Account permanently locked for user: {}", payload.email);
+                    return Err((
+                        StatusCode::LOCKED,
+                        Json(ApiResponse::error(
+                            ErrorCode::ACCOUNT_LOCKED,
+                            ErrorMessage::ACCOUNT_LOCKED_TEMPORARILY,
+                        )),
+                    ));
+                }
+            }
+        }
+        Ok(false) => {
+            // Account is not locked, continue with authentication
+        }
+        Err(e) => {
+            tracing::error!("Error checking account lock status: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::error(
+                    ErrorCode::DATABASE_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
+                )),
+            ));
+        }
     }
 
     // Verify password
@@ -239,7 +275,7 @@ pub async fn signin_handler(
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
                     ErrorCode::INVALID_CREDENTIALS,
-                    ErrorMessage::INVALID_CREDENTIALS,
+                    ErrorMessage::CREDENTIALS_INVALID,
                 )),
             ));
         }
@@ -249,17 +285,17 @@ pub async fn signin_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::INTERNAL_SERVER_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
     }
 
     // Get user role
-    let role = db
-        .get_user_role(user.id)
-        .unwrap_or(Some("user".to_string()))
-        .unwrap_or("user".to_string());
+    let role = match db.get_user_role(user.id) {
+        Ok(r) => r.unwrap_or("user".to_string()),
+        Err(_) => "user".to_string(),
+    };
 
     // Generate JWT token
     let token = match JwtService::generate_token(user.id, &user.email, &role) {
@@ -270,7 +306,7 @@ pub async fn signin_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::JWT_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
@@ -283,7 +319,7 @@ pub async fn signin_handler(
 
     tracing::info!("User {} successfully signed in", payload.email);
 
-    Ok(Json(json!({
+    Ok(Json(ApiResponse::success(json!({
         "token": token,
         "user": {
             "id": user.id,
@@ -292,7 +328,7 @@ pub async fn signin_handler(
             "role": role,
             "last_login": auth_user.last_login
         }
-    })))
+    }))))
 }
 
 /// Handler for user logout
@@ -308,18 +344,12 @@ pub async fn logout_handler(Json(payload): Json<LogoutPayload>) -> Json<Value> {
     match JwtService::validate_token(&payload.token) {
         Ok(_) => {
             tracing::info!("User successfully logged out");
-            Json(json!({
-                "success": true,
-                "message": "Successfully logged out"
-            }))
+            Json(ApiResponse::success(json!(null)))
         }
         Err(_) => {
             // Even if token is invalid, we'll return success
             // to avoid leaking information about token validity
-            Json(json!({
-                "success": true,
-                "message": "Successfully logged out"
-            }))
+            Json(ApiResponse::success(json!(null)))
         }
     }
 }

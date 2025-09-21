@@ -29,13 +29,27 @@
         "editor.defaultFormatter": "rust-lang.rust-analyzer",
     },
     "rust-analyzer.linkedProjects": [
-        "./servers/authorization/Cargo.toml"
+        "./services/auth/Cargo.toml"
     ],
 
     /* ==================================================================================================== */
     /* Others */
     /* ==================================================================================================== */
+    "cSpell.ignorePaths": [
+        "**/__pycache__/**",
+        "**/venv/**",
+        "**/node_modules/**",
+        "**/.vscode/**",
+        "**/dist/**",
+        "**/*.pyc",
+        "**/*.log",
+        "**/*.lock",
+        "**/*.sh/**",
+        "**/*.sql/**",
+    ],
     "cSpell.words": [
+        "BlaxBerry",
+        "SIGNUP",
         "__pycache__",
         "gonic",
         "iconify",
@@ -45,7 +59,8 @@
         "vercel",
         "venv",
         "xyflow",
-        "BlaxBerry",
-        "SIGNUP"
+        "elif",
+        "makemigrations",
+        "showmigrations"
     ]
 }

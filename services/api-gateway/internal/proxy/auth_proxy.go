@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthProxy handles reverse proxy operations for authorization service
+// AuthProxy handles reverse proxy operations for auth service
 type AuthProxy struct {
 	authServiceURL string
 }

@@ -10,7 +10,7 @@ use uuid::Uuid;
 use validator::Validate;
 
 use crate::database::Database;
-use crate::models::{ApiResponse, ErrorCode};
+use crate::models::{ApiResponse, ErrorCode, ErrorMessage};
 use crate::utils::{JwtService, PasswordService};
 
 /// Request models for admin operations
@@ -53,6 +53,13 @@ pub struct SecurityLogsQuery {
 #[derive(Debug, Deserialize)]
 pub struct RevokeSessionsRequest {
     pub user_id: String,
+    pub reason: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UnlockAccountRequest {
+    pub user_id: Option<String>,
+    pub email: Option<String>,
     pub reason: Option<String>,
 }
 
@@ -113,8 +120,8 @@ async fn verify_admin_token(
             return Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
-                    "Missing or invalid authorization header",
+                    ErrorCode::TOKEN_INVALID,
+                    ErrorMessage::AUTH_HEADER_MISSING,
                 )),
             ));
         }
@@ -127,8 +134,8 @@ async fn verify_admin_token(
             return Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
-                    "Invalid or expired token",
+                    ErrorCode::TOKEN_INVALID,
+                    ErrorMessage::TOKEN_EXPIRED_OR_INVALID,
                 )),
             ));
         }
@@ -140,40 +147,50 @@ async fn verify_admin_token(
             return Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
-                    "Invalid user ID in token",
+                    ErrorCode::TOKEN_INVALID,
+                    ErrorMessage::USER_ID_INVALID_IN_TOKEN,
                 )),
             ));
         }
     };
 
     // Check if user has admin role
-    let user_roles = match db.get_user_roles(user_id) {
-        Ok(roles) => roles,
+    let _admin_user = match db.find_user_by_id(user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return Err((
+                StatusCode::UNAUTHORIZED,
+                Json(ApiResponse::error(
+                    ErrorCode::USER_NOT_FOUND,
+                    ErrorMessage::USER_DOES_NOT_EXIST,
+                )),
+            ));
+        }
         Err(_) => {
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to get user roles",
+                    ErrorMessage::USER_INFO_RETRIEVAL_FAILED,
                 )),
             ));
         }
     };
 
-    // Define admin role patterns - these should eventually come from config
+    // Define admin role patterns
     const ADMIN_ROLES: &[&str] = &["admin", "super_admin", "user_admin", "security_admin"];
 
-    let has_admin_role = user_roles
-        .iter()
-        .any(|role| ADMIN_ROLES.contains(&role.as_str()));
+    let admin_role = match db.get_user_role(user_id) {
+        Ok(r) => r.unwrap_or("user".to_string()),
+        Err(_) => "user".to_string(),
+    };
 
-    if !has_admin_role {
+    if !ADMIN_ROLES.contains(&admin_role.as_str()) {
         return Err((
             StatusCode::FORBIDDEN,
             Json(ApiResponse::error(
                 ErrorCode::INSUFFICIENT_PERMISSIONS,
-                "Admin access required",
+                ErrorMessage::ADMIN_PRIVILEGES_REQUIRED,
             )),
         ));
     }
@@ -264,12 +281,12 @@ pub async fn get_users_handler(
         Ok(users) => {
             let total = db.count_users_admin(&params).unwrap_or(0);
 
-            Ok(Json(json!({
+            Ok(Json(ApiResponse::success(json!({
                 "users": users,
                 "total": total,
                 "page": params.page,
                 "limit": params.limit
-            })))
+            }))))
         }
         Err(e) => {
             tracing::error!("Database error getting users: {}", e);
@@ -277,7 +294,7 @@ pub async fn get_users_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to retrieve users",
+                    ErrorMessage::USERS_RETRIEVAL_FAILED,
                 )),
             ))
         }
@@ -307,7 +324,7 @@ pub async fn update_user_status_handler(
                 StatusCode::BAD_REQUEST,
                 Json(ApiResponse::error(
                     ErrorCode::VALIDATION_ERROR,
-                    "Invalid user ID format",
+                    ErrorMessage::USER_ID_FORMAT_INVALID,
                 )),
             ));
         }
@@ -319,7 +336,7 @@ pub async fn update_user_status_handler(
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::error(
                 ErrorCode::VALIDATION_ERROR,
-                "Cannot disable your own account",
+                ErrorMessage::SELF_ACCOUNT_DISABLE_FORBIDDEN,
             )),
         ));
     }
@@ -332,7 +349,7 @@ pub async fn update_user_status_handler(
                 StatusCode::NOT_FOUND,
                 Json(ApiResponse::error(
                     ErrorCode::USER_NOT_FOUND,
-                    "User not found",
+                    ErrorMessage::USER_DOES_NOT_EXIST,
                 )),
             ));
         }
@@ -342,7 +359,7 @@ pub async fn update_user_status_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to find user",
+                    ErrorMessage::USER_LOOKUP_FAILED,
                 )),
             ));
         }
@@ -377,15 +394,14 @@ pub async fn update_user_status_handler(
                 None,
             );
 
-            Ok(Json(json!({
-                "success": true,
+            Ok(Json(ApiResponse::success(json!({
                 "message": format!("User status updated to {}", payload.status),
                 "user": {
                     "id": target_user.id,
                     "email": target_user.email,
                     "status": payload.status
                 }
-            })))
+            }))))
         }
         Err(e) => {
             tracing::error!("Database error updating user status: {}", e);
@@ -393,7 +409,7 @@ pub async fn update_user_status_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to update user status",
+                    ErrorMessage::USER_STATUS_UPDATE_FAILED,
                 )),
             ))
         }
@@ -417,7 +433,7 @@ pub async fn reset_user_password_handler(
                 StatusCode::BAD_REQUEST,
                 Json(ApiResponse::error(
                     ErrorCode::VALIDATION_ERROR,
-                    "Invalid user ID format",
+                    ErrorMessage::USER_ID_FORMAT_INVALID,
                 )),
             ));
         }
@@ -431,7 +447,7 @@ pub async fn reset_user_password_handler(
                 StatusCode::NOT_FOUND,
                 Json(ApiResponse::error(
                     ErrorCode::USER_NOT_FOUND,
-                    "User not found",
+                    ErrorMessage::USER_DOES_NOT_EXIST,
                 )),
             ));
         }
@@ -441,7 +457,7 @@ pub async fn reset_user_password_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to find user",
+                    ErrorMessage::USER_LOOKUP_FAILED,
                 )),
             ));
         }
@@ -457,7 +473,7 @@ pub async fn reset_user_password_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::INTERNAL_SERVER_ERROR,
-                    "Failed to generate new password",
+                    ErrorMessage::PASSWORD_GENERATION_FAILED,
                 )),
             ));
         }
@@ -483,11 +499,10 @@ pub async fn reset_user_password_handler(
                 None,
             );
 
-            Ok(Json(json!({
-                "success": true,
+            Ok(Json(ApiResponse::success(json!({
                 "message": "Password reset successfully",
                 "temp_password": temp_password, // In production, send via email instead
-            })))
+            }))))
         }
         Err(e) => {
             tracing::error!("Database error resetting password: {}", e);
@@ -495,7 +510,7 @@ pub async fn reset_user_password_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to reset password",
+                    ErrorMessage::PASSWORD_RESET_FAILED,
                 )),
             ))
         }
@@ -518,12 +533,12 @@ pub async fn get_security_logs_handler(
         Ok(logs) => {
             let total = db.count_security_logs(&params).unwrap_or(0);
 
-            Ok(Json(json!({
+            Ok(Json(ApiResponse::success(json!({
                 "logs": logs,
                 "total": total,
                 "page": params.page,
                 "limit": params.limit
-            })))
+            }))))
         }
         Err(e) => {
             tracing::error!("Database error getting security logs: {}", e);
@@ -531,7 +546,7 @@ pub async fn get_security_logs_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to retrieve security logs",
+                    ErrorMessage::SECURITY_LOGS_RETRIEVAL_FAILED,
                 )),
             ))
         }
@@ -555,7 +570,7 @@ pub async fn revoke_user_sessions_handler(
                 StatusCode::BAD_REQUEST,
                 Json(ApiResponse::error(
                     ErrorCode::VALIDATION_ERROR,
-                    "Invalid user ID format",
+                    ErrorMessage::USER_ID_FORMAT_INVALID,
                 )),
             ));
         }
@@ -580,11 +595,10 @@ pub async fn revoke_user_sessions_handler(
                 None,
             );
 
-            Ok(Json(json!({
-                "success": true,
+            Ok(Json(ApiResponse::success(json!({
                 "message": format!("Revoked {} sessions", revoked_count),
                 "revoked_count": revoked_count
-            })))
+            }))))
         }
         Err(e) => {
             tracing::error!("Database error revoking sessions: {}", e);
@@ -592,7 +606,206 @@ pub async fn revoke_user_sessions_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    "Failed to revoke sessions",
+                    ErrorMessage::SESSION_REVOCATION_FAILED,
+                )),
+            ))
+        }
+    }
+}
+
+/// Unlock user account (admin function)
+pub async fn unlock_user_account_handler(
+    State(db): State<Arc<Database>>,
+    headers: HeaderMap,
+    Json(payload): Json<UnlockAccountRequest>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let admin_id = verify_admin_token(&headers, &db).await?;
+
+    tracing::info!("Admin unlock account request: {:?}", payload);
+
+    // Validate that either user_id or email is provided
+    if payload.user_id.is_none() && payload.email.is_none() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ApiResponse::error(
+                ErrorCode::VALIDATION_ERROR,
+                ErrorMessage::USER_ID_FORMAT_INVALID,
+            )),
+        ));
+    }
+
+    let reason = payload.reason.unwrap_or_else(|| "unlocked_by_admin".to_string());
+
+    // Unlock by user_id or email
+    let unlock_result = if let Some(user_id_str) = payload.user_id {
+        let user_id: Uuid = match user_id_str.parse() {
+            Ok(id) => id,
+            Err(_) => {
+                return Err((
+                    StatusCode::BAD_REQUEST,
+                    Json(ApiResponse::error(
+                        ErrorCode::VALIDATION_ERROR,
+                        ErrorMessage::USER_ID_FORMAT_INVALID,
+                    )),
+                ));
+            }
+        };
+
+        // Check if user exists
+        match db.find_user_by_id(user_id) {
+            Ok(Some(user)) => {
+                // Unlock the account
+                match db.admin_unlock_user_account(user_id) {
+                    Ok(_) => {
+                        tracing::info!("Admin {} unlocked account for user ID: {}", admin_id, user_id);
+                        Some(user.email.clone())
+                    }
+                    Err(e) => {
+                        tracing::error!("Failed to unlock account for user ID {}: {}", user_id, e);
+                        return Err((
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(ApiResponse::error(
+                                ErrorCode::DATABASE_ERROR,
+                                ErrorMessage::ACCOUNT_UNLOCK_FAILED,
+                            )),
+                        ));
+                    }
+                }
+            }
+            Ok(None) => {
+                return Err((
+                    StatusCode::NOT_FOUND,
+                    Json(ApiResponse::error(
+                        ErrorCode::USER_NOT_FOUND,
+                        ErrorMessage::USER_DOES_NOT_EXIST,
+                    )),
+                ));
+            }
+            Err(e) => {
+                tracing::error!("Database error finding user by ID {}: {}", user_id, e);
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ApiResponse::error(
+                        ErrorCode::DATABASE_ERROR,
+                        ErrorMessage::USER_LOOKUP_FAILED,
+                    )),
+                ));
+            }
+        }
+    } else if let Some(email) = payload.email {
+        // Unlock by email
+        match db.admin_unlock_user_account_by_email(&email) {
+            Ok(_) => {
+                tracing::info!("Admin {} unlocked account for email: {}", admin_id, email);
+                Some(email.clone())
+            }
+            Err(e) => {
+                tracing::error!("Failed to unlock account for email {}: {}", email, e);
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ApiResponse::error(
+                        ErrorCode::DATABASE_ERROR,
+                        ErrorMessage::ACCOUNT_UNLOCK_FAILED,
+                    )),
+                ));
+            }
+        }
+    } else {
+        None
+    };
+
+    if let Some(email) = unlock_result {
+        // Log the admin action
+        let _ = db.log_security_event(
+            Some(admin_id),
+            "admin_account_unlock",
+            Some(json!({
+                "target_email": email,
+                "reason": reason
+            })),
+            true,
+            None,
+        );
+
+        Ok(Json(ApiResponse::success(json!({
+            "message": "Account successfully unlocked",
+            "email": email,
+            "unlocked_by": admin_id,
+            "reason": reason
+        }))))
+    } else {
+        Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ApiResponse::error(
+                ErrorCode::INTERNAL_SERVER_ERROR,
+                ErrorMessage::ACCOUNT_UNLOCK_FAILED,
+            )),
+        ))
+    }
+}
+
+/// Get account lock status (admin function)
+pub async fn get_account_lock_status_handler(
+    State(db): State<Arc<Database>>,
+    Path(user_id): Path<String>,
+    headers: HeaderMap,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let _admin_id = verify_admin_token(&headers, &db).await?;
+
+    let target_user_id: Uuid = match user_id.parse() {
+        Ok(id) => id,
+        Err(_) => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(ApiResponse::error(
+                    ErrorCode::VALIDATION_ERROR,
+                    ErrorMessage::USER_ID_FORMAT_INVALID,
+                )),
+            ));
+        }
+    };
+
+    match db.get_account_lock_status(target_user_id) {
+        Ok(Some((failed_attempts, locked_until))) => {
+            let is_locked = failed_attempts >= 5;
+            let remaining_time = if is_locked {
+                locked_until.and_then(|unlock_time| {
+                    let now = chrono::Utc::now();
+                    if now < unlock_time {
+                        Some((unlock_time - now).num_minutes())
+                    } else {
+                        None
+                    }
+                })
+            } else {
+                None
+            };
+
+            Ok(Json(ApiResponse::success(json!({
+                "user_id": target_user_id,
+                "is_locked": is_locked,
+                "failed_attempts": failed_attempts,
+                "locked_until": locked_until,
+                "remaining_minutes": remaining_time,
+                "auto_unlock": locked_until.is_some()
+            }))))
+        }
+        Ok(None) => {
+            Err((
+                StatusCode::NOT_FOUND,
+                Json(ApiResponse::error(
+                    ErrorCode::USER_NOT_FOUND,
+                    ErrorMessage::USER_DOES_NOT_EXIST,
+                )),
+            ))
+        }
+        Err(e) => {
+            tracing::error!("Database error getting lock status: {}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::error(
+                    ErrorCode::DATABASE_ERROR,
+                    ErrorMessage::ACCOUNT_LOCK_CHECK_FAILED,
                 )),
             ))
         }

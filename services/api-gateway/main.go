@@ -33,7 +33,7 @@ func main() {
 	})
 
 	// Initialize proxies
-	authServiceURL := "http://authorization:8080"
+	authServiceURL := "http://auth:8080"
 	authProxy := proxy.NewAuthProxy(authServiceURL)
 
 	// Setup routes - pure proxy mode

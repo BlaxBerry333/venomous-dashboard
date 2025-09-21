@@ -1,13 +1,13 @@
 use anyhow::Result;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager, Pool};
 use std::env;
 use uuid::Uuid;
 
 use crate::handlers::admin::{GetUsersQuery, SecurityLogEntry, SecurityLogsQuery, UserAdminView};
-use crate::models::database::{AuthUser, NewAuthUser, NewUser, NewUserRole, User};
-use crate::schema::{auth_users, roles, user_roles, users};
+use crate::models::database::{AuthUser, NewAuthUser, NewUser, Role, User};
+use crate::schema::{auth_users, roles, users};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
@@ -34,13 +34,28 @@ impl Database {
         self.pool.get().map_err(|e| anyhow::anyhow!(e))
     }
 
+    /// Get default user role ID
+    pub fn get_default_role_id(&self) -> Result<Uuid> {
+        let mut conn = self.get_connection()?;
+
+        let role_id = roles::table
+            .filter(roles::name.eq("user"))
+            .select(roles::id)
+            .first::<Uuid>(&mut conn)?;
+
+        Ok(role_id)
+    }
+
     /// Create a new user (main user table)
     pub fn create_user(&self, email: &str, name: &str, locale: &str) -> Result<User> {
         let mut conn = self.get_connection()?;
 
+        let default_role_id = self.get_default_role_id()?;
+
         let new_user = NewUser {
             email: email.to_string(),
             name: name.to_string(),
+            role_id: default_role_id,
             avatar: None,
             locale: locale.to_string(),
             timezone: None,
@@ -128,39 +143,32 @@ impl Database {
         Ok(count > 0)
     }
 
+    /// Get user with role information
+    pub fn get_user_with_role(&self, user_id: Uuid) -> Result<Option<(User, Role)>> {
+        let mut conn = self.get_connection()?;
+
+        let result = users::table
+            .inner_join(roles::table)
+            .filter(users::id.eq(user_id))
+            .select((User::as_select(), Role::as_select()))
+            .first::<(User, Role)>(&mut conn)
+            .optional()?;
+
+        Ok(result)
+    }
+
     /// Get user role by user ID
     pub fn get_user_role(&self, user_id: Uuid) -> Result<Option<String>> {
         let mut conn = self.get_connection()?;
 
-        let role_name = user_roles::table
+        let role_name = users::table
             .inner_join(roles::table)
-            .filter(user_roles::user_id.eq(user_id))
+            .filter(users::id.eq(user_id))
             .select(roles::name)
             .first::<String>(&mut conn)
             .optional()?;
 
         Ok(role_name)
-    }
-
-    /// Assign role to user
-    pub fn assign_user_role(&self, user_id: Uuid, role_name: &str) -> Result<()> {
-        let mut conn = self.get_connection()?;
-
-        // First find the role ID
-        let role_id = roles::table
-            .filter(roles::name.eq(role_name))
-            .select(roles::id)
-            .first::<Uuid>(&mut conn)?;
-
-        // Then create the user-role association
-        let new_user_role = NewUserRole { user_id, role_id };
-
-        diesel::insert_into(user_roles::table)
-            .values(&new_user_role)
-            .on_conflict_do_nothing()
-            .execute(&mut conn)?;
-
-        Ok(())
     }
 
     /// Get user by ID
@@ -175,13 +183,46 @@ impl Database {
         Ok(user)
     }
 
-    /// Update failed login attempts
+    /// Update failed login attempts and set lock time if threshold is reached
     pub fn increment_failed_login_attempts(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        // Get current failed attempts count
+        let current_attempts: i32 = auth_users::table
+            .filter(auth_users::email.eq(email))
+            .select(auth_users::failed_login_attempts)
+            .first(&mut conn)
+            .unwrap_or(0);
+
+        let new_attempts = current_attempts + 1;
+        let now = Utc::now();
+
+        // If this will be the 5th failed attempt, set account_locked_until (lock for 30 minutes)
+        let locked_until = if new_attempts >= 5 {
+            Some(now + chrono::Duration::minutes(30))
+        } else {
+            None
+        };
+
+        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
+            .set((
+                auth_users::failed_login_attempts.eq(new_attempts),
+                auth_users::account_locked_until.eq(locked_until),
+                auth_users::updated_at.eq(now),
+            ))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Reset failed login attempts and clear lock time
+    pub fn reset_failed_login_attempts(&self, email: &str) -> Result<()> {
         let mut conn = self.get_connection()?;
 
         diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
             .set((
-                auth_users::failed_login_attempts.eq(auth_users::failed_login_attempts + 1),
+                auth_users::failed_login_attempts.eq(0),
+                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
                 auth_users::updated_at.eq(Utc::now()),
             ))
             .execute(&mut conn)?;
@@ -189,18 +230,102 @@ impl Database {
         Ok(())
     }
 
-    /// Reset failed login attempts
-    pub fn reset_failed_login_attempts(&self, email: &str) -> Result<()> {
+    /// Check if account is currently locked (considering automatic unlock time)
+    pub fn is_account_locked(&self, email: &str) -> Result<bool> {
+        let mut conn = self.get_connection()?;
+        let now = Utc::now();
+
+        let auth_user = auth_users::table
+            .filter(auth_users::email.eq(email))
+            .select((auth_users::failed_login_attempts, auth_users::account_locked_until))
+            .first::<(i32, Option<DateTime<Utc>>)>(&mut conn)
+            .optional()?;
+
+        match auth_user {
+            Some((failed_attempts, locked_until)) => {
+                // Check if account has failed attempts >= 5
+                if failed_attempts >= 5 {
+                    match locked_until {
+                        Some(unlock_time) => {
+                            if now >= unlock_time {
+                                // Lock time has expired, automatically unlock the account
+                                self.reset_failed_login_attempts(email)?;
+                                Ok(false) // Account is no longer locked
+                            } else {
+                                Ok(true) // Account is still locked
+                            }
+                        }
+                        None => Ok(true), // Account is locked indefinitely (manual unlock required)
+                    }
+                } else {
+                    Ok(false) // Account is not locked
+                }
+            }
+            None => Ok(false), // User doesn't exist or no auth record
+        }
+    }
+
+    /// Get remaining lock time for an account
+    pub fn get_account_lock_remaining_time(&self, email: &str) -> Result<Option<chrono::Duration>> {
+        let mut conn = self.get_connection()?;
+        let now = Utc::now();
+
+        let locked_until: Option<DateTime<Utc>> = auth_users::table
+            .filter(auth_users::email.eq(email))
+            .select(auth_users::account_locked_until)
+            .first(&mut conn)
+            .optional()?
+            .flatten();
+
+        match locked_until {
+            Some(unlock_time) if now < unlock_time => {
+                Ok(Some(unlock_time - now))
+            }
+            _ => Ok(None),
+        }
+    }
+
+    /// Manually unlock user account (admin function)
+    pub fn admin_unlock_user_account(&self, user_id: Uuid) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
+        diesel::update(auth_users::table.filter(auth_users::user_id.eq(user_id)))
             .set((
                 auth_users::failed_login_attempts.eq(0),
+                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
                 auth_users::updated_at.eq(Utc::now()),
             ))
             .execute(&mut conn)?;
 
         Ok(())
+    }
+
+    /// Manually unlock user account by email (admin function)
+    pub fn admin_unlock_user_account_by_email(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
+            .set((
+                auth_users::failed_login_attempts.eq(0),
+                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
+                auth_users::updated_at.eq(Utc::now()),
+            ))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Get account lock status for admin view
+    pub fn get_account_lock_status(&self, user_id: Uuid) -> Result<Option<(i32, Option<DateTime<Utc>>)>> {
+        let mut conn = self.get_connection()?;
+
+        let result = auth_users::table
+            .filter(auth_users::user_id.eq(user_id))
+            .select((auth_users::failed_login_attempts, auth_users::account_locked_until))
+            .first::<(i32, Option<DateTime<Utc>>)>(&mut conn)
+            .optional()?;
+
+        Ok(result)
     }
 
     // ========================================
@@ -268,19 +393,6 @@ impl Database {
             .execute(&mut conn)?;
 
         Ok(())
-    }
-
-    /// Get user roles
-    pub fn get_user_roles(&self, user_id: Uuid) -> Result<Vec<String>> {
-        let mut conn = self.get_connection()?;
-
-        let role_names = user_roles::table
-            .inner_join(roles::table)
-            .filter(user_roles::user_id.eq(user_id))
-            .select(roles::name)
-            .load::<String>(&mut conn)?;
-
-        Ok(role_names)
     }
 
     /// Revoke all user sessions (admin function)

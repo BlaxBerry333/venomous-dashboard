@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import { getAccessCookie, mapHttpStatusToTRPCCode, parseAuthServiceError, removeAccessCookie, setAccessCookie } from "@/server/helpers";
-import { API_ENDPOINTS } from "@/utils/api";
-import { getDictionary, i18n } from "@/utils/i18n/index.serve";
+import { getAccessCookie, mapHttpStatusToTRPCCode, removeAccessCookie, setAccessCookie } from "@/server/helpers";
+import { API_ENDPOINTS, type TApiResponseOfAuthSignin, type TApiResponseOfAuthSignup, type TApiResponseOfAuthTokenRefresh } from "@/utils/api";
 import { trpc } from "@/utils/trpc/index.server";
 import { AUTH_SIGNIN_SCHEMA, AUTH_SIGNUP_SCHEMA } from "@/utils/validation";
 
@@ -10,42 +9,35 @@ export const AuthAPI = {
   /**
    * Signup
    */
-  signup: trpc.procedure.input(AUTH_SIGNUP_SCHEMA).mutation(async ({ input, ctx }) => {
+  signup: trpc.procedure.input(AUTH_SIGNUP_SCHEMA).mutation(async ({ input }) => {
     try {
-      const dictionary = await getDictionary(ctx.i18nLocale, i18n.namespaces);
-
       const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.SIGNUP, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
 
-      if (!response.ok) {
-        const errorCode = await parseAuthServiceError(response, "SIGNUP_FAILED");
-        const errorMessage = dictionary.service_auth.apiResults[errorCode] || dictionary.service_auth.apiResults.SIGNUP_FAILED;
-        const trpcErrorCode = mapHttpStatusToTRPCCode(response.status);
-        return new TRPCError({
-          code: trpcErrorCode,
-          message: errorMessage,
+      const apiResponse = (await response.json()) as TApiResponseOfAuthSignup;
+      if (!response.ok || !apiResponse.success) {
+        throw new TRPCError({
+          code: mapHttpStatusToTRPCCode(response.status),
           cause: {
-            httpStatus: response.status,
-            errorCode: errorCode,
+            errorCode: apiResponse.error?.code,
+            errorMessage: apiResponse.error?.message,
+            statusCode: response.status,
           },
         });
       }
 
-      const data = await response.json();
-      const token = data.token as string;
-
+      const token = apiResponse.data?.token;
       if (!token) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: dictionary.service_auth.apiResults.SIGNUP_FAILED,
+          message: "SIGNUP_FAILED",
         });
       }
 
       await setAccessCookie(token);
-
       return { success: true };
     } catch (error) {
       if (error instanceof TRPCError) {
@@ -61,42 +53,35 @@ export const AuthAPI = {
   /**
    * Signin
    */
-  signin: trpc.procedure.input(AUTH_SIGNIN_SCHEMA).mutation(async ({ input, ctx }) => {
+  signin: trpc.procedure.input(AUTH_SIGNIN_SCHEMA).mutation(async ({ input }) => {
     try {
-      const dictionary = await getDictionary(ctx.i18nLocale, i18n.namespaces);
-
       const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.SIGNIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
 
-      if (!response.ok) {
-        const errorCode = await parseAuthServiceError(response, "SIGNIN_FAILED");
-        const errorMessage = dictionary.service_auth.apiResults[errorCode] || dictionary.service_auth.apiResults.SIGNIN_FAILED;
-        const trpcErrorCode = mapHttpStatusToTRPCCode(response.status);
-        return new TRPCError({
-          code: trpcErrorCode,
-          message: errorMessage,
+      const apiResponse = (await response.json()) as TApiResponseOfAuthSignin;
+      if (!response.ok || !apiResponse.success) {
+        throw new TRPCError({
+          code: mapHttpStatusToTRPCCode(response.status),
           cause: {
-            httpStatus: response.status,
-            errorCode: errorCode,
+            errorCode: apiResponse.error?.code,
+            errorMessage: apiResponse.error?.message,
+            statusCode: response.status,
           },
         });
       }
 
-      const data = await response.json();
-      const token = data.token as string;
-
+      const token = apiResponse.data?.token;
       if (!token) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: dictionary.service_auth.apiResults.SIGNIN_FAILED,
+          message: "SIGNIN_FAILED",
         });
       }
 
       await setAccessCookie(token);
-
       return { success: true };
     } catch (error) {
       if (error instanceof TRPCError) {
@@ -121,49 +106,8 @@ export const AuthAPI = {
         throw error;
       }
       throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR", // 500
-        message: `${(error as Error).message}`,
-      });
-    }
-  }),
-
-  /**
-   * Get access token info
-   */
-  accessToken: trpc.procedure.query(async ({ ctx }) => {
-    try {
-      const dictionary = await getDictionary(ctx.i18nLocale, i18n.namespaces);
-      const token = await getAccessCookie();
-
-      if (!token?.value) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: dictionary.service_auth.apiResults.TOKEN_NOT_FOUND,
-        });
-      }
-
-      const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.TOKEN_INFO, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: token.value }),
-      });
-
-      if (!response.ok) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: dictionary.service_auth.apiResults.TOKEN_INVALID,
-        });
-      }
-
-      const tokenInfo = await response.json();
-      return tokenInfo;
-    } catch (error) {
-      if (error instanceof TRPCError) {
-        throw error;
-      }
-      throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `${(error as Error).message}`,
+        message: String((error as Error).message),
       });
     }
   }),
@@ -171,15 +115,13 @@ export const AuthAPI = {
   /**
    * Refresh access token
    */
-  refreshToken: trpc.procedure.mutation(async ({ ctx }) => {
+  refreshToken: trpc.procedure.mutation(async () => {
     try {
-      const dictionary = await getDictionary(ctx.i18nLocale, i18n.namespaces);
       const token = await getAccessCookie();
-
       if (!token?.value) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: dictionary.service_auth.apiResults.TOKEN_NOT_FOUND,
+          message: "TOKEN_NOT_FOUND",
         });
       }
 
@@ -189,25 +131,27 @@ export const AuthAPI = {
         body: JSON.stringify({ token: token.value }),
       });
 
-      if (!response.ok) {
+      const apiResponse = (await response.json()) as TApiResponseOfAuthTokenRefresh;
+      if (!response.ok || !apiResponse.success) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: dictionary.service_auth.apiResults.TOKEN_REFRESH_FAILED,
+          cause: {
+            errorCode: apiResponse.error?.code,
+            errorMessage: apiResponse.error?.message,
+            statusCode: response.status,
+          },
         });
       }
 
-      const data = await response.json();
-      const newToken = data.token as string;
-
+      const newToken = apiResponse.data?.token;
       if (!newToken) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: dictionary.service_auth.apiResults.TOKEN_REFRESH_FAILED,
+          message: "TOKEN_REFRESH_FAILED",
         });
       }
 
       await setAccessCookie(newToken);
-
       return { success: true, token: newToken };
     } catch (error) {
       if (error instanceof TRPCError) {
@@ -215,7 +159,7 @@ export const AuthAPI = {
       }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `${(error as Error).message}`,
+        message: String((error as Error).message),
       });
     }
   }),

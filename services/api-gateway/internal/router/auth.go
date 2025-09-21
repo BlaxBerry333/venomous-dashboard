@@ -6,7 +6,7 @@ import (
 )
 
 // SetupAuthRoutes configures authentication-related routes
-// All routes are proxied to the authorization service
+// All routes are proxied to the auth service
 func SetupAuthRoutes(r *gin.Engine, authProxy *proxy.AuthProxy) {
 	// Auth route group - pure proxy mode
 	auth := r.Group("/api/auth")

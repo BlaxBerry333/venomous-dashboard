@@ -4,7 +4,18 @@ import type { TRPCContextGenerator } from "./context";
 let trpcSingleton: ReturnType<typeof createTRPCInstance> | undefined;
 
 function createTRPCInstance() {
-  return initTRPC.context<TRPCContextGenerator>().create();
+  return initTRPC.context<TRPCContextGenerator>().create({
+    errorFormatter(opts) {
+      const { shape, error } = opts;
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          cause: error.cause,
+        },
+      };
+    },
+  });
 }
 
 function init(): ReturnType<typeof createTRPCInstance> {

@@ -11,5 +11,7 @@ export const ROUTER_PATHS = {
     MEDIA: "/dashboard/media",
     NOTES: "/dashboard/notes",
     WORKFLOW: "/dashboard/workflow",
+
+    USER_PROFILE: "/dashboard/profile",
   },
 } as const;

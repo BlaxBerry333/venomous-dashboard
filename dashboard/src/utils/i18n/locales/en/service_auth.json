@@ -1,24 +1,26 @@
 {
   "apiResults": {
-    "SIGNIN_FAILED": "Login failed. Please check your credentials.",
-    "SIGNIN_SUCCESS": "Login successful! Welcome back.",
-    "SIGNUP_FAILED": "Registration failed. Please try again.",
-    "SIGNUP_SUCCESS": "Account created successfully! Welcome aboard.",
-    "TOKEN_VERIFICATION_FAILED": "Authentication failed. Please login again.",
+    "TOKEN_INVALID": "Invalid or expired token.",
+    "TOKEN_REFRESH_FAILED": "Token refresh failed.",
+    "SIGNIN_FAILED": "Login failed.",
+    "SIGNIN_SUCCESS": "Login successful!",
+    "SIGNUP_FAILED": "Registration failed.",
+    "SIGNUP_SUCCESS": "Account created successfully!",
+    "LOGOUT_SUCCESS": "Logout successful!",
+    "VALIDATION_ERROR": "Invalid input data.",
+    "WEAK_PASSWORD": "Password must be at least 8 characters with letters and numbers.",
+    "USER_ALREADY_EXISTS": "This email is already registered.",
+    "DATABASE_ERROR": "Database operation failed.",
+    "INTERNAL_SERVER_ERROR": "Internal server error.",
+    "INVALID_CREDENTIALS": "Invalid email or password.",
+    "USER_NOT_FOUND": "User not found.",
+    "ACCOUNT_LOCKED": "Account is locked.",
+    "JWT_ERROR": "Token processing error.",
+
+    "TOKEN_VERIFICATION_FAILED": "Authentication failed.",
     "TOKEN_VERIFICATION_SUCCESS": "Authentication successful.",
     "TOKEN_NOT_FOUND": "Please login to continue.",
-    "TOKEN_INVALID": "Invalid or expired token. Please login again.",
-    "TOKEN_REFRESH_FAILED": "Token refresh failed. Please login again.",
-    "JWT_ERROR": "Token processing error. Please login again.",
-    "USER_NOT_FOUND": "User not found.",
-    "USER_ALREADY_EXISTS": "This email is already registered. Please use a different email.",
-    "ACCOUNT_LOCKED": "Account is locked. Please contact administrator.",
-    "EMAIL_ALREADY_EXISTS": "This email is already registered. Please use a different email.",
-    "WEAK_PASSWORD": "Password must be at least 8 characters with letters and numbers.",
-    "INVALID_CREDENTIALS": "Invalid email or password.",
-    "VALIDATION_ERROR": "Invalid input data. Please check format.",
-    "DATABASE_ERROR": "Database operation failed. Please try again.",
-    "INTERNAL_SERVER_ERROR": "Internal server error. Please try again later."
+    "EMAIL_ALREADY_EXISTS": "This email is already registered."
   },
 
   "uiMessages": {

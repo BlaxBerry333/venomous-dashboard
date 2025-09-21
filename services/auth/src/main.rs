@@ -8,12 +8,13 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 // Import handlers and database
-use venomous_dashboard_authorization::{
+use venomous_dashboard_auth::{
     database::Database,
     handlers::{
         admin::{
-            get_security_logs_handler, get_users_handler, reset_user_password_handler,
-            revoke_user_sessions_handler, update_user_status_handler,
+            get_account_lock_status_handler, get_security_logs_handler, get_users_handler,
+            reset_user_password_handler, revoke_user_sessions_handler,
+            unlock_user_account_handler, update_user_status_handler,
         },
         auth::{logout_handler, signin_handler, signup_handler},
         token::{token_info_handler, token_refresh_handler, token_verify_handler},
@@ -28,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing (stdout)
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
-            "venomous_dashboard_authorization=info,axum=debug,tower_http=debug",
+            "venomous_dashboard_auth=info,axum=debug,tower_http=debug",
         ))
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -65,6 +66,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .route("/admin/security-logs", get(get_security_logs_handler))
         .route("/admin/sessions/revoke", post(revoke_user_sessions_handler))
+        // Account unlock routes
+        .route("/admin/account/unlock", post(unlock_user_account_handler))
+        .route(
+            "/admin/users/:user_id/lock-status",
+            get(get_account_lock_status_handler),
+        )
         // Add shared state (database connection pool)
         .with_state(database)
         // Add logging middleware

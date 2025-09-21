@@ -4,6 +4,6 @@
 export { COOKIE_NAME, getAccessCookie, removeAccessCookie, setAccessCookie } from "./cookies";
 
 // ====================================================================================================
-// error mapping
+// errors
 // ====================================================================================================
-export { mapHttpStatusToTRPCCode, parseAuthServiceError } from "./error-mapping";
+export { mapHttpStatusToTRPCCode } from "./error-mapping";

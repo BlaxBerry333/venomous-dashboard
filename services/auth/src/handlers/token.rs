@@ -25,7 +25,7 @@ pub async fn token_verify_handler(
                     return Err((
                         StatusCode::UNAUTHORIZED,
                         Json(ApiResponse::error(
-                            ErrorCode::INVALID_TOKEN,
+                            ErrorCode::TOKEN_INVALID,
                             ErrorMessage::TOKEN_INVALID_OR_EXPIRED,
                         )),
                     ));
@@ -34,13 +34,21 @@ pub async fn token_verify_handler(
 
             // Optionally verify user still exists in database
             match db.find_user_by_id(user_id) {
-                Ok(Some(_)) => Ok(Json(ApiResponse::success(json!({
-                    "valid": true,
-                    "user_id": user_id,
-                    "email": token_data.claims.email,
-                    "role": token_data.claims.role,
-                    "expires_at": token_data.claims.exp
-                })))),
+                Ok(Some(user)) => {
+                    let role = match db.get_user_role(user_id) {
+                        Ok(r) => r.unwrap_or("user".to_string()),
+                        Err(_) => "user".to_string(),
+                    };
+                    Ok(Json(ApiResponse::success(json!({
+                        "valid": true,
+                        "user_id": user.id,
+                        "email": user.email,
+                        "name": user.name,
+                        "role": role,
+                        "expires_at": token_data.claims.exp,
+                        "issued_at": token_data.claims.iat
+                    }))))
+                }
                 Ok(None) => {
                     // User no longer exists
                     Err((
@@ -57,7 +65,7 @@ pub async fn token_verify_handler(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         Json(ApiResponse::error(
                             ErrorCode::DATABASE_ERROR,
-                            ErrorMessage::INTERNAL_SERVER_ERROR,
+                            ErrorMessage::SERVER_ERROR_OCCURRED,
                         )),
                     ))
                 }
@@ -68,7 +76,7 @@ pub async fn token_verify_handler(
             Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
+                    ErrorCode::TOKEN_INVALID,
                     ErrorMessage::TOKEN_INVALID_OR_EXPIRED,
                 )),
             ))
@@ -92,7 +100,7 @@ pub async fn token_info_handler(
                     return Err((
                         StatusCode::UNAUTHORIZED,
                         Json(ApiResponse::error(
-                            ErrorCode::INVALID_TOKEN,
+                            ErrorCode::TOKEN_INVALID,
                             ErrorMessage::TOKEN_INVALID_OR_EXPIRED,
                         )),
                     ));
@@ -102,19 +110,18 @@ pub async fn token_info_handler(
             // Get fresh user data from database
             match db.find_user_by_id(user_id) {
                 Ok(Some(user)) => {
-                    let role = db
-                        .get_user_role(user_id)
-                        .unwrap_or(Some("user".to_string()))
-                        .unwrap_or("user".to_string());
+                    let role = match db.get_user_role(user_id) {
+                        Ok(r) => r.unwrap_or("user".to_string()),
+                        Err(_) => "user".to_string(),
+                    };
 
                     Ok(Json(ApiResponse::success(json!({
+                        "valid": true,
                         "user_id": user.id,
                         "email": user.email,
-                        "name": user.name,
                         "role": role,
                         "issued_at": token_data.claims.iat,
-                        "expires_at": token_data.claims.exp,
-                        "issuer": token_data.claims.iss
+                        "expires_at": token_data.claims.exp
                     }))))
                 }
                 Ok(None) => Err((
@@ -130,7 +137,7 @@ pub async fn token_info_handler(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         Json(ApiResponse::error(
                             ErrorCode::DATABASE_ERROR,
-                            ErrorMessage::INTERNAL_SERVER_ERROR,
+                            ErrorMessage::SERVER_ERROR_OCCURRED,
                         )),
                     ))
                 }
@@ -141,7 +148,7 @@ pub async fn token_info_handler(
             Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
+                    ErrorCode::TOKEN_INVALID,
                     ErrorMessage::TOKEN_INVALID_OR_EXPIRED,
                 )),
             ))
@@ -167,7 +174,7 @@ pub async fn token_refresh_handler(
             return Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
+                    ErrorCode::TOKEN_INVALID,
                     ErrorMessage::TOKEN_REFRESH_FAILED,
                 )),
             ));
@@ -180,7 +187,7 @@ pub async fn token_refresh_handler(
             return Err((
                 StatusCode::UNAUTHORIZED,
                 Json(ApiResponse::error(
-                    ErrorCode::INVALID_TOKEN,
+                    ErrorCode::TOKEN_INVALID,
                     ErrorMessage::TOKEN_REFRESH_FAILED,
                 )),
             ));
@@ -205,31 +212,33 @@ pub async fn token_refresh_handler(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(ApiResponse::error(
                     ErrorCode::DATABASE_ERROR,
-                    ErrorMessage::INTERNAL_SERVER_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
                 )),
             ));
         }
     };
 
     // Get current role
-    let role = db
-        .get_user_role(user_id)
-        .unwrap_or(Some("user".to_string()))
-        .unwrap_or("user".to_string());
+    let role = match db.get_user_role(user_id) {
+        Ok(r) => r.unwrap_or("user".to_string()),
+        Err(_) => "user".to_string(),
+    };
 
     // Generate new token
     match JwtService::generate_token(user_id, &user.email, &role) {
         Ok(new_token) => {
             tracing::info!("Token successfully refreshed for user: {}", user.email);
 
+            // Calculate expiration time (24 hours from now by default)
+            let exp_hours = std::env::var("JWT_EXPIRATION_HOURS")
+                .unwrap_or_else(|_| "24".to_string())
+                .parse::<i64>()
+                .unwrap_or(24);
+            let expires_at = chrono::Utc::now() + chrono::Duration::hours(exp_hours);
+
             Ok(Json(ApiResponse::success(json!({
                 "token": new_token,
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "name": user.name,
-                    "role": role
-                }
+                "expires_at": expires_at.timestamp()
             }))))
         }
         Err(e) => {
