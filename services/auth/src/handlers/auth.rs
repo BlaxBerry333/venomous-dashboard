@@ -3,14 +3,17 @@ use serde_json::{json, Value};
 use std::sync::Arc;
 use validator::Validate;
 
+use crate::constants::Roles;
 use crate::database::Database;
-use crate::models::{ApiResponse, AuthPayload, ErrorCode, ErrorMessage, LogoutPayload};
+use crate::models::{
+    ApiResponse, AuthPayload, ErrorCode, ErrorMessage, LogoutPayload, SignupPayload,
+};
 use crate::utils::{JwtService, PasswordService};
 
 /// Handler for user signup
 pub async fn signup_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<AuthPayload>,
+    Json(payload): Json<SignupPayload>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!(
         "Signup request received for user: {}. Creating account and issuing token.",
@@ -78,8 +81,8 @@ pub async fn signup_handler(
         }
     };
 
-    // Create main user record
-    let user = match db.create_user(&payload.email, &payload.email, "en") {
+    // Create main user record (business information only)
+    let user = match db.create_user(&payload.email, &payload.name) {
         Ok(user) => user,
         Err(e) => {
             tracing::error!("Database error creating user: {}", e);
@@ -106,11 +109,10 @@ pub async fn signup_handler(
     }
 
     // Role is now set directly in the user table during creation
-
-    // Get user role for JWT
+    // Get user role
     let role = match db.get_user_role(user.id) {
-        Ok(r) => r.unwrap_or("user".to_string()),
-        Err(_) => "user".to_string(),
+        Ok(r) => r.unwrap_or(Roles::USER.to_string()),
+        Err(_) => Roles::USER.to_string(),
     };
 
     // Generate JWT token
@@ -216,18 +218,27 @@ pub async fn signin_handler(
     match db.is_account_locked(&payload.email) {
         Ok(true) => {
             // Account is still locked, check remaining time
-            let remaining_time = db.get_account_lock_remaining_time(&payload.email)
+            let remaining_time = db
+                .get_account_lock_remaining_time(&payload.email)
                 .unwrap_or(None);
 
             match remaining_time {
                 Some(duration) => {
                     let minutes_remaining = duration.num_minutes().max(1); // At least 1 minute
-                    tracing::warn!("Account locked for user: {} (unlock in {} minutes)", payload.email, minutes_remaining);
+                    tracing::warn!(
+                        "Account locked for user: {} (unlock in {} minutes)",
+                        payload.email,
+                        minutes_remaining
+                    );
                     return Err((
                         StatusCode::LOCKED,
                         Json(ApiResponse::error(
                             ErrorCode::ACCOUNT_LOCKED,
-                            &format!("{}", ErrorMessage::ACCOUNT_LOCKED_WITH_COUNTDOWN.replace("{}", &minutes_remaining.to_string())),
+                            &format!(
+                                "{}",
+                                ErrorMessage::ACCOUNT_LOCKED_WITH_COUNTDOWN
+                                    .replace("{}", &minutes_remaining.to_string())
+                            ),
                         )),
                     ));
                 }
@@ -293,8 +304,8 @@ pub async fn signin_handler(
 
     // Get user role
     let role = match db.get_user_role(user.id) {
-        Ok(r) => r.unwrap_or("user".to_string()),
-        Err(_) => "user".to_string(),
+        Ok(r) => r.unwrap_or(Roles::USER.to_string()),
+        Err(_) => Roles::USER.to_string(),
     };
 
     // Generate JWT token

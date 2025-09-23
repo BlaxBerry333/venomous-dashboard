@@ -5,6 +5,9 @@ use std::env;
 use thiserror::Error;
 use uuid::Uuid;
 
+#[cfg(test)]
+use crate::constants::Roles;
+
 #[derive(Debug, Error)]
 pub enum JwtError {
     #[error("Invalid token: {0}")]
@@ -149,7 +152,7 @@ mod tests {
 
         let user_id = Uuid::new_v4();
         let email = "test@example.com";
-        let role = "user";
+        let role = Roles::USER;
 
         // Generate token
         let token = JwtService::generate_token(user_id, email, role).unwrap();

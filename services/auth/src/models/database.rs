@@ -13,6 +13,8 @@ pub struct Role {
     pub name: String,
     pub description: Option<String>,
     pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 /// Role insert model
@@ -23,19 +25,18 @@ pub struct NewRole {
     pub description: Option<String>,
 }
 
-/// User model for database
+/// User model for database (business information only)
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: Uuid,
     pub email: String,
     pub name: String,
+    pub avatar_path: Option<String>,
     pub role_id: Uuid,
-    pub avatar: Option<String>,
-    pub locale: String,
-    pub timezone: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 /// User insert model
@@ -44,10 +45,8 @@ pub struct User {
 pub struct NewUser {
     pub email: String,
     pub name: String,
+    pub avatar_path: Option<String>,
     pub role_id: Uuid,
-    pub avatar: Option<String>,
-    pub locale: String,
-    pub timezone: Option<String>,
 }
 
 /// Auth user model for authentication data
@@ -63,10 +62,9 @@ pub struct AuthUser {
     pub password_hash: String,
     pub email_verified: bool,
     pub last_login: Option<DateTime<Utc>>,
-    pub failed_login_attempts: i32,
-    pub account_locked_until: Option<DateTime<Utc>>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub login_failure_count: i32,
+    pub is_login_locked: bool,
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 /// Auth user insert model

@@ -5,8 +5,9 @@ use diesel::r2d2::{self, ConnectionManager, Pool};
 use std::env;
 use uuid::Uuid;
 
+use crate::constants::{AccountLock, Roles};
 use crate::handlers::admin::{GetUsersQuery, SecurityLogEntry, SecurityLogsQuery, UserAdminView};
-use crate::models::database::{AuthUser, NewAuthUser, NewUser, Role, User};
+use crate::models::database::{AuthUser, NewAuthUser, NewUser, User};
 use crate::schema::{auth_users, roles, users};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
@@ -34,31 +35,20 @@ impl Database {
         self.pool.get().map_err(|e| anyhow::anyhow!(e))
     }
 
-    /// Get default user role ID
-    pub fn get_default_role_id(&self) -> Result<Uuid> {
+    /// Create a new user (main user table - business information only)
+    pub fn create_user(&self, email: &str, name: &str) -> Result<User> {
         let mut conn = self.get_connection()?;
 
-        let role_id = roles::table
-            .filter(roles::name.eq("user"))
-            .select(roles::id)
-            .first::<Uuid>(&mut conn)?;
-
-        Ok(role_id)
-    }
-
-    /// Create a new user (main user table)
-    pub fn create_user(&self, email: &str, name: &str, locale: &str) -> Result<User> {
-        let mut conn = self.get_connection()?;
-
-        let default_role_id = self.get_default_role_id()?;
+        // Get default user role ID
+        let default_role_id = self
+            .get_role_id_by_name(Roles::USER)?
+            .ok_or_else(|| anyhow::anyhow!("Default user role not found"))?;
 
         let new_user = NewUser {
             email: email.to_string(),
             name: name.to_string(),
+            avatar_path: None,
             role_id: default_role_id,
-            avatar: None,
-            locale: locale.to_string(),
-            timezone: None,
         };
 
         let user = diesel::insert_into(users::table)
@@ -93,68 +83,72 @@ impl Database {
         Ok(auth_user)
     }
 
-    /// Find user by email
+    /// Find user by email (excluding soft deleted)
     pub fn find_user_by_email(&self, email: &str) -> Result<Option<User>> {
         let mut conn = self.get_connection()?;
 
         let user = users::table
             .filter(users::email.eq(email))
+            .filter(users::deleted_at.is_null())
             .first::<User>(&mut conn)
             .optional()?;
 
         Ok(user)
     }
 
-    /// Find auth user by email
+    /// Find auth user by email (excluding soft deleted)
     pub fn find_auth_user_by_email(&self, email: &str) -> Result<Option<AuthUser>> {
         let mut conn = self.get_connection()?;
 
         let auth_user = auth_users::table
             .filter(auth_users::email.eq(email))
+            .filter(auth_users::deleted_at.is_null())
             .first::<AuthUser>(&mut conn)
             .optional()?;
 
         Ok(auth_user)
     }
 
-    /// Update user last login
+    /// Update user last login (successful login)
     pub fn update_last_login(&self, user_id: Uuid) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::user_id.eq(user_id)))
-            .set((
-                auth_users::last_login.eq(Some(Utc::now())),
-                auth_users::updated_at.eq(Utc::now()),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::user_id.eq(user_id))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set(auth_users::last_login.eq(Some(Utc::now())))
+        .execute(&mut conn)?;
 
         Ok(())
     }
 
-    /// Check if email exists
+    /// Check if email exists (excluding soft deleted)
     pub fn email_exists(&self, email: &str) -> Result<bool> {
         let mut conn = self.get_connection()?;
 
         let count = users::table
             .filter(users::email.eq(email))
+            .filter(users::deleted_at.is_null())
             .count()
             .get_result::<i64>(&mut conn)?;
 
         Ok(count > 0)
     }
 
-    /// Get user with role information
-    pub fn get_user_with_role(&self, user_id: Uuid) -> Result<Option<(User, Role)>> {
+    /// Get role ID by role name
+    pub fn get_role_id_by_name(&self, role_name: &str) -> Result<Option<Uuid>> {
         let mut conn = self.get_connection()?;
 
-        let result = users::table
-            .inner_join(roles::table)
-            .filter(users::id.eq(user_id))
-            .select((User::as_select(), Role::as_select()))
-            .first::<(User, Role)>(&mut conn)
+        let role_id = roles::table
+            .filter(roles::name.eq(role_name))
+            .filter(roles::deleted_at.is_null())
+            .select(roles::id)
+            .first::<Uuid>(&mut conn)
             .optional()?;
 
-        Ok(result)
+        Ok(role_id)
     }
 
     /// Get user role by user ID
@@ -162,8 +156,10 @@ impl Database {
         let mut conn = self.get_connection()?;
 
         let role_name = users::table
-            .inner_join(roles::table)
+            .inner_join(roles::table.on(users::role_id.eq(roles::id)))
             .filter(users::id.eq(user_id))
+            .filter(users::deleted_at.is_null())
+            .filter(roles::deleted_at.is_null())
             .select(roles::name)
             .first::<String>(&mut conn)
             .optional()?;
@@ -171,46 +167,49 @@ impl Database {
         Ok(role_name)
     }
 
-    /// Get user by ID
+    /// Get user by ID (excluding soft deleted)
     pub fn find_user_by_id(&self, user_id: Uuid) -> Result<Option<User>> {
         let mut conn = self.get_connection()?;
 
         let user = users::table
             .filter(users::id.eq(user_id))
+            .filter(users::deleted_at.is_null())
             .first::<User>(&mut conn)
             .optional()?;
 
         Ok(user)
     }
 
-    /// Update failed login attempts and set lock time if threshold is reached
+    /// Update failed login attempts and lock if threshold is reached
     pub fn increment_failed_login_attempts(&self, email: &str) -> Result<()> {
         let mut conn = self.get_connection()?;
 
         // Get current failed attempts count
         let current_attempts: i32 = auth_users::table
             .filter(auth_users::email.eq(email))
-            .select(auth_users::failed_login_attempts)
+            .filter(auth_users::deleted_at.is_null())
+            .select(auth_users::login_failure_count)
             .first(&mut conn)
             .unwrap_or(0);
 
         let new_attempts = current_attempts + 1;
         let now = Utc::now();
 
-        // If this will be the 5th failed attempt, set account_locked_until (lock for 30 minutes)
-        let locked_until = if new_attempts >= 5 {
-            Some(now + chrono::Duration::minutes(30))
-        } else {
-            None
-        };
+        // Lock account after max failed attempts
+        const MAX_FAILED_ATTEMPTS: i32 = AccountLock::MAX_FAILED_ATTEMPTS;
+        let is_locked = new_attempts >= MAX_FAILED_ATTEMPTS;
 
-        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
-            .set((
-                auth_users::failed_login_attempts.eq(new_attempts),
-                auth_users::account_locked_until.eq(locked_until),
-                auth_users::updated_at.eq(now),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::email.eq(email))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set((
+            auth_users::login_failure_count.eq(new_attempts),
+            auth_users::last_login.eq(Some(now)),
+            auth_users::is_login_locked.eq(is_locked),
+        ))
+        .execute(&mut conn)?;
 
         Ok(())
     }
@@ -219,43 +218,59 @@ impl Database {
     pub fn reset_failed_login_attempts(&self, email: &str) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
-            .set((
-                auth_users::failed_login_attempts.eq(0),
-                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
-                auth_users::updated_at.eq(Utc::now()),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::email.eq(email))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set((
+            auth_users::login_failure_count.eq(0),
+            auth_users::is_login_locked.eq(false),
+        ))
+        .execute(&mut conn)?;
 
         Ok(())
     }
 
-    /// Check if account is currently locked (considering automatic unlock time)
+    /// Check if account is currently locked (considering automatic unlock based on time)
     pub fn is_account_locked(&self, email: &str) -> Result<bool> {
         let mut conn = self.get_connection()?;
         let now = Utc::now();
 
         let auth_user = auth_users::table
             .filter(auth_users::email.eq(email))
-            .select((auth_users::failed_login_attempts, auth_users::account_locked_until))
-            .first::<(i32, Option<DateTime<Utc>>)>(&mut conn)
+            .filter(auth_users::deleted_at.is_null())
+            .select((
+                auth_users::login_failure_count,
+                auth_users::is_login_locked,
+                auth_users::last_login,
+            ))
+            .first::<(i32, bool, Option<DateTime<Utc>>)>(&mut conn)
             .optional()?;
 
         match auth_user {
-            Some((failed_attempts, locked_until)) => {
-                // Check if account has failed attempts >= 5
-                if failed_attempts >= 5 {
-                    match locked_until {
-                        Some(unlock_time) => {
+            Some((failed_attempts, is_locked, last_login)) => {
+                // Check against max failed attempts threshold
+                const MAX_FAILED_ATTEMPTS: i32 = AccountLock::MAX_FAILED_ATTEMPTS;
+
+                if is_locked && failed_attempts >= MAX_FAILED_ATTEMPTS {
+                    // Auto-unlock after configured minutes
+                    const AUTO_UNLOCK_MINUTES: i64 = AccountLock::AUTO_UNLOCK_MINUTES;
+
+                    // Check if lockout period has passed since last login attempt
+                    match last_login {
+                        Some(last_attempt) => {
+                            let unlock_time =
+                                last_attempt + chrono::Duration::minutes(AUTO_UNLOCK_MINUTES);
                             if now >= unlock_time {
-                                // Lock time has expired, automatically unlock the account
+                                // Lockout period has passed, automatically unlock and reset counters
                                 self.reset_failed_login_attempts(email)?;
                                 Ok(false) // Account is no longer locked
                             } else {
                                 Ok(true) // Account is still locked
                             }
                         }
-                        None => Ok(true), // Account is locked indefinitely (manual unlock required)
+                        None => Ok(true), // No last login time, keep locked
                     }
                 } else {
                     Ok(false) // Account is not locked
@@ -270,18 +285,26 @@ impl Database {
         let mut conn = self.get_connection()?;
         let now = Utc::now();
 
-        let locked_until: Option<DateTime<Utc>> = auth_users::table
+        let auth_user = auth_users::table
             .filter(auth_users::email.eq(email))
-            .select(auth_users::account_locked_until)
-            .first(&mut conn)
-            .optional()?
-            .flatten();
+            .filter(auth_users::deleted_at.is_null())
+            .select((auth_users::is_login_locked, auth_users::last_login))
+            .first::<(bool, Option<DateTime<Utc>>)>(&mut conn)
+            .optional()?;
 
-        match locked_until {
-            Some(unlock_time) if now < unlock_time => {
-                Ok(Some(unlock_time - now))
+        match auth_user {
+            Some((is_locked, Some(last_login))) if is_locked => {
+                // Auto-unlock after configured minutes
+                const AUTO_UNLOCK_MINUTES: i64 = AccountLock::AUTO_UNLOCK_MINUTES;
+
+                let unlock_time = last_login + chrono::Duration::minutes(AUTO_UNLOCK_MINUTES);
+                if now < unlock_time {
+                    Ok(Some(unlock_time - now))
+                } else {
+                    Ok(None) // Lock time has expired
+                }
             }
-            _ => Ok(None),
+            _ => Ok(None), // Not locked or no last login time
         }
     }
 
@@ -289,13 +312,16 @@ impl Database {
     pub fn admin_unlock_user_account(&self, user_id: Uuid) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::user_id.eq(user_id)))
-            .set((
-                auth_users::failed_login_attempts.eq(0),
-                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
-                auth_users::updated_at.eq(Utc::now()),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::user_id.eq(user_id))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set((
+            auth_users::login_failure_count.eq(0),
+            auth_users::is_login_locked.eq(false),
+        ))
+        .execute(&mut conn)?;
 
         Ok(())
     }
@@ -304,25 +330,29 @@ impl Database {
     pub fn admin_unlock_user_account_by_email(&self, email: &str) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::email.eq(email)))
-            .set((
-                auth_users::failed_login_attempts.eq(0),
-                auth_users::account_locked_until.eq(None::<DateTime<Utc>>),
-                auth_users::updated_at.eq(Utc::now()),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::email.eq(email))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set((
+            auth_users::login_failure_count.eq(0),
+            auth_users::is_login_locked.eq(false),
+        ))
+        .execute(&mut conn)?;
 
         Ok(())
     }
 
     /// Get account lock status for admin view
-    pub fn get_account_lock_status(&self, user_id: Uuid) -> Result<Option<(i32, Option<DateTime<Utc>>)>> {
+    pub fn get_account_lock_status(&self, user_id: Uuid) -> Result<Option<(i32, bool)>> {
         let mut conn = self.get_connection()?;
 
         let result = auth_users::table
             .filter(auth_users::user_id.eq(user_id))
-            .select((auth_users::failed_login_attempts, auth_users::account_locked_until))
-            .first::<(i32, Option<DateTime<Utc>>)>(&mut conn)
+            .filter(auth_users::deleted_at.is_null())
+            .select((auth_users::login_failure_count, auth_users::is_login_locked))
+            .first::<(i32, bool)>(&mut conn)
             .optional()?;
 
         Ok(result)
@@ -383,14 +413,17 @@ impl Database {
     pub fn admin_reset_user_password(&self, user_id: Uuid, password_hash: &str) -> Result<()> {
         let mut conn = self.get_connection()?;
 
-        diesel::update(auth_users::table.filter(auth_users::user_id.eq(user_id)))
-            .set((
-                auth_users::password_hash.eq(password_hash),
-                auth_users::updated_at.eq(Utc::now()),
-                // In a real implementation, you might have a password_reset_required field:
-                // auth_users::password_reset_required.eq(true),
-            ))
-            .execute(&mut conn)?;
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::user_id.eq(user_id))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .set((
+            auth_users::password_hash.eq(password_hash),
+            // In a real implementation, you might have a password_reset_required field:
+            // auth_users::password_reset_required.eq(true),
+        ))
+        .execute(&mut conn)?;
 
         Ok(())
     }
@@ -443,5 +476,153 @@ impl Database {
         // TODO: Implement actual security logs count query
         let _ = params; // Suppress unused parameter warning
         Ok(0)
+    }
+
+    // ========================================
+    // Auth User Soft Delete Operations
+    // ========================================
+
+    /// Soft delete auth user by user_id (admin function)
+    pub fn soft_delete_auth_user(&self, user_id: Uuid) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::user_id.eq(user_id))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .filter(auth_users::deleted_at.is_null())
+        .set(auth_users::deleted_at.eq(Some(Utc::now())))
+        .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Soft delete auth user by email (admin function)
+    pub fn soft_delete_auth_user_by_email(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::email.eq(email))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .filter(auth_users::deleted_at.is_null())
+        .set(auth_users::deleted_at.eq(Some(Utc::now())))
+        .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Restore soft deleted auth user by user_id (admin function)
+    pub fn restore_auth_user(&self, user_id: Uuid) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::user_id.eq(user_id))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .filter(auth_users::deleted_at.is_not_null())
+        .set(auth_users::deleted_at.eq(None::<DateTime<Utc>>))
+        .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Restore soft deleted auth user by email (admin function)
+    pub fn restore_auth_user_by_email(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(
+            auth_users::table
+                .filter(auth_users::email.eq(email))
+                .filter(auth_users::deleted_at.is_null()),
+        )
+        .filter(auth_users::deleted_at.is_not_null())
+        .set(auth_users::deleted_at.eq(None::<DateTime<Utc>>))
+        .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Check if auth user is soft deleted
+    pub fn is_auth_user_deleted(&self, user_id: Uuid) -> Result<bool> {
+        let mut conn = self.get_connection()?;
+
+        let deleted_at: Option<DateTime<Utc>> = auth_users::table
+            .filter(auth_users::user_id.eq(user_id))
+            .select(auth_users::deleted_at)
+            .first(&mut conn)
+            .optional()?
+            .flatten();
+
+        Ok(deleted_at.is_some())
+    }
+
+    // ========================================
+    // User Soft Delete Operations
+    // ========================================
+
+    /// Soft delete user by user_id (admin function)
+    pub fn soft_delete_user(&self, user_id: Uuid) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(users::table.filter(users::id.eq(user_id)))
+            .filter(users::deleted_at.is_null())
+            .set(users::deleted_at.eq(Some(Utc::now())))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Soft delete user by email (admin function)
+    pub fn soft_delete_user_by_email(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(users::table.filter(users::email.eq(email)))
+            .filter(users::deleted_at.is_null())
+            .set(users::deleted_at.eq(Some(Utc::now())))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Restore soft deleted user by user_id (admin function)
+    pub fn restore_user(&self, user_id: Uuid) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(users::table.filter(users::id.eq(user_id)))
+            .filter(users::deleted_at.is_not_null())
+            .set(users::deleted_at.eq(None::<DateTime<Utc>>))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Restore soft deleted user by email (admin function)
+    pub fn restore_user_by_email(&self, email: &str) -> Result<()> {
+        let mut conn = self.get_connection()?;
+
+        diesel::update(users::table.filter(users::email.eq(email)))
+            .filter(users::deleted_at.is_not_null())
+            .set(users::deleted_at.eq(None::<DateTime<Utc>>))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    /// Check if user is soft deleted
+    pub fn is_user_deleted(&self, user_id: Uuid) -> Result<bool> {
+        let mut conn = self.get_connection()?;
+
+        let deleted_at: Option<DateTime<Utc>> = users::table
+            .filter(users::id.eq(user_id))
+            .select(users::deleted_at)
+            .first(&mut conn)
+            .optional()?
+            .flatten();
+
+        Ok(deleted_at.is_some())
     }
 }

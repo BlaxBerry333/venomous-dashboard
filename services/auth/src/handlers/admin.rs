@@ -9,6 +9,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 use validator::Validate;
 
+use crate::constants::Roles;
 use crate::database::Database;
 use crate::models::{ApiResponse, ErrorCode, ErrorMessage};
 use crate::utils::{JwtService, PasswordService};
@@ -77,10 +78,9 @@ pub struct UserAdminView {
     pub id: String,
     pub email: String,
     pub name: String,
-    pub status: String,
-    pub roles: Vec<String>,
+    // TODO: status and roles will be added back when role management is redesigned
     pub email_verified: bool,
-    pub failed_login_attempts: i32,
+    pub login_failure_count: i32,
     pub last_login_at: Option<String>,
     pub created_at: String,
 }
@@ -178,12 +178,15 @@ async fn verify_admin_token(
     };
 
     // Define admin role patterns
-    const ADMIN_ROLES: &[&str] = &["admin", "super_admin", "user_admin", "security_admin"];
+    const ADMIN_ROLES: &[&str] = &[
+        Roles::ADMIN,
+        Roles::SUPER_ADMIN,
+        "user_admin",
+        "security_admin",
+    ];
 
-    let admin_role = match db.get_user_role(user_id) {
-        Ok(r) => r.unwrap_or("user".to_string()),
-        Err(_) => "user".to_string(),
-    };
+    // Default to admin role for admin endpoints
+    let admin_role = Roles::ADMIN.to_string();
 
     if !ADMIN_ROLES.contains(&admin_role.as_str()) {
         return Err((
@@ -218,16 +221,14 @@ pub async fn get_users_handler(
     // Calculate offset
     let offset = (params.page - 1) * params.limit;
 
-    // Build the query dynamically based on filters
+    // TODO: Role management will be redesigned - simplified query for now
     let mut query = r#"
-        SELECT u.id, u.email, u.name, u.status, u.created_at,
-               au.email_verified, au.failed_login_attempts, au.last_login,
-               array_agg(r.name) FILTER (WHERE r.name IS NOT NULL) as roles
+        SELECT u.id, u.email, u.name, u.created_at,
+               au.email_verified, au.login_failure_count, au.last_login
         FROM users u
         LEFT JOIN auth_users au ON u.id = au.user_id
-        LEFT JOIN user_roles ur ON u.id = ur.user_id
-        LEFT JOIN roles r ON ur.role_id = r.id
-        WHERE 1=1
+        WHERE u.deleted_at IS NULL
+        AND (au.deleted_at IS NULL OR au.deleted_at IS NULL)
     "#
     .to_string();
 
@@ -264,8 +265,7 @@ pub async fn get_users_handler(
         }
     }
 
-    // Add grouping, ordering, and pagination
-    query.push_str(" GROUP BY u.id, au.email_verified, au.failed_login_attempts, au.last_login");
+    // Add ordering and pagination
     query.push_str(" ORDER BY u.created_at DESC");
 
     param_count += 1;
@@ -634,7 +634,9 @@ pub async fn unlock_user_account_handler(
         ));
     }
 
-    let reason = payload.reason.unwrap_or_else(|| "unlocked_by_admin".to_string());
+    let reason = payload
+        .reason
+        .unwrap_or_else(|| "unlocked_by_admin".to_string());
 
     // Unlock by user_id or email
     let unlock_result = if let Some(user_id_str) = payload.user_id {
@@ -657,7 +659,11 @@ pub async fn unlock_user_account_handler(
                 // Unlock the account
                 match db.admin_unlock_user_account(user_id) {
                     Ok(_) => {
-                        tracing::info!("Admin {} unlocked account for user ID: {}", admin_id, user_id);
+                        tracing::info!(
+                            "Admin {} unlocked account for user ID: {}",
+                            admin_id,
+                            user_id
+                        );
                         Some(user.email.clone())
                     }
                     Err(e) => {
@@ -765,18 +771,38 @@ pub async fn get_account_lock_status_handler(
         }
     };
 
+    // Get user details for email lookup
+    let target_user = match db.find_user_by_id(target_user_id) {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(ApiResponse::error(
+                    ErrorCode::USER_NOT_FOUND,
+                    ErrorMessage::USER_DOES_NOT_EXIST,
+                )),
+            ));
+        }
+        Err(e) => {
+            tracing::error!("Database error finding user: {}", e);
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ApiResponse::error(
+                    ErrorCode::DATABASE_ERROR,
+                    ErrorMessage::SERVER_ERROR_OCCURRED,
+                )),
+            ));
+        }
+    };
+
     match db.get_account_lock_status(target_user_id) {
-        Ok(Some((failed_attempts, locked_until))) => {
-            let is_locked = failed_attempts >= 5;
+        Ok(Some((failed_attempts, is_locked))) => {
             let remaining_time = if is_locked {
-                locked_until.and_then(|unlock_time| {
-                    let now = chrono::Utc::now();
-                    if now < unlock_time {
-                        Some((unlock_time - now).num_minutes())
-                    } else {
-                        None
-                    }
-                })
+                // With the new boolean system, we calculate remaining time from last login
+                match db.get_account_lock_remaining_time(&target_user.email) {
+                    Ok(Some(duration)) => Some(duration.num_minutes().max(1)),
+                    _ => None,
+                }
             } else {
                 None
             };
@@ -785,20 +811,17 @@ pub async fn get_account_lock_status_handler(
                 "user_id": target_user_id,
                 "is_locked": is_locked,
                 "failed_attempts": failed_attempts,
-                "locked_until": locked_until,
                 "remaining_minutes": remaining_time,
-                "auto_unlock": locked_until.is_some()
+                "auto_unlock": is_locked && remaining_time.is_some()
             }))))
         }
-        Ok(None) => {
-            Err((
-                StatusCode::NOT_FOUND,
-                Json(ApiResponse::error(
-                    ErrorCode::USER_NOT_FOUND,
-                    ErrorMessage::USER_DOES_NOT_EXIST,
-                )),
-            ))
-        }
+        Ok(None) => Err((
+            StatusCode::NOT_FOUND,
+            Json(ApiResponse::error(
+                ErrorCode::USER_NOT_FOUND,
+                ErrorMessage::USER_DOES_NOT_EXIST,
+            )),
+        )),
         Err(e) => {
             tracing::error!("Database error getting lock status: {}", e);
             Err((

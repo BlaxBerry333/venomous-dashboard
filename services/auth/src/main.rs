@@ -13,8 +13,8 @@ use venomous_dashboard_auth::{
     handlers::{
         admin::{
             get_account_lock_status_handler, get_security_logs_handler, get_users_handler,
-            reset_user_password_handler, revoke_user_sessions_handler,
-            unlock_user_account_handler, update_user_status_handler,
+            reset_user_password_handler, revoke_user_sessions_handler, unlock_user_account_handler,
+            update_user_status_handler,
         },
         auth::{logout_handler, signin_handler, signup_handler},
         token::{token_info_handler, token_refresh_handler, token_verify_handler},

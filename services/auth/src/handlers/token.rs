@@ -2,6 +2,7 @@ use axum::{extract::State, http::StatusCode, response::Json};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
+use crate::constants::Roles;
 use crate::database::Database;
 use crate::models::{ApiResponse, ErrorCode, ErrorMessage, TokenRequest};
 use crate::utils::JwtService;
@@ -35,10 +36,8 @@ pub async fn token_verify_handler(
             // Optionally verify user still exists in database
             match db.find_user_by_id(user_id) {
                 Ok(Some(user)) => {
-                    let role = match db.get_user_role(user_id) {
-                        Ok(r) => r.unwrap_or("user".to_string()),
-                        Err(_) => "user".to_string(),
-                    };
+                    // Default to user role
+                    let role = Roles::USER.to_string();
                     Ok(Json(ApiResponse::success(json!({
                         "valid": true,
                         "user_id": user.id,
@@ -110,10 +109,8 @@ pub async fn token_info_handler(
             // Get fresh user data from database
             match db.find_user_by_id(user_id) {
                 Ok(Some(user)) => {
-                    let role = match db.get_user_role(user_id) {
-                        Ok(r) => r.unwrap_or("user".to_string()),
-                        Err(_) => "user".to_string(),
-                    };
+                    // Default to user role
+                    let role = Roles::USER.to_string();
 
                     Ok(Json(ApiResponse::success(json!({
                         "valid": true,
@@ -218,11 +215,8 @@ pub async fn token_refresh_handler(
         }
     };
 
-    // Get current role
-    let role = match db.get_user_role(user_id) {
-        Ok(r) => r.unwrap_or("user".to_string()),
-        Err(_) => "user".to_string(),
-    };
+    // Default to user role
+    let role = Roles::USER.to_string();
 
     // Generate new token
     match JwtService::generate_token(user_id, &user.email, &role) {
