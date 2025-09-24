@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package venomous_dashboard.auth;
+
+import "auth/common.proto";
+import "auth/interface.proto";
+
+
+// ====================================================================================================
+// Authentication API Request/Response Types
+// ====================================================================================================
+
+
+message AuthSignupRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message AuthSignupResponse {
+  bool success = 1;
+  optional AuthSignupData data = 2;
+  optional ApiError error = 3;
+}
+
+message AuthSignupData {
+  string token = 1;
+  User user = 2;
+  string created_at = 3;
+}
+
+message AuthSigninRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthSigninResponse {
+  bool success = 1;
+  optional AuthSigninData data = 2;
+  optional ApiError error = 3;
+}
+
+message AuthSigninData {
+  string token = 1;
+  User user = 2;
+  string last_login = 3;
+}
+
+message AuthLogoutRequest {
+  string token = 1;
+}
+
+message AuthLogoutResponse {
+  bool success = 1;
+  optional ApiError error = 2;
+}
+
+
+// ====================================================================================================
+// Token Management API Types
+// ====================================================================================================
+
+
+message AuthTokenVerifyRequest {
+  string token = 1;
+}
+
+message AuthTokenVerifyResponse {
+  bool success = 1;
+  optional AuthTokenInfo data = 2;
+  optional ApiError error = 3;
+}
+
+message AuthTokenInfoRequest {
+  string token = 1;
+}
+
+message AuthTokenInfoResponse {
+  bool success = 1;
+  optional AuthTokenInfo data = 2;
+  optional ApiError error = 3;
+}
+
+message AuthTokenRefreshRequest {
+  string token = 1;
+}
+
+message AuthTokenRefreshResponse {
+  bool success = 1;
+  optional AuthTokenRefreshData data = 2;
+  optional ApiError error = 3;
+}
+
+message AuthTokenRefreshData {
+  string token = 1;
+  int64 expires_at = 2;
+}

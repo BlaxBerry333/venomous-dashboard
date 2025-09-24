@@ -4,20 +4,6 @@
 export { API_ENDPOINTS } from "./endpoints";
 
 // ====================================================================================================
-// types
+// fetchers
 // ====================================================================================================
-export type {
-  TApiResponseError,
-  TApiResponseOfAuthLogout,
-  TApiResponseOfAuthSignin,
-  // API response types
-  TApiResponseOfAuthSignup,
-  TApiResponseOfAuthTokenInfo,
-  TApiResponseOfAuthTokenRefresh,
-  TApiResponseOfAuthTokenVerify,
-  TAuthToken,
-  TAuthTokenInfo,
-  // Base types
-  TAuthUser,
-  TAuthUserProfile,
-} from "./types/auth";
+export { AUTH_FETCHERS } from "./fetchers";

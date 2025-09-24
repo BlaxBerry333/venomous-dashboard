@@ -1,19 +1,17 @@
 use axum::{extract::State, http::StatusCode, response::Json};
 use serde_json::{json, Value};
 use std::sync::Arc;
-use validator::Validate;
 
-use crate::constants::Roles;
 use crate::database::Database;
-use crate::models::{
-    ApiResponse, AuthPayload, ErrorCode, ErrorMessage, LogoutPayload, SignupPayload,
-};
-use crate::utils::{JwtService, PasswordService};
+use crate::models::ApiResponse;
+use crate::proto_generated::*;
+use crate::utils::{JwtService, PasswordService, ProtoValidator};
+use crate::{ErrorCode, ErrorMessage, Roles};
 
 /// Handler for user signup
 pub async fn signup_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<SignupPayload>,
+    Json(payload): Json<AuthSignupRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!(
         "Signup request received for user: {}. Creating account and issuing token.",
@@ -21,7 +19,7 @@ pub async fn signup_handler(
     );
 
     // Validate input
-    if let Err(_) = payload.validate() {
+    if let Err(_) = ProtoValidator::validate_signup_request(&payload) {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::error(
@@ -146,7 +144,7 @@ pub async fn signup_handler(
 /// Handler for user signin
 pub async fn signin_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<AuthPayload>,
+    Json(payload): Json<AuthSigninRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!(
         "Signin request received for user: {}. Validating credentials.",
@@ -154,7 +152,7 @@ pub async fn signin_handler(
     );
 
     // Validate input
-    if let Err(_) = payload.validate() {
+    if let Err(_) = ProtoValidator::validate_signin_request(&payload) {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(ApiResponse::error(
@@ -343,7 +341,7 @@ pub async fn signin_handler(
 }
 
 /// Handler for user logout
-pub async fn logout_handler(Json(payload): Json<LogoutPayload>) -> Json<Value> {
+pub async fn logout_handler(Json(payload): Json<AuthLogoutRequest>) -> Json<Value> {
     tracing::info!("Logout request received. Token: {:?}", payload.token);
 
     // In a production system, you might want to:

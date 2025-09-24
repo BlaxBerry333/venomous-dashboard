@@ -1,20 +1,25 @@
 {
   "ignorePaths": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/.next/**",
     "**/.vscode/**",
-    "**/.git/**",
-    "**/.DS_Store/**",
+    "**/dist/**",
+    "**/*.pyc",
+    "**/*.log",
+    "**/*.lock",
+    "**/*.sh/**",
+    "**/*.sql/**",
+    "**/.next/**",
+    "**/__pycache__/**",
+    "**/venv/**",
+    "**/node_modules/**",
     "**/__tests__/**",
     "**/__mocks__/**",
     "**/__snapshots__/**",
-    "**/coverage/**",
-    "**/reports/**",
     "**/logs/**",
     "**/temp/**",
     "**/temp_*/**",
-    "**/generated/prisma/**"
+    "**/target/**",
+    "**/generated/**",
+    "**/*_generated/**",
   ],
 
   "words": []

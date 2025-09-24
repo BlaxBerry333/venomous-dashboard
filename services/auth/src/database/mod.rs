@@ -1,14 +1,17 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
+pub mod constants;
+pub mod schema;
+
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager, Pool};
 use std::env;
 use uuid::Uuid;
 
-use crate::constants::{AccountLock, Roles};
 use crate::handlers::admin::{GetUsersQuery, SecurityLogEntry, SecurityLogsQuery, UserAdminView};
 use crate::models::database::{AuthUser, NewAuthUser, NewUser, User};
-use crate::schema::{auth_users, roles, users};
+use constants::{AccountLock, Roles};
+use schema::{auth_users, roles, users};
 
 pub type DbPool = Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;

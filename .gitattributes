@@ -16,6 +16,14 @@
 **/package-lock.json linguist-generated=true
 **/yarn.lock linguist-generated=true
 **/.next/* linguist-generated=true
+**/*.d.ts linguist-generated=true
+
+# Web Assets
+*.html linguist-vendored=true
+*.css linguist-vendored=true
+*.less linguist-vendored=true
+*.sass linguist-vendored=true
+*.scss linguist-vendored=true
 
 # Ruby、Rails
 **/Gemfile.lock linguist-generated=true
@@ -39,12 +47,18 @@
 # Markdown
 *.md linguist-documentation=true
 
+# Configuration Files
+*.json linguist-generated=true
+*.yaml linguist-generated=true
+*.yml linguist-generated=true
+
 
 # ====================================================================================================
 # # Ensure
 # ====================================================================================================
 
-# Others
+
+# Makefile
 Makefile linguist-language=Makefile
 *Dockerfile* linguist-language=Dockerfile
 
@@ -52,3 +66,7 @@ Makefile linguist-language=Makefile
 *.sh linguist-language=Shell
 **/*.sh linguist-language=Shell
 **/manage.sh linguist-language=Shell
+
+# Protocol Buffers
+*.proto linguist-language=Protocol-Buffer
+**/*.proto linguist-language=Protocol-Buffer

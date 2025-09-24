@@ -46,5 +46,9 @@ validator = { version = "0.18", features = ["derive"] }
 # Random generation for tests
 rand = "0.8"
 
+# Protocol Buffers
+prost = "0.13"
+prost-types = "0.13"
+
 # Force compatible versions to avoid edition2024 issues
 base64ct = "=1.6.0"

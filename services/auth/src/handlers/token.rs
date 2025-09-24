@@ -2,15 +2,16 @@ use axum::{extract::State, http::StatusCode, response::Json};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
-use crate::constants::Roles;
 use crate::database::Database;
-use crate::models::{ApiResponse, ErrorCode, ErrorMessage, TokenRequest};
+use crate::models::ApiResponse;
+use crate::proto_generated::*;
 use crate::utils::JwtService;
+use crate::{ErrorCode, ErrorMessage, Roles};
 
 /// Handler for token verification
 pub async fn token_verify_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<TokenRequest>,
+    Json(payload): Json<AuthTokenVerifyRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!(
         "Token verification request received for token: {}",
@@ -86,7 +87,7 @@ pub async fn token_verify_handler(
 /// Handler for retrieving token information
 pub async fn token_info_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<TokenRequest>,
+    Json(payload): Json<AuthTokenInfoRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!("Token info request received for token: {}", payload.token);
 
@@ -156,7 +157,7 @@ pub async fn token_info_handler(
 /// Handler for token refresh
 pub async fn token_refresh_handler(
     State(db): State<Arc<Database>>,
-    Json(payload): Json<TokenRequest>,
+    Json(payload): Json<AuthTokenRefreshRequest>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     tracing::info!(
         "Token refresh request received for token: {}",

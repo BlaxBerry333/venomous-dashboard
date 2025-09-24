@@ -33,34 +33,69 @@
     ],
 
     /* ==================================================================================================== */
+    /* Protobuf */
+    /* ==================================================================================================== */
+    "protoc": {
+      "path": "/opt/homebrew/bin//protoc",
+      "compile_on_save": false,
+      "options": [
+        "--proto_path=./protobuf/protos",
+        "--proto_path=./node_modules/protobufjs"
+      ]
+    },
+
+    /* ==================================================================================================== */
     /* Others */
     /* ==================================================================================================== */
     "cSpell.ignorePaths": [
-        "**/__pycache__/**",
-        "**/venv/**",
-        "**/node_modules/**",
         "**/.vscode/**",
         "**/dist/**",
-        "**/*.pyc",
+        "**/*.pyc", 
         "**/*.log",
         "**/*.lock",
         "**/*.sh/**",
         "**/*.sql/**",
+        "**/.next/**",
+        "**/__pycache__/**",
+        "**/venv/**",
+        "**/node_modules/**",
+        "**/__tests__/**",
+        "**/__mocks__/**",
+        "**/__snapshots__/**",
+        "**/logs/**",
+        "**/temp/**",
+        "**/temp_*/**",
+        "**/target/**",
+        "**/generated/**",
+        "**/*_generated/**",
     ],
     "cSpell.words": [
-        "BlaxBerry",
-        "SIGNUP",
         "__pycache__",
+        "BlaxBerry",
+        "chrono",
+        "dotenv",
+        "dotenvy",
+        "elif",
+        "esac",
         "gonic",
         "iconify",
-        "prettiercache",
-        "serde",
-        "turbopack",
-        "vercel",
-        "venv",
-        "xyflow",
-        "elif",
+        "ILIKE",
+        "Insertable",
+        "jsonwebtoken",
         "makemigrations",
-        "showmigrations"
+        "onlyletters",
+        "prettiercache",
+        "protoc",
+        "protos",
+        "serde",
+        "showmigrations",
+        "SIGNUP",
+        "sqlx",
+        "thiserror",
+        "Timestamptz",
+        "turbopack",
+        "venv",
+        "vercel",
+        "xyflow"
     ]
 }

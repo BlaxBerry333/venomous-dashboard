@@ -9,10 +9,10 @@ use std::sync::Arc;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::constants::Roles;
 use crate::database::Database;
-use crate::models::{ApiResponse, ErrorCode, ErrorMessage};
+use crate::models::ApiResponse;
 use crate::utils::{JwtService, PasswordService};
+use crate::{ErrorCode, ErrorMessage, Roles};
 
 /// Request models for admin operations
 #[derive(Debug, Deserialize, Validate)]

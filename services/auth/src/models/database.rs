@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::schema::{auth_users, roles, users};
+use crate::database::schema::{auth_users, roles, users};
 
 /// Role model for database
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable, Selectable)]
