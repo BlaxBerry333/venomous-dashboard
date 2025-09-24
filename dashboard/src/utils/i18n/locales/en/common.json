@@ -1,17 +1,16 @@
 {
-  "buttonText": {
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "submit": "Submit",
-    "save": "Save",
-    "reset": "Reset",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "update": "Update",
-    "search": "Search",
-    "undo": "Undo",
-    "redo": "Redo",
-    "execute": "Run"
+  "BUTTON_TEXT": {
+    "CANCEL": "Cancel",
+    "CONFIRM": "Confirm",
+    "SUBMIT": "Submit",
+    "SAVE": "Save",
+    "RESET": "Reset",
+    "DELETE": "Delete",
+    "CREATE": "Create",
+    "UPDATE": "Update",
+    "SEARCH": "Search",
+    "UNDO": "Undo",
+    "REDO": "Redo",
+    "EXECUTE": "Execute"
   }
 }

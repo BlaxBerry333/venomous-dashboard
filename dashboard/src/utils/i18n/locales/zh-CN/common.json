@@ -1,17 +1,16 @@
 {
-  "buttonText": {
-    "cancel": "取消",
-    "confirm": "确认",
-    "submit": "提交",
-    "save": "保存",
-    "reset": "重置",
-    "delete": "删除",
-    "edit": "编辑",
-    "create": "创建",
-    "update": "更新",
-    "search": "搜索",
-    "undo": "撤销",
-    "redo": "重做",
-    "execute": "运行"
+  "BUTTON_TEXT": {
+    "CANCEL": "取消",
+    "CONFIRM": "确认",
+    "SUBMIT": "提交",
+    "SAVE": "保存",
+    "RESET": "重置",
+    "DELETE": "删除",
+    "CREATE": "创建",
+    "UPDATE": "更新",
+    "SEARCH": "搜索",
+    "UNDO": "撤销",
+    "REDO": "重做",
+    "EXECUTE": "运行"
   }
 }

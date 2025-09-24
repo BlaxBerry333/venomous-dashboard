@@ -23,7 +23,7 @@
     "EMAIL_ALREADY_EXISTS": "This email is already registered."
   },
 
-  "uiMessages": {
+  "UI_MESSAGES": {
     "SIGNIN": "User Signin",
     "SIGNUP": "User Signup",
     "LOGOUT": "Logout",
@@ -35,12 +35,10 @@
     "USER_PROFILE": "User Profile"
   },
 
-  "uiForm": {
-    "labels": {
-      "name": "Name",
-      "email": "Email",
-      "password": "Password",
-      "confirmPassword": "Confirm Password"
-    }
+  "UI_FORM_LABELS": {
+    "NAME": "Name",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "PASSWORD_CONFIRM": "Confirm Password"
   }
 }

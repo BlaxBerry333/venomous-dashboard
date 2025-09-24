@@ -4,7 +4,7 @@
     "SIGNIN_SUCCESS": "登录成功！",
     "SIGNUP_FAILED": "注册失败",
     "SIGNUP_SUCCESS": "账户创建成功",
-    "LOGOUT_SUCCESS": "注销成功！",
+    "LOGOUT_SUCCESS": "退出登录成功",
     "TOKEN_VERIFICATION_FAILED": "身份验证失败",
     "TOKEN_VERIFICATION_SUCCESS": "身份验证成功",
     "TOKEN_NOT_FOUND": "请先登录以继续",
@@ -22,7 +22,7 @@
     "INTERNAL_SERVER_ERROR": "服务器内部错误"
   },
 
-  "uiMessages": {
+  "UI_MESSAGES": {
     "SIGNIN": "用户登录",
     "SIGNUP": "用户注册",
     "LOGOUT": "退出登录",
@@ -34,12 +34,10 @@
     "USER_PROFILE": "用户信息"
   },
 
-  "uiForm": {
-    "labels": {
-      "name": "用户名",
-      "email": "登陆邮箱",
-      "password": "登陆密码",
-      "confirmPassword": "密码确认"
-    }
+  "UI_FORM_LABELS": {
+    "NAME": "用户名",
+    "EMAIL": "登陆邮箱",
+    "PASSWORD": "登陆密码",
+    "PASSWORD_CONFIRM": "密码确认"
   }
 }

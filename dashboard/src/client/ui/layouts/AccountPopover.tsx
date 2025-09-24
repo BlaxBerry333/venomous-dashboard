@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Divider, Icon, Menu, notify, Space, Theme, Typography } from "venomous-ui-react/components";
+import { useMutation } from "@tanstack/react-query";
+import { Divider, Icon, Menu, notify, Space, Theme } from "venomous-ui-react/components";
 import { SEMANTIC_COLORS } from "venomous-ui-react/utils";
 
 import { ROUTER_PATHS } from "@/client/routes";
@@ -20,15 +20,14 @@ const AccountPopover = React.memo<{
 
   const router = useRouter();
   const trpc = useTRPC();
-  const dictionary = useI18nDictionary();
+  const { service_auth: dictionaryOfServiceAuth } = useI18nDictionary();
 
   const mutationOfLogout = useMutation(
     trpc.auth.logout.mutationOptions({
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionary.service_auth.apiResults.LOGOUT_SUCCESS.title,
-          description: dictionary.service_auth.apiResults.LOGOUT_SUCCESS.description,
+          title: dictionaryOfServiceAuth.apiResults.LOGOUT_SUCCESS,
         });
         router.replace(ROUTER_PATHS.AUTH.SIGNIN);
       },
@@ -36,27 +35,14 @@ const AccountPopover = React.memo<{
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: dictionary.service_auth?.apiResults?.[errorCode],
+          title: dictionaryOfServiceAuth.apiResults?.[errorCode],
           description: errorMessage,
         });
       },
     }),
   );
 
-  const queryOfUser = useQuery(trpc.user.getUser.queryOptions());
-
-  React.useEffect(() => {
-    if (queryOfUser.error) {
-      const { errorCode, errorMessage } = extractTRPCErrorInfo(queryOfUser.error);
-      const errorTranslation = errorCode && dictionary.service_auth?.apiResults?.[errorCode];
-
-      notify({
-        type: "error",
-        title: errorTranslation?.title || "Failed to get user",
-        description: errorTranslation?.description || errorMessage || queryOfUser.error.message,
-      });
-    }
-  }, [queryOfUser.error, dictionary]);
+  // const queryOfUser = useQuery(trpc.auth..queryOptions());
 
   return (
     <CustomPopover
@@ -75,8 +61,8 @@ const AccountPopover = React.memo<{
       <React.Suspense>
         <Menu.List style={{ minWidth: "160px" }}>
           <Space.Flex column style={{ padding: "8px" }}>
-            <Typography.Text isEllipsis text={queryOfUser.data?.name ?? ""} />
-            <Typography.Text isEllipsis text={queryOfUser.data?.email ?? ""} />
+            {/* <Typography.Text isEllipsis text={queryOfUser.data?.name ?? ""} />
+            <Typography.Text isEllipsis text={queryOfUser.data?.email ?? ""} /> */}
           </Space.Flex>
 
           <Divider />
@@ -84,7 +70,7 @@ const AccountPopover = React.memo<{
           <Menu.Item
             icon="solar:shield-user-line-duotone"
             id="profile"
-            text={dictionary.service_auth.uiMessages.USER_PROFILE}
+            text={dictionaryOfServiceAuth.UI_MESSAGES.USER_PROFILE}
             onClick={() => void router.push(ROUTER_PATHS.DASHBOARD.USER_PROFILE)}
           />
 
@@ -93,7 +79,7 @@ const AccountPopover = React.memo<{
           <Menu.Item
             icon="solar:logout-line-duotone"
             id="logout"
-            text={dictionary.service_auth.uiMessages.LOGOUT}
+            text={dictionaryOfServiceAuth.UI_MESSAGES.LOGOUT}
             onClick={() => void mutationOfLogout.mutateAsync()}
             style={{ backgroundColor: SEMANTIC_COLORS.error, color: "white" }}
           />

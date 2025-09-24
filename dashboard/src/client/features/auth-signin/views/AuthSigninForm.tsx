@@ -17,7 +17,7 @@ const AuthSigninForm = React.memo(() => {
 
   const router = useRouter();
   const trpc = useTRPC();
-  const dictionary = useI18nDictionary();
+  const { service_auth: dictionaryOfServiceAuth, common: dictionaryOfCommon } = useI18nDictionary();
   const { currentLocale } = useI18nLocale();
 
   const mutation = useMutation(
@@ -25,8 +25,7 @@ const AuthSigninForm = React.memo(() => {
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionary.service_auth.apiResults.SIGNIN_SUCCESS.title,
-          description: dictionary.service_auth.apiResults.SIGNIN_SUCCESS.description,
+          title: dictionaryOfServiceAuth.apiResults.SIGNIN_SUCCESS,
         });
         router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
       },
@@ -34,7 +33,7 @@ const AuthSigninForm = React.memo(() => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: dictionary.service_auth?.apiResults?.[errorCode],
+          title: dictionaryOfServiceAuth.apiResults?.[errorCode],
           description: errorMessage,
         });
       },
@@ -56,23 +55,23 @@ const AuthSigninForm = React.memo(() => {
       }}
     >
       <Space.Flex column>
-        <Typography.Title as="h3" text={dictionary.service_auth.uiMessages.SIGNIN} />
+        <Typography.Title as="h3" text={dictionaryOfServiceAuth.UI_MESSAGES.SIGNIN} />
         <Space.Flex style={{ flexWrap: "wrap", alignItems: "center" }}>
-          <Typography.Text text={dictionary.service_auth.uiMessages.DO_NOT_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
+          <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.DO_NOT_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
           <Link href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNUP}`} style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}>
-            <Typography.Text text={dictionary.service_auth.uiMessages.CREATE_AN_ACCOUNT} style={{ color: "inherit" }} />
+            <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.CREATE_AN_ACCOUNT} style={{ color: "inherit" }} />
           </Link>
         </Space.Flex>
       </Space.Flex>
 
       <Space.Flex column gap={16} style={{ margin: "40px 0" }}>
-        <FormField.Text name="email" label={dictionary.service_auth.uiForm.labels.email} fullWidth />
-        <FormField.Password name="password" label={dictionary.service_auth.uiForm.labels.password} fullWidth />
+        <FormField.Text name="email" label={dictionaryOfServiceAuth.UI_FORM_LABELS.EMAIL} fullWidth />
+        <FormField.Password name="password" label={dictionaryOfServiceAuth.UI_FORM_LABELS.PASSWORD} fullWidth />
       </Space.Flex>
 
       <Space.Flex gap={8}>
-        <Button type="reset" text={dictionary.common.buttonText.cancel} variant="outlined" semanticColor="error" />
-        <Button type="submit" text={dictionary.common.buttonText.submit} />
+        <Button type="reset" text={dictionaryOfCommon.BUTTON_TEXT.CANCEL} variant="outlined" semanticColor="error" />
+        <Button type="submit" text={dictionaryOfCommon.BUTTON_TEXT.CONFIRM} />
       </Space.Flex>
     </Form>
   );
