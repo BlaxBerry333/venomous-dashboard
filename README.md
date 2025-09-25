@@ -4,19 +4,19 @@ A multi-language microservices project for learning and demonstration purposes.
 
 ## Server List
 
-|     Category     |              Service Name              |    Main Skill     |                                                           |
-| :--------------: | :------------------------------------: | :---------------: | --------------------------------------------------------- |
-|   Application    |       [dashboard](./dashboard/)        |      Next.js      | Main user interface.                                      |
-|   Application    |        [document](./document/)         |         -         |                                                           |
-|      Tools       |        [protobuf](./protobuf/)         | Protocol Buffers  | Protocol Buffers definitions and code generation scripts. |
-|   API Gateway    | [api-gateway](./services/api-gateway/) |    Go ( Gin )     | Single entry point for all backend requests.              |
-| Headless Service |        [auth](./services/auth/)        |   Rust ( Axum )   | User registration, login, JWT management.                 |
-| Headless Service |       [notes](./services/notes/)       |  Ruby ( Rails )   | Note management service.                                  |
-| Headless Service |       [media](./services/media/)       |      Node.js      | Media and file management service.                        |
-| Headless Service |   [workflows](./services/workflows/)   | Python ( Django ) | Workflow management service.                              |
-|     Database     |                   db                   |    PostgresSQL    | Primary relational database.                              |
-|      Cache       |                 redis                  |       Redis       | Caching layer.                                            |
-|     Storage      |                 minio                  |         -         | S3-compatible object storage.                             |
+|     Category     |              Service Name              |    Main Skill    | Description                                               |
+| :--------------: | :------------------------------------: | :--------------: | --------------------------------------------------------- |
+|   Application    |       [dashboard](./dashboard/)        |     Next.js      | Main frontend application.                                |
+|  Documentations  |        [document](./document/)         |        -         | ...                                                       |
+|      Tools       |        [protobuf](./protobuf/)         | Protocol Buffers | Protocol Buffers definitions and code generation scripts. |
+|   API Gateway    | [api-gateway](./services/api-gateway/) |     Go・Gin      | Single entry point for all backend requests.              |
+| Headless Service |        [auth](./services/auth/)        |    Rust・Axum    | User registration, login, JWT management.                 |
+| Headless Service |       [notes](./services/notes/)       |   Ruby・Rails    | Note management service.                                  |
+| Headless Service |       [media](./services/media/)       |     Node.js      | Media and file management service.                        |
+| Headless Service |   [workflows](./services/workflows/)   |  Python・Django  | Workflow management service.                              |
+|     Database     |                   db                   |   PostgresSQL    | ...                                                       |
+|      Cache       |                 redis                  |      Redis       | ...                                                       |
+|     Storage      |                 minio                  |        -         | ...                                                       |
 
 ## Directory Structure
 
@@ -88,6 +88,14 @@ A multi-language microservices project for learning and demonstration purposes.
 $ make help
 ```
 
+### Local Setup
+
+```shell
+$ make setup-all
+# or
+$ make setup SERVICE=<service_name>
+```
+
 ### Migration
 
 ```shell
@@ -110,6 +118,7 @@ $ make db-showmigrations SERVICE=<service_name>
 
 # 2. generate types for services by command
 $ make proto-gen-all
+# or
 $ make proto-gen SERVICE=<service_name>
 
 # 3. update types dependencies files in services
