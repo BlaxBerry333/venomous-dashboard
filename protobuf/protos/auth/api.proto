@@ -95,3 +95,30 @@ message AuthTokenRefreshData {
   string token = 1;
   int64 expires_at = 2;
 }
+
+
+// ====================================================================================================
+// User Management API Types
+// ====================================================================================================
+
+
+message UserGetProfileRequest {
+  // No fields needed - user identified by JWT token
+}
+
+message UserGetProfileResponse {
+  bool success = 1;
+  optional User data = 2;
+  optional ApiError error = 3;
+}
+
+message UserUpdateProfileRequest {
+  optional string name = 1;
+  optional string avatar_path = 2;
+}
+
+message UserUpdateProfileResponse {
+  bool success = 1;
+  optional User data = 2;
+  optional ApiError error = 3;
+}

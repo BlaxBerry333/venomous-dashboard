@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post, put},
+    routing::{get, patch, post, put},
     Router,
 };
 use std::net::SocketAddr;
@@ -18,6 +18,7 @@ use venomous_dashboard_auth::{
         },
         auth::{logout_handler, signin_handler, signup_handler},
         token::{token_info_handler, token_refresh_handler, token_verify_handler},
+        user::{get_profile_handler, update_profile_handler},
     },
 };
 
@@ -72,6 +73,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "/admin/users/:user_id/lock-status",
             get(get_account_lock_status_handler),
         )
+        // User management routes
+        .route("/user/profile", get(get_profile_handler))
+        .route("/user/profile", patch(update_profile_handler))
         // Add shared state (database connection pool)
         .with_state(database)
         // Add logging middleware

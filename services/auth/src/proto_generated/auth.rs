@@ -221,4 +221,36 @@ pub struct AuthTokenRefreshData {
     #[prost(int64, tag = "2")]
     pub expires_at: i64,
 }
+// ====================================================================================================
+// User Management API Types
+// ====================================================================================================
+
+/// No fields needed - user identified by JWT token
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct UserGetProfileRequest {}
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
+pub struct UserGetProfileResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(message, optional, tag = "2")]
+    pub data: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "3")]
+    pub error: ::core::option::Option<ApiError>,
+}
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
+pub struct UserUpdateProfileRequest {
+    #[prost(string, optional, tag = "1")]
+    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "2")]
+    pub avatar_path: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
+pub struct UserUpdateProfileResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(message, optional, tag = "2")]
+    pub data: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "3")]
+    pub error: ::core::option::Option<ApiError>,
+}
 // @@protoc_insertion_point(module)

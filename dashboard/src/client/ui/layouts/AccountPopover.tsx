@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 
-import { useMutation } from "@tanstack/react-query";
-import { Divider, Icon, Menu, notify, Space, Theme } from "venomous-ui-react/components";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Divider, Icon, Menu, notify, Space, Theme, Typography } from "venomous-ui-react/components";
 import { SEMANTIC_COLORS } from "venomous-ui-react/utils";
 
 import { ROUTER_PATHS } from "@/client/routes";
@@ -21,6 +21,8 @@ const AccountPopover = React.memo<{
   const router = useRouter();
   const trpc = useTRPC();
   const { service_auth: dictionaryOfServiceAuth } = useI18nDictionary();
+
+  const queryOfUser = useQuery(trpc.user.getProfile.queryOptions());
 
   const mutationOfLogout = useMutation(
     trpc.auth.logout.mutationOptions({
@@ -42,7 +44,9 @@ const AccountPopover = React.memo<{
     }),
   );
 
-  // const queryOfUser = useQuery(trpc.auth..queryOptions());
+  if (!queryOfUser.data) {
+    return null;
+  }
 
   return (
     <CustomPopover
@@ -61,8 +65,8 @@ const AccountPopover = React.memo<{
       <React.Suspense>
         <Menu.List style={{ minWidth: "160px" }}>
           <Space.Flex column style={{ padding: "8px" }}>
-            {/* <Typography.Text isEllipsis text={queryOfUser.data?.name ?? ""} />
-            <Typography.Text isEllipsis text={queryOfUser.data?.email ?? ""} /> */}
+            <Typography.Text isEllipsis text={queryOfUser.data?.name ?? ""} />
+            <Typography.Text isEllipsis text={queryOfUser.data?.email ?? ""} />
           </Space.Flex>
 
           <Divider />

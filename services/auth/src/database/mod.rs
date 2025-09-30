@@ -628,4 +628,64 @@ impl Database {
 
         Ok(deleted_at.is_some())
     }
+
+    // ========================================
+    // User Profile Management Operations
+    // ========================================
+
+    /// Get user by user_id (for profile operations)
+    pub fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<User>> {
+        let mut conn = self.get_connection()?;
+
+        let user = users::table
+            .filter(users::id.eq(user_id))
+            .filter(users::deleted_at.is_null())
+            .first::<User>(&mut conn)
+            .optional()?;
+
+        Ok(user)
+    }
+
+    /// Update user profile information
+    pub fn update_user_profile(
+        &self,
+        user_id: Uuid,
+        name: Option<&str>,
+        avatar_path: Option<&str>,
+    ) -> Result<User> {
+        let mut conn = self.get_connection()?;
+
+        let updated_user = if let Some(name) = name {
+            if let Some(avatar) = avatar_path {
+                diesel::update(users::table.filter(users::id.eq(user_id)))
+                    .set((
+                        users::name.eq(name),
+                        users::avatar_path.eq(avatar),
+                        users::updated_at.eq(Utc::now()),
+                    ))
+                    .returning(User::as_returning())
+                    .get_result(&mut conn)?
+            } else {
+                diesel::update(users::table.filter(users::id.eq(user_id)))
+                    .set((users::name.eq(name), users::updated_at.eq(Utc::now())))
+                    .returning(User::as_returning())
+                    .get_result(&mut conn)?
+            }
+        } else if let Some(avatar) = avatar_path {
+            diesel::update(users::table.filter(users::id.eq(user_id)))
+                .set((
+                    users::avatar_path.eq(avatar),
+                    users::updated_at.eq(Utc::now()),
+                ))
+                .returning(User::as_returning())
+                .get_result(&mut conn)?
+        } else {
+            // No changes, just return current user
+            return self
+                .get_user_by_id(user_id)?
+                .ok_or_else(|| anyhow::anyhow!("User not found"));
+        };
+
+        Ok(updated_user)
+    }
 }

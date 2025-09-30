@@ -9,7 +9,8 @@ import type {
   TAuthTokenVerifyRequest,
   TAuthTokenVerifyResponse,
 } from "@/types";
-import { API_ENDPOINTS } from "./endpoints";
+import { toCamelCase } from "@/utils/helper";
+import { API_ENDPOINTS } from "../endpoints";
 
 export const AUTH_FETCHERS = {
   SIGNUP: async (
@@ -23,9 +24,11 @@ export const AUTH_FETCHERS = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+    const rawData = await response.json();
+    const data = toCamelCase<TAuthSignupResponse>(rawData);
     return {
       response,
-      data: await response.json(),
+      data,
     };
   },
 
@@ -40,9 +43,11 @@ export const AUTH_FETCHERS = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+    const rawData = await response.json();
+    const data = toCamelCase<TAuthSigninResponse>(rawData);
     return {
       response,
-      data: await response.json(),
+      data,
     };
   },
 
@@ -57,9 +62,11 @@ export const AUTH_FETCHERS = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+    const rawData = await response.json();
+    const data = toCamelCase<TAuthTokenRefreshResponse>(rawData);
     return {
       response,
-      data: await response.json(),
+      data,
     };
   },
 
@@ -74,9 +81,11 @@ export const AUTH_FETCHERS = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+    const rawData = await response.json();
+    const data = toCamelCase<TAuthTokenVerifyResponse>(rawData);
     return {
       response,
-      data: await response.json(),
+      data,
     };
   },
 
@@ -91,28 +100,11 @@ export const AUTH_FETCHERS = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+    const rawData = await response.json();
+    const data = toCamelCase<TAuthTokenRefreshResponse>(rawData);
     return {
       response,
-      data: await response.json(),
-    };
-  },
-} as const;
-
-export const USER_FETCHERS = {
-  PROFILE: async (
-    requestBody: TAuthTokenRefreshRequest,
-  ): Promise<{
-    response: Response;
-    data: TAuthTokenRefreshResponse;
-  }> => {
-    const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.TOKEN_REFRESH, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
-    return {
-      response,
-      data: await response.json(),
+      data,
     };
   },
 } as const;

@@ -1,19 +1,18 @@
 import z from "zod";
 
 import { VALIDATION_MESSAGE_I18N_KEYS } from "../validation-message-keys";
-import { __USER_BASE_SCHEMA } from "./user";
+import { USER_BASE_SCHEMA } from "./user";
 
-export const AUTH_SIGNIN_SCHEMA = __USER_BASE_SCHEMA.pick({
+export const AUTH_SIGNIN_SCHEMA = USER_BASE_SCHEMA.pick({
   email: true,
   password: true,
 });
 
-export const AUTH_SIGNUP_SCHEMA = __USER_BASE_SCHEMA
-  .pick({
-    name: true,
-    email: true,
-    password: true,
-  })
+export const AUTH_SIGNUP_SCHEMA = USER_BASE_SCHEMA.pick({
+  name: true,
+  email: true,
+  password: true,
+})
   .extend({
     confirmPassword: z.string(),
   })

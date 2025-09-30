@@ -28,6 +28,12 @@ impl ErrorMessage {
         "Your account has been temporarily locked due to multiple failed login attempts. Please wait a few minutes before trying again or contact support.";
     pub const JWT_PROCESSING_ERROR: &'static str =
         "There was an error processing your authentication. Please log out and log back in to resolve this issue.";
+    pub const TOKEN_NOT_FOUND: &'static str =
+        "Authentication token is missing. Please log in to access this resource.";
+    pub const USER_NOT_FOUND: &'static str =
+        "The requested user was not found in our system. Please verify the user information and try again.";
+    pub const INTERNAL_SERVER_ERROR: &'static str =
+        "An internal server error occurred. Please try again later or contact support if the problem persists.";
 
     // Admin-specific error messages
     pub const AUTH_HEADER_MISSING: &'static str =

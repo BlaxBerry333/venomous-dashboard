@@ -38,6 +38,7 @@ func main() {
 
 	// Setup routes - pure proxy mode
 	router.SetupAuthRoutes(r, authProxy)
+	router.SetupUserRoutes(r, authProxy)
 
 	// Start server
 	port := ":8080"

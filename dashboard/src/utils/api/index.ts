@@ -6,4 +6,5 @@ export { API_ENDPOINTS } from "./endpoints";
 // ====================================================================================================
 // fetchers
 // ====================================================================================================
-export { AUTH_FETCHERS } from "./fetchers";
+export { AUTH_FETCHERS } from "./fetchers/auth";
+export { USER_FETCHERS } from "./fetchers/user";

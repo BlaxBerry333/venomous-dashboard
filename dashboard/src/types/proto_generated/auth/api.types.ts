@@ -86,3 +86,23 @@ export interface TAuthTokenRefreshData {
   token: string;
   expiresAt: number;
 }
+
+/** No fields needed - user identified by JWT token */
+export interface TUserGetProfileRequest {}
+
+export interface TUserGetProfileResponse {
+  success: boolean;
+  data?: TUser | undefined;
+  error?: TApiError | undefined;
+}
+
+export interface TUserUpdateProfileRequest {
+  name?: string | undefined;
+  avatarPath?: string | undefined;
+}
+
+export interface TUserUpdateProfileResponse {
+  success: boolean;
+  data?: TUser | undefined;
+  error?: TApiError | undefined;
+}
