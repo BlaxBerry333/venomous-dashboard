@@ -24,6 +24,8 @@
 *.less linguist-vendored=true
 *.sass linguist-vendored=true
 *.scss linguist-vendored=true
+*.mjs linguist-vendored=true
+*.cjs linguist-detectable=false
 
 # Ruby、Rails
 **/Gemfile.lock linguist-generated=true
@@ -47,10 +49,12 @@
 # Markdown
 *.md linguist-documentation=true
 
-# Configuration Files
-*.json linguist-generated=true
-*.yaml linguist-generated=true
-*.yml linguist-generated=true
+# Configuration Files - be more specific
+**/package-lock.json linguist-generated=true
+**/yarn.lock linguist-generated=true
+**/*lock.json linguist-generated=true
+*.yaml linguist-vendored=true
+*.yml linguist-vendored=true
 
 
 # ====================================================================================================
@@ -68,5 +72,11 @@ Makefile linguist-language=Makefile
 **/manage.sh linguist-language=Shell
 
 # Protocol Buffers
-*.proto linguist-language=Protocol-Buffer
-**/*.proto linguist-language=Protocol-Buffer
+*.proto linguist-vendored=false
+*.proto linguist-generated=false
+*.proto linguist-documentation=false
+*.proto linguist-detectable=true
+**/*.proto linguist-vendored=false
+**/*.proto linguist-generated=false
+**/*.proto linguist-documentation=false
+**/*.proto linguist-detectable=true
