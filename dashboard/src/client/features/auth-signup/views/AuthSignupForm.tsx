@@ -20,7 +20,7 @@ const AuthSignupForm = React.memo(() => {
 
   const router = useRouter();
   const trpc = useTRPC();
-  const { service_auth: dictionaryOfServiceAuth, common: dictionaryOfCommon, validations: dictionaryOfValidations } = useI18nDictionary();
+  const dictionary = useI18nDictionary();
   const { currentLocale } = useI18nLocale();
 
   const mutation = useMutation(
@@ -28,7 +28,7 @@ const AuthSignupForm = React.memo(() => {
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionaryOfServiceAuth.apiResults.SIGNUP_SUCCESS,
+          title: dictionary.service_auth.apiResults.SIGNUP_SUCCESS,
         });
         router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
       },
@@ -36,7 +36,7 @@ const AuthSignupForm = React.memo(() => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: dictionaryOfServiceAuth.apiResults?.[errorCode],
+          title: dictionary.service_auth.apiResults?.[errorCode],
           description: errorMessage,
         });
       },
@@ -74,14 +74,14 @@ const AuthSignupForm = React.memo(() => {
     <FormProvider {...formInstance}>
       <Form onSubmit={formInstance.handleSubmit(handleSubmit)} onReset={handleReset}>
         <Space.Flex column>
-          <Typography.Title as="h3" text={dictionaryOfServiceAuth.UI_MESSAGES.SIGNUP} />
+          <Typography.Title as="h3" text={dictionary.service_auth.UI_MESSAGES.SIGNUP} />
           <Space.Flex style={{ flexWrap: "wrap", alignItems: "center" }}>
-            <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.ALREADY_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
+            <Typography.Text text={dictionary.service_auth.UI_MESSAGES.ALREADY_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
             <Link
               href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNIN}`}
               style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}
             >
-              <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.SIGNIN} style={{ color: "inherit" }} />
+              <Typography.Text text={dictionary.service_auth.UI_MESSAGES.SIGNIN} style={{ color: "inherit" }} />
             </Link>
           </Space.Flex>
         </Space.Flex>
@@ -92,12 +92,12 @@ const AuthSignupForm = React.memo(() => {
             control={formInstance.control}
             render={({ field, fieldState: { error } }) => (
               <FormField.Text
-                label={dictionaryOfServiceAuth.UI_FORM_LABELS.NAME}
+                label={dictionary.service_auth.UI_FORM_LABELS.NAME}
                 fullWidth
                 value={field.value}
                 onChange={field.onChange}
                 isError={!!error}
-                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+                helpText={dictionary.validations[error?.message ?? ""] ?? error?.message}
               />
             )}
           />
@@ -106,12 +106,12 @@ const AuthSignupForm = React.memo(() => {
             control={formInstance.control}
             render={({ field, fieldState: { error } }) => (
               <FormField.Text
-                label={dictionaryOfServiceAuth.UI_FORM_LABELS.EMAIL}
+                label={dictionary.service_auth.UI_FORM_LABELS.EMAIL}
                 fullWidth
                 value={field.value}
                 onChange={field.onChange}
                 isError={!!error}
-                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+                helpText={dictionary.validations[error?.message ?? ""] ?? error?.message}
               />
             )}
           />
@@ -120,12 +120,12 @@ const AuthSignupForm = React.memo(() => {
             control={formInstance.control}
             render={({ field, fieldState: { error } }) => (
               <FormField.Text
-                label={dictionaryOfServiceAuth.UI_FORM_LABELS.PASSWORD}
+                label={dictionary.service_auth.UI_FORM_LABELS.PASSWORD}
                 fullWidth
                 value={field.value}
                 onChange={field.onChange}
                 isError={!!error}
-                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+                helpText={dictionary.validations[error?.message ?? ""] ?? error?.message}
               />
             )}
           />
@@ -134,12 +134,12 @@ const AuthSignupForm = React.memo(() => {
             control={formInstance.control}
             render={({ field, fieldState: { error } }) => (
               <FormField.Text
-                label={dictionaryOfServiceAuth.UI_FORM_LABELS.PASSWORD_CONFIRM}
+                label={dictionary.service_auth.UI_FORM_LABELS.PASSWORD_CONFIRM}
                 fullWidth
                 value={field.value}
                 onChange={field.onChange}
                 isError={!!error}
-                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+                helpText={dictionary.validations[error?.message ?? ""] ?? error?.message}
               />
             )}
           />
@@ -148,14 +148,14 @@ const AuthSignupForm = React.memo(() => {
         <Space.Flex gap={8}>
           <Button
             type="reset"
-            text={dictionaryOfCommon.BUTTON_TEXT.RESET}
+            text={dictionary.common.BUTTON_TEXT.RESET}
             variant="outlined"
             semanticColor="error"
             disabled={!formInstance.formState.isDirty || mutation.isPending}
           />
           <Button
             type="submit"
-            text={dictionaryOfCommon.BUTTON_TEXT.CONFIRM}
+            text={dictionary.common.BUTTON_TEXT.CONFIRM}
             isLoading={mutation.isPending}
             isDisabled={!!Object.keys(formInstance.formState.errors).length}
           />

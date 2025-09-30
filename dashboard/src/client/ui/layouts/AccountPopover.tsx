@@ -20,7 +20,7 @@ const AccountPopover = React.memo<{
 
   const router = useRouter();
   const trpc = useTRPC();
-  const { service_auth: dictionaryOfServiceAuth } = useI18nDictionary();
+  const dictionary = useI18nDictionary();
 
   const queryOfUser = useQuery(trpc.user.getProfile.queryOptions());
 
@@ -29,7 +29,7 @@ const AccountPopover = React.memo<{
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionaryOfServiceAuth.apiResults.LOGOUT_SUCCESS,
+          title: dictionary.service_auth.apiResults.LOGOUT_SUCCESS,
         });
         router.replace(ROUTER_PATHS.AUTH.SIGNIN);
       },
@@ -37,7 +37,7 @@ const AccountPopover = React.memo<{
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: dictionaryOfServiceAuth.apiResults?.[errorCode],
+          title: dictionary.service_auth.apiResults?.[errorCode],
           description: errorMessage,
         });
       },
@@ -74,7 +74,7 @@ const AccountPopover = React.memo<{
           <Menu.Item
             icon="solar:shield-user-line-duotone"
             id="profile"
-            text={dictionaryOfServiceAuth.UI_MESSAGES.USER_PROFILE}
+            text={dictionary.service_auth.UI_MESSAGES.USER_PROFILE}
             onClick={() => void router.push(ROUTER_PATHS.DASHBOARD.USER_PROFILE)}
           />
 
@@ -83,7 +83,7 @@ const AccountPopover = React.memo<{
           <Menu.Item
             icon="solar:logout-line-duotone"
             id="logout"
-            text={dictionaryOfServiceAuth.UI_MESSAGES.LOGOUT}
+            text={dictionary.service_auth.UI_MESSAGES.LOGOUT}
             onClick={() => void mutationOfLogout.mutateAsync()}
             style={{ backgroundColor: SEMANTIC_COLORS.error, color: "white" }}
           />

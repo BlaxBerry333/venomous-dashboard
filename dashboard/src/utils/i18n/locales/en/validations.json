@@ -9,7 +9,7 @@
   "EMAIL_TOO_LONG": "Email must not exceed 100 characters",
   "EMAIL_INVALID": "Please enter a valid email address",
 
-  "PASSWORD_TOO_SHORT": "Password must be at least 4 characters long",
+  "PASSWORD_TOO_SHORT": "Password must be at least 8 characters long",
   "PASSWORD_TOO_LONG": "Password must not exceed 128 characters",
   "PASSWORD_WEAK": "Password must contain uppercase, lowercase and numbers",
   "CONFIRM_PASSWORD_MISMATCH": "Password confirmation does not match"
