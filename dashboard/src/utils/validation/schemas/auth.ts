@@ -14,11 +14,11 @@ export const AUTH_SIGNUP_SCHEMA = USER_BASE_SCHEMA.pick({
   password: true,
 })
   .extend({
-    confirmPassword: z.string(),
+    passwordConfirm: z.string().min(8, VALIDATION_MESSAGE_I18N_KEYS.PASSWORD_TOO_SHORT),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.passwordConfirm.length > 8 && data.password === data.passwordConfirm, {
     message: VALIDATION_MESSAGE_I18N_KEYS.CONFIRM_PASSWORD_MISMATCH,
-    path: ["confirmPassword"],
+    path: ["passwordConfirm"],
   });
 
 export type TAuthSigninSchema = z.infer<typeof AUTH_SIGNIN_SCHEMA>;

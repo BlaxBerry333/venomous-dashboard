@@ -4,20 +4,23 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Button, Form, FormField, notify, Space, Theme, Typography } from "venomous-ui-react/components";
 
 import { ROUTER_PATHS } from "@/client/routes";
 import { useI18nDictionary, useI18nLocale } from "@/utils/i18n/index.client";
 import { useTRPC } from "@/utils/trpc/index.client";
 import { extractTRPCErrorInfo } from "@/utils/trpc/types";
+import { AUTH_SIGNIN_FORM_DEFAULT_VALUES, AUTH_SIGNIN_SCHEMA, type TAuthSigninSchema } from "@/utils/validation";
 
 const AuthSigninForm = React.memo(() => {
   const { themeColor } = Theme.useThemeColor();
 
   const router = useRouter();
   const trpc = useTRPC();
-  const { service_auth: dictionaryOfServiceAuth, common: dictionaryOfCommon } = useI18nDictionary();
+  const { service_auth: dictionaryOfServiceAuth, common: dictionaryOfCommon, validations: dictionaryOfValidations } = useI18nDictionary();
   const { currentLocale } = useI18nLocale();
 
   const mutation = useMutation(
@@ -40,40 +43,99 @@ const AuthSigninForm = React.memo(() => {
     }),
   );
 
-  const handleSubmit = React.useCallback(async () => {
-    await mutation.mutateAsync({
-      email: "admin@example.com",
-      password: "admin123456789",
-    });
-  }, [mutation]);
+  const formInstance = useForm<TAuthSigninSchema>({
+    mode: "all",
+    resolver: zodResolver(AUTH_SIGNIN_SCHEMA),
+    defaultValues: AUTH_SIGNIN_FORM_DEFAULT_VALUES,
+  });
+
+  React.useLayoutEffect(() => {
+    formInstance.trigger();
+  }, [formInstance]);
+
+  const handleSubmit = React.useCallback(
+    async (values: TAuthSigninSchema) => {
+      await mutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+      });
+      //  {
+      //   email: "admin@example.com",
+      //   password: "admin123456789",
+      // }
+    },
+    [mutation],
+  );
+
+  const handleReset = React.useCallback(() => {
+    formInstance.reset(AUTH_SIGNIN_FORM_DEFAULT_VALUES);
+    formInstance.trigger();
+  }, [formInstance]);
 
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-    >
-      <Space.Flex column>
-        <Typography.Title as="h3" text={dictionaryOfServiceAuth.UI_MESSAGES.SIGNIN} />
-        <Space.Flex style={{ flexWrap: "wrap", alignItems: "center" }}>
-          <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.DO_NOT_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
-          <Link href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNUP}`} style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}>
-            <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.CREATE_AN_ACCOUNT} style={{ color: "inherit" }} />
-          </Link>
+    <FormProvider {...formInstance}>
+      <Form onSubmit={formInstance.handleSubmit(handleSubmit)} onReset={handleReset}>
+        <Space.Flex column>
+          <Typography.Title as="h3" text={dictionaryOfServiceAuth.UI_MESSAGES.SIGNIN} />
+          <Space.Flex style={{ flexWrap: "wrap", alignItems: "center" }}>
+            <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.DO_NOT_HAVE_AN_ACCOUNT} style={{ marginRight: "8px" }} />
+            <Link
+              href={`/${currentLocale}${ROUTER_PATHS.AUTH.SIGNUP}`}
+              style={{ textDecorationSkipInk: "auto", textDecoration: "underline", color: themeColor }}
+            >
+              <Typography.Text text={dictionaryOfServiceAuth.UI_MESSAGES.CREATE_AN_ACCOUNT} style={{ color: "inherit" }} />
+            </Link>
+          </Space.Flex>
         </Space.Flex>
-      </Space.Flex>
 
-      <Space.Flex column gap={16} style={{ margin: "40px 0" }}>
-        <FormField.Text name="email" label={dictionaryOfServiceAuth.UI_FORM_LABELS.EMAIL} fullWidth />
-        <FormField.Password name="password" label={dictionaryOfServiceAuth.UI_FORM_LABELS.PASSWORD} fullWidth />
-      </Space.Flex>
+        <Space.Flex column gap={16} style={{ margin: "40px 0" }}>
+          <Controller
+            name="email"
+            control={formInstance.control}
+            render={({ field, fieldState: { error } }) => (
+              <FormField.Text
+                label={dictionaryOfServiceAuth.UI_FORM_LABELS.EMAIL}
+                fullWidth
+                value={field.value}
+                onChange={field.onChange}
+                isError={!!error}
+                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="password"
+            control={formInstance.control}
+            render={({ field, fieldState: { error } }) => (
+              <FormField.Text
+                label={dictionaryOfServiceAuth.UI_FORM_LABELS.PASSWORD}
+                fullWidth
+                value={field.value}
+                onChange={field.onChange}
+                isError={!!error}
+                helpText={dictionaryOfValidations[error?.message ?? ""] ?? error?.message}
+              />
+            )}
+          />
+        </Space.Flex>
 
-      <Space.Flex gap={8}>
-        <Button type="reset" text={dictionaryOfCommon.BUTTON_TEXT.CANCEL} variant="outlined" semanticColor="error" />
-        <Button type="submit" text={dictionaryOfCommon.BUTTON_TEXT.CONFIRM} />
-      </Space.Flex>
-    </Form>
+        <Space.Flex gap={8}>
+          <Button
+            type="reset"
+            text={dictionaryOfCommon.BUTTON_TEXT.RESET}
+            variant="outlined"
+            semanticColor="error"
+            disabled={!formInstance.formState.isDirty || mutation.isPending}
+          />
+          <Button
+            type="submit"
+            text={dictionaryOfCommon.BUTTON_TEXT.CONFIRM}
+            isLoading={mutation.isPending}
+            isDisabled={!!Object.keys(formInstance.formState.errors).length}
+          />
+        </Space.Flex>
+      </Form>
+    </FormProvider>
   );
 });
 
