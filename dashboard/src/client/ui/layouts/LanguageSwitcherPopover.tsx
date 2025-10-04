@@ -3,16 +3,14 @@
 import Link from "next/link";
 import React from "react";
 
-import { Icon, Menu, Theme } from "venomous-ui-react/components";
+import { Icon, Menu } from "venomous-ui-react/components";
 
 import { i18n, useI18nLocale } from "@/utils/i18n/index.client";
 import CustomPopover from "../custom/CustomPopover";
 
 const LanguageSwitcherPopover = React.memo<{
-  triggerHeight: number;
+  triggerHeight?: number;
 }>(({ triggerHeight }) => {
-  const { themeColor } = Theme.useThemeColor();
-
   const { currentLocale, currentLocalOption, getTargetLocaleOption, getReplacedPathnameWithTargetLocale } = useI18nLocale();
 
   if (!currentLocalOption) {
@@ -22,16 +20,8 @@ const LanguageSwitcherPopover = React.memo<{
   return (
     <CustomPopover
       alignment="center"
-      triggerStyle={{ height: triggerHeight }}
-      renderTrigger={({ isOpen }) => (
-        <Icon
-          icon={currentLocalOption.icon}
-          width={24}
-          style={{
-            ...(isOpen ? { outline: `2px solid ${themeColor}` } : {}),
-          }}
-        />
-      )}
+      triggerStyle={{ height: triggerHeight ?? "100%" }}
+      renderTrigger={() => <Icon icon={currentLocalOption.icon} width={24} />}
     >
       <React.Suspense>
         <Menu.List style={{ minWidth: "160px" }}>

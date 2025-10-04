@@ -12,5 +12,25 @@
     "UNDO": "Undo",
     "REDO": "Redo",
     "EXECUTE": "Execute"
+  },
+
+  "SERVICE_NAME": {
+    "DASHBOARD": "Dashboard",
+    "AUTH": "Auth",
+    "NOTES": "Notes",
+    "MEDIA": "Media",
+    "WORKFLOW": "Workflow"
+  },
+
+  "NAVIGATION_PAGE_NAME": {
+    "MEDIA_LIST": "Media List",
+    "MEDIA_CREATE": "Media Create",
+    "MEDIA_DETAIL": "Media Detail",
+    "NOTES_LIST": "Notes List",
+    "NOTES_CREATE": "Notes Create",
+    "NOTES_DETAIL": "Notes Detail",
+    "WORKFLOW_LIST": "Workflow List",
+    "WORKFLOW_CREATE": "Workflow Create",
+    "WORKFLOW_DETAIL": "Workflow Detail"
   }
 }

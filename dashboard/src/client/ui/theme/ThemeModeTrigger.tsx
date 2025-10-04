@@ -4,7 +4,9 @@ import React from "react";
 
 import { Icon, Theme } from "venomous-ui-react/components";
 
-const ThemeModeTrigger = React.memo(() => {
+const ThemeModeTrigger = React.memo<{
+  style?: React.CSSProperties;
+}>(({ style }) => {
   const { isDarkThemeMode, toggleThemeMode } = Theme.useThemeMode();
 
   return (
@@ -14,6 +16,7 @@ const ThemeModeTrigger = React.memo(() => {
       onClick={toggleThemeMode}
       style={{
         cursor: "pointer",
+        ...style,
       }}
     />
   );

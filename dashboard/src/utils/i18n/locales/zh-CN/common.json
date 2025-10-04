@@ -12,5 +12,25 @@
     "UNDO": "撤销",
     "REDO": "重做",
     "EXECUTE": "运行"
+  },
+
+  "SERVICE_NAME": {
+    "DASHBOARD": "控制台",
+    "AUTH": "认证",
+    "NOTES": "笔记・文档",
+    "MEDIA": "媒体・文件",
+    "WORKFLOW": "工作流"
+  },
+
+  "NAVIGATION_PAGE_NAME": {
+    "MEDIA_LIST": "媒体列表",
+    "MEDIA_CREATE": "新建媒体",
+    "MEDIA_DETAIL": "媒体详情",
+    "NOTES_LIST": "笔记列表",
+    "NOTES_CREATE": "新建笔记",
+    "NOTES_DETAIL": "笔记详情",
+    "WORKFLOW_LIST": "工作流列表",
+    "WORKFLOW_CREATE": "新建工作流",
+    "WORKFLOW_DETAIL": "工作流详情"
   }
 }

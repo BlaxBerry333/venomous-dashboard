@@ -3,10 +3,13 @@
 import Image from "next/image";
 import React from "react";
 
+import type { SERVICE_NAMES } from "@/client/routes/paths";
+
 const Logo = React.memo<{
-  serviceName: string;
+  serviceName: (typeof SERVICE_NAMES)[keyof typeof SERVICE_NAMES];
   size: number;
-}>(({ serviceName, size }) => {
+  style?: React.CSSProperties;
+}>(({ serviceName, size, style }) => {
   return (
     <Image
       src={`/assets/logos/${serviceName}.webp`}
@@ -15,7 +18,7 @@ const Logo = React.memo<{
       height={size}
       draggable={false}
       loading="lazy"
-      style={{ userSelect: "none" }}
+      style={{ userSelect: "none", ...style }}
     />
   );
 });
