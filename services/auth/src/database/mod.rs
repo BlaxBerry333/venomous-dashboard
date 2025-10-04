@@ -646,6 +646,24 @@ impl Database {
         Ok(user)
     }
 
+    /// Get user profile with auth info and role name (for GET /api/user/profile)
+    pub fn get_user_profile(&self, user_id: Uuid) -> Result<Option<(User, AuthUser, String)>> {
+        let mut conn = self.get_connection()?;
+
+        let result = users::table
+            .inner_join(auth_users::table.on(users::id.eq(auth_users::user_id)))
+            .inner_join(roles::table.on(users::role_id.eq(roles::id)))
+            .filter(users::id.eq(user_id))
+            .filter(users::deleted_at.is_null())
+            .filter(auth_users::deleted_at.is_null())
+            .filter(roles::deleted_at.is_null())
+            .select((User::as_select(), AuthUser::as_select(), roles::name))
+            .first::<(User, AuthUser, String)>(&mut conn)
+            .optional()?;
+
+        Ok(result)
+    }
+
     /// Update user profile information
     pub fn update_user_profile(
         &self,

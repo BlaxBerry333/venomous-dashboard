@@ -1,5 +1,5 @@
 {
-  "apiResults": {
+  "API_RESULTS": {
     "TOKEN_INVALID": "Invalid or expired token.",
     "TOKEN_REFRESH_FAILED": "Token refresh failed.",
     "SIGNIN_FAILED": "Login failed.",
@@ -32,7 +32,19 @@
     "CREATE_AN_ACCOUNT": "Create a new account now !",
     "FORGOT_PASSWORD": "Forgot password ?",
     "RESET_PASSWORD": "Reset Password",
-    "USER_PROFILE": "User Profile"
+    "USER_PROFILE": "User Profile",
+    "USER_ID": "User ID",
+    "USER_NAME": "User Name",
+    "USER_EMAIL": "User Email",
+    "USER_AVATAR": "User Avatar",
+    "USER_ROLE_NAME": "Role Name",
+    "CREATED_AT": "Created At",
+    "UPDATED_AT": "Updated At",
+    "DELETED_AT": "Deleted At",
+    "LAST_LOGIN": "Last Login",
+    "IS_LOGIN_LOCKED": "Is Login Locked",
+    "LOGIN_FAILURE_COUNT": "Login Failure Count",
+    "IS_EMAIL_VERIFIED": "Is Email Verified"
   },
 
   "UI_FORM_LABELS": {

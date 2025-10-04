@@ -28,9 +28,9 @@ const AuthSigninForm = React.memo(() => {
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionary.service_auth.apiResults.SIGNIN_SUCCESS,
+          title: dictionary.service_auth.API_RESULTS.SIGNIN_SUCCESS,
         });
-        router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
+        router.replace(`/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_LIST}`);
       },
       onError: (error) => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
@@ -51,6 +51,12 @@ const AuthSigninForm = React.memo(() => {
 
   React.useLayoutEffect(() => {
     formInstance.trigger();
+
+    // test for development
+    if (process.env.NODE_ENV === "development") {
+      formInstance.setValue("email", "admin@example.com", { shouldValidate: true });
+      formInstance.setValue("password", "admin123456789", { shouldValidate: true });
+    }
   }, [formInstance]);
 
   const handleSubmit = React.useCallback(
@@ -59,10 +65,6 @@ const AuthSigninForm = React.memo(() => {
         email: values.email,
         password: values.password,
       });
-      //  {
-      //   email: "admin@example.com",
-      //   password: "admin123456789",
-      // }
     },
     [mutation],
   );

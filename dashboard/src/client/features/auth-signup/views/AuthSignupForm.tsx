@@ -28,9 +28,9 @@ const AuthSignupForm = React.memo(() => {
       onSuccess: () => {
         notify({
           type: "success",
-          title: dictionary.service_auth.apiResults.SIGNUP_SUCCESS,
+          title: dictionary.service_auth.API_RESULTS.SIGNUP_SUCCESS,
         });
-        router.replace(ROUTER_PATHS.DASHBOARD.ROOT);
+        router.replace(`/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_LIST}`);
       },
       onError: (error) => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);

@@ -108,7 +108,7 @@ message UserGetProfileRequest {
 
 message UserGetProfileResponse {
   bool success = 1;
-  optional User data = 2;
+  optional UserProfile data = 2;
   optional ApiError error = 3;
 }
 

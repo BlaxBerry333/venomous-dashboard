@@ -77,10 +77,11 @@ pub async fn get_profile_handler(
     // Extract user_id from JWT token
     let user_id = extract_user_id_from_token(&headers)?;
 
-    match db.get_user_by_id(user_id) {
-        Ok(Some(user)) => {
-            // Convert database User to proto User
-            let proto_user = User {
+    match db.get_user_profile(user_id) {
+        Ok(Some((user, auth_user, role_name))) => {
+            // Convert database data to proto UserProfile
+            let proto_user_profile = UserProfile {
+                // Fields from User table
                 id: user.id.to_string(),
                 email: user.email,
                 name: user.name,
@@ -89,11 +90,18 @@ pub async fn get_profile_handler(
                 created_at: user.created_at.to_rfc3339(),
                 updated_at: user.updated_at.to_rfc3339(),
                 deleted_at: user.deleted_at.map(|dt| dt.to_rfc3339()),
+                // Fields from AuthUser table
+                email_verified: auth_user.email_verified,
+                last_login: auth_user.last_login.map(|dt| dt.to_rfc3339()),
+                login_failure_count: auth_user.login_failure_count,
+                is_login_locked: auth_user.is_login_locked,
+                // Fields from Role table
+                role_name,
             };
 
             let response = json!({
                 "success": true,
-                "data": proto_user
+                "data": proto_user_profile
             });
             Ok(Json(response))
         }

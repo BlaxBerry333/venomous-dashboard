@@ -6,7 +6,7 @@
 
 /* eslint-disable */
 import type { TApiError } from "./common.types";
-import type { TAuthTokenInfo, TUser } from "./interface.types";
+import type { TAuthTokenInfo, TUser, TUserProfile } from "./interface.types";
 
 export interface TAuthSignupRequest {
   email: string;
@@ -92,7 +92,7 @@ export interface TUserGetProfileRequest {}
 
 export interface TUserGetProfileResponse {
   success: boolean;
-  data?: TUser | undefined;
+  data?: TUserProfile | undefined;
   error?: TApiError | undefined;
 }
 

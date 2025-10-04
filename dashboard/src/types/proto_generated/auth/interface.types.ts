@@ -38,6 +38,25 @@ export interface TAuthUser {
   deletedAt?: string | undefined;
 }
 
+export interface TUserProfile {
+  /** Fields from User table */
+  id: string;
+  email: string;
+  name: string;
+  roleId: string;
+  avatarPath?: string | undefined;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | undefined;
+  /** Fields from AuthUser table */
+  emailVerified: boolean;
+  lastLogin?: string | undefined;
+  loginFailureCount: number;
+  isLoginLocked: boolean;
+  /** Fields from Role table */
+  roleName: string;
+}
+
 export interface TAuthToken {
   token: string;
   expiresAt: string;

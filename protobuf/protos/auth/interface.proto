@@ -39,6 +39,27 @@ message AuthUser {
   optional string deleted_at = 9;
 }
 
+message UserProfile {
+  // Fields from User table
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role_id = 4;
+  optional string avatar_path = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  optional string deleted_at = 8;
+
+  // Fields from AuthUser table
+  bool email_verified = 9;
+  optional string last_login = 10;
+  int32 login_failure_count = 11;
+  bool is_login_locked = 12;
+
+  // Fields from Role table
+  string role_name = 13;
+}
+
 // ====================================================================================================
 // Token Types
 // ====================================================================================================

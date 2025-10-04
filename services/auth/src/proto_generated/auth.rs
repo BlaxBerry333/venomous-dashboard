@@ -70,6 +70,38 @@ pub struct AuthUser {
     #[prost(string, optional, tag = "9")]
     pub deleted_at: ::core::option::Option<::prost::alloc::string::String>,
 }
+#[derive(Clone, PartialEq, ::prost::Message, serde::Serialize, serde::Deserialize)]
+pub struct UserProfile {
+    /// Fields from User table
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub email: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub role_id: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "5")]
+    pub avatar_path: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, tag = "6")]
+    pub created_at: ::prost::alloc::string::String,
+    #[prost(string, tag = "7")]
+    pub updated_at: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "8")]
+    pub deleted_at: ::core::option::Option<::prost::alloc::string::String>,
+    /// Fields from AuthUser table
+    #[prost(bool, tag = "9")]
+    pub email_verified: bool,
+    #[prost(string, optional, tag = "10")]
+    pub last_login: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(int32, tag = "11")]
+    pub login_failure_count: i32,
+    #[prost(bool, tag = "12")]
+    pub is_login_locked: bool,
+    /// Fields from Role table
+    #[prost(string, tag = "13")]
+    pub role_name: ::prost::alloc::string::String,
+}
 // ====================================================================================================
 // Token Types
 // ====================================================================================================
@@ -233,7 +265,7 @@ pub struct UserGetProfileResponse {
     #[prost(bool, tag = "1")]
     pub success: bool,
     #[prost(message, optional, tag = "2")]
-    pub data: ::core::option::Option<User>,
+    pub data: ::core::option::Option<UserProfile>,
     #[prost(message, optional, tag = "3")]
     pub error: ::core::option::Option<ApiError>,
 }
