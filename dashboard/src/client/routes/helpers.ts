@@ -1,4 +1,4 @@
-import { SERVICE_NAMES, __MEDIA_SERVICE_PATHS, __NOTES_SERVICE_PATHS, __WORKFLOW_SERVICE_PATHS } from "./paths";
+import { SERVICE_NAMES, __MEDIAS_SERVICE_PATHS, __NOTES_SERVICE_PATHS, __WORKFLOWS_SERVICE_PATHS } from "./paths";
 
 const isPathIncludeService = (pathname: string, servicePaths: Record<string, string>) => {
   // Remove locale prefix (e.g., /zh-CN or /en) to get the actual path
@@ -12,16 +12,16 @@ const isPathIncludeService = (pathname: string, servicePaths: Record<string, str
  * @returns
  */
 export const getServiceNameFromPathname = (pathname: string) => {
-  if (isPathIncludeService(pathname, __MEDIA_SERVICE_PATHS)) {
-    return SERVICE_NAMES.MEDIA;
+  if (isPathIncludeService(pathname, __MEDIAS_SERVICE_PATHS)) {
+    return SERVICE_NAMES.MEDIAS;
   }
 
   if (isPathIncludeService(pathname, __NOTES_SERVICE_PATHS)) {
     return SERVICE_NAMES.NOTES;
   }
 
-  if (isPathIncludeService(pathname, __WORKFLOW_SERVICE_PATHS)) {
-    return SERVICE_NAMES.WORKFLOW;
+  if (isPathIncludeService(pathname, __WORKFLOWS_SERVICE_PATHS)) {
+    return SERVICE_NAMES.WORKFLOWS;
   }
 
   return undefined;

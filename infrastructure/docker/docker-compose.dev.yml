@@ -31,7 +31,7 @@ services:
     depends_on:
       - auth
       # - notes
-      # - media
+      # - medias
       # - workflows
 
   # ====================================================================================================
@@ -66,15 +66,15 @@ services:
       - venomous-network
 
   # ====================================================================================================
-  # Headless Service: media
+  # Headless Service: medias
   # ====================================================================================================
-  media:
-    container_name: media
+  medias:
+    container_name: medias
     build:
-      context: ../../services/media
+      context: ../../services/medias
       dockerfile: Dockerfile.dev
     volumes:
-      - ../../services/media:/app
+      - ../../services/medias:/app
     networks:
       - venomous-network
 

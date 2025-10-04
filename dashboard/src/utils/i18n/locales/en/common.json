@@ -14,12 +14,22 @@
     "EXECUTE": "Execute"
   },
 
-  "SERVICE_NAME": {
-    "DASHBOARD": "Dashboard",
-    "AUTH": "Auth",
-    "NOTES": "Notes",
-    "MEDIA": "Media",
-    "WORKFLOW": "Workflow"
+  "SERVICE": {
+    "DASHBOARD": {
+      "LABEL": "Dashboard"
+    },
+    "AUTH": {
+      "LABEL": "Auth Service"
+    },
+    "NOTES": {
+      "LABEL": "Notes Service"
+    },
+    "MEDIAS": {
+      "LABEL": "Medias Service"
+    },
+    "WORKFLOWS": {
+      "LABEL": "Workflows Service"
+    }
   },
 
   "NAVIGATION_PAGE_NAME": {

@@ -23,21 +23,21 @@ const ServiceSwitcherPopover = React.memo<{
   const serviceItems = React.useMemo(() => {
     return [
       {
-        serviceName: SERVICE_NAMES.MEDIA,
-        label: "Media Service",
-        description: dictionary.common.SERVICE_NAME.MEDIA,
+        serviceName: SERVICE_NAMES.MEDIAS,
+        text: dictionary.common.SERVICE.MEDIAS.LABEL,
+        subText: SERVICE_NAMES.MEDIAS,
         path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.MEDIA_LIST}`,
       },
       {
         serviceName: SERVICE_NAMES.NOTES,
-        label: "Notes Service",
-        description: dictionary.common.SERVICE_NAME.NOTES,
+        text: dictionary.common.SERVICE.NOTES.LABEL,
+        subText: SERVICE_NAMES.NOTES,
         path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_LIST}`,
       },
       {
-        serviceName: SERVICE_NAMES.WORKFLOW,
-        label: "Workflow Service",
-        description: dictionary.common.SERVICE_NAME.WORKFLOW,
+        serviceName: SERVICE_NAMES.WORKFLOWS,
+        text: dictionary.common.SERVICE.WORKFLOWS.LABEL,
+        subText: SERVICE_NAMES.WORKFLOWS,
         path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.WORKFLOW_LIST}`,
       },
     ];
@@ -59,21 +59,21 @@ const ServiceSwitcherPopover = React.memo<{
       renderTrigger={() => (
         <Space.Flex gap={8} style={{ alignItems: "center", padding: "0 8px" }}>
           <Logo serviceName={currentService?.serviceName} size={40} />
-          <Typography.Text text={currentService.label} />
+          <Typography.Text text={currentService.text} />
         </Space.Flex>
       )}
     >
       <React.Suspense>
         <Menu.List style={{ minWidth: "200px" }}>
           {serviceItems.map((currentItem, index) => {
-            const { serviceName, label, description } = currentItem;
+            const { serviceName, text, subText } = currentItem;
             const isSelected = serviceName === currentService.serviceName;
             return (
               <Link href={currentItem.path} key={serviceName}>
                 <Menu.Item
                   id={serviceName}
-                  text={label}
-                  subText={description}
+                  text={text}
+                  subText={` ( ${subText} )`}
                   renderStartElement={() => <Logo serviceName={serviceName} size={40} />}
                   isActive={isSelected}
                   style={{ marginBottom: index === serviceItems.length - 1 ? 0 : "8px", cursor: "pointer" }}

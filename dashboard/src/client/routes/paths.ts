@@ -1,9 +1,9 @@
 export const SERVICE_NAMES = {
   DASHBOARD: "dashboard",
   AUTH: "auth",
-  MEDIA: "media",
+  MEDIAS: "medias",
   NOTES: "notes",
-  WORKFLOW: "workflow",
+  WORKFLOWS: "workflow",
 } as const;
 
 export const __NOTES_SERVICE_PATHS = {
@@ -12,16 +12,16 @@ export const __NOTES_SERVICE_PATHS = {
   DETAIL: "/dashboard/notes-detail", // +?id={noteId}
 } as const;
 
-export const __MEDIA_SERVICE_PATHS = {
-  LIST: "/dashboard/media-list",
-  CREATE: "/dashboard/media-create",
-  DETAIL: "/dashboard/media-detail", // +?id={mediaId}
+export const __MEDIAS_SERVICE_PATHS = {
+  LIST: "/dashboard/medias-list",
+  CREATE: "/dashboard/medias-create",
+  DETAIL: "/dashboard/medias-detail", // +?id={mediaId}
 } as const;
 
-export const __WORKFLOW_SERVICE_PATHS = {
-  LIST: "/dashboard/workflow-list",
-  CREATE: "/dashboard/workflow-create",
-  DETAIL: "/dashboard/workflow-detail", // +?id={workflowId}
+export const __WORKFLOWS_SERVICE_PATHS = {
+  LIST: "/dashboard/workflows-list",
+  CREATE: "/dashboard/workflows-create",
+  DETAIL: "/dashboard/workflows-detail", // +?id={workflowId}
 } as const;
 
 export const ROUTER_PATHS = {
@@ -31,14 +31,14 @@ export const ROUTER_PATHS = {
     SIGNUP: "/auth/signup",
   },
   DASHBOARD: {
-    MEDIA_LIST: __MEDIA_SERVICE_PATHS.LIST,
-    MEDIA_CREATE: __MEDIA_SERVICE_PATHS.CREATE,
-    MEDIA_DETAIL: __MEDIA_SERVICE_PATHS.DETAIL,
+    MEDIA_LIST: __MEDIAS_SERVICE_PATHS.LIST,
+    MEDIA_CREATE: __MEDIAS_SERVICE_PATHS.CREATE,
+    MEDIA_DETAIL: __MEDIAS_SERVICE_PATHS.DETAIL,
     NOTES_LIST: __NOTES_SERVICE_PATHS.LIST,
     NOTES_CREATE: __NOTES_SERVICE_PATHS.CREATE,
     NOTES_DETAIL: __NOTES_SERVICE_PATHS.DETAIL,
-    WORKFLOW_LIST: __WORKFLOW_SERVICE_PATHS.LIST,
-    WORKFLOW_CREATE: __WORKFLOW_SERVICE_PATHS.CREATE,
-    WORKFLOW_DETAIL: __WORKFLOW_SERVICE_PATHS.DETAIL,
+    WORKFLOW_LIST: __WORKFLOWS_SERVICE_PATHS.LIST,
+    WORKFLOW_CREATE: __WORKFLOWS_SERVICE_PATHS.CREATE,
+    WORKFLOW_DETAIL: __WORKFLOWS_SERVICE_PATHS.DETAIL,
   },
 } as const;

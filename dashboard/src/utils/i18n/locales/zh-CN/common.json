@@ -14,12 +14,22 @@
     "EXECUTE": "运行"
   },
 
-  "SERVICE_NAME": {
-    "DASHBOARD": "控制台",
-    "AUTH": "认证",
-    "NOTES": "笔记・文档",
-    "MEDIA": "媒体・文件",
-    "WORKFLOW": "工作流"
+  "SERVICE": {
+    "DASHBOARD": {
+      "LABEL": "管理页面"
+    },
+    "AUTH": {
+      "LABEL": "认证功能"
+    },
+    "NOTES": {
+      "LABEL": "笔记功能"
+    },
+    "MEDIAS": {
+      "LABEL": "媒体功能"
+    },
+    "WORKFLOWS": {
+      "LABEL": "工作流功能"
+    }
   },
 
   "NAVIGATION_PAGE_NAME": {

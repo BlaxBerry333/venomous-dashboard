@@ -1,19 +1,14 @@
-# Rails logs and temporary files
-/log
-/tmp
-
-# Bundler local cache
-.bundle
-
-# Uploads and assets
-/public/system
-/public/assets
-
-# Node.js dependencies (if using Webpacker/jsbundling-rails)
-/node_modules
+# Dependencies
+node_modules
 
 # Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
 
 # Git
 .git

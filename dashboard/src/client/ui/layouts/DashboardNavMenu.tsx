@@ -20,7 +20,7 @@ const DashboardNavMenu = React.memo(() => {
 
   const navItems = React.useMemo(() => {
     switch (currentServiceName) {
-      case SERVICE_NAMES.MEDIA:
+      case SERVICE_NAMES.MEDIAS:
         return [
           {
             label: dictionary.common.NAVIGATION_PAGE_NAME.MEDIA_LIST,
@@ -46,7 +46,7 @@ const DashboardNavMenu = React.memo(() => {
             icon: "solar:document-add-line-duotone",
           },
         ];
-      case SERVICE_NAMES.WORKFLOW:
+      case SERVICE_NAMES.WORKFLOWS:
         return [
           {
             label: dictionary.common.NAVIGATION_PAGE_NAME.WORKFLOW_LIST,
@@ -73,8 +73,9 @@ const DashboardNavMenu = React.memo(() => {
           <Link key={path} href={path}>
             <Menu.Item
               id={path}
-              icon={icon}
               text={label}
+              icon={icon}
+              iconStyle={{ margin: "0 8px" }}
               isActive={isSelected}
               style={{ marginBottom: index === navItems.length - 1 ? 0 : "8px", cursor: "pointer" }}
             />
@@ -83,8 +84,6 @@ const DashboardNavMenu = React.memo(() => {
       })}
     </Menu.List>
   );
-
-  return <div style={{ height: "200vh", backgroundColor: "crimson" }} />;
 });
 
 DashboardNavMenu.displayName = "DashboardNavMenu";

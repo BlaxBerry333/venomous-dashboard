@@ -59,11 +59,6 @@ const AccountPopover = React.memo<{
       >
         <React.Suspense>
           <Menu.List style={{ minWidth: "160px" }}>
-            <Space.Flex column style={{ padding: "8px" }}>
-              <Typography.Text isEllipsis text={queryOfUser.data?.name ?? ""} />
-              <Typography.Text isEllipsis text={queryOfUser.data?.email ?? ""} />
-            </Space.Flex>
-            <Divider />
             <Menu.Item
               icon="solar:user-circle-bold-duotone"
               id="profile"

@@ -7,7 +7,7 @@
 # This script initializes PostgreSQL databases for the microservices architecture:
 # - auth: Authentication and user management service
 # - notes: Note-taking and content management service
-# - media: File upload and media management service
+# - medias: File upload and medias management service
 # - workflows: Business process automation service
 # =============================================================================
 
@@ -19,7 +19,7 @@ DB_USER="venomous_dashboard_db"
 # Database names
 AUTH_DB="venomous_auth_db"
 NOTES_DB="venomous_notes_db"
-MEDIA_DB="venomous_media_db"
+MEDIA_DB="venomous_medias_db"
 WORKFLOWS_DB="venomous_workflows_db"
 
 # Function to create database if it doesn't exist

@@ -1,0 +1,16 @@
+# Use an official Ruby runtime as a parent image
+FROM ruby:3.1
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install dependencies
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# Copy the rest of the application's code
+COPY . .
+
+# Run the app when the container launches
+# The port will be internal to docker
+CMD ["rails", "server", "-b", "0.0.0.0"]

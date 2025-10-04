@@ -4,19 +4,19 @@ A multi-language microservices project for learning and demonstration purposes.
 
 ## Server List
 
-|     Category     |              Service Name              |    Main Skill    | Description                                               |
-| :--------------: | :------------------------------------: | :--------------: | --------------------------------------------------------- |
-|   Application    |       [dashboard](./dashboard/)        |     Next.js      | Main frontend application.                                |
-|  Documentations  |        [document](./document/)         |        -         | ...                                                       |
-|      Tools       |        [protobuf](./protobuf/)         | Protocol Buffers | Protocol Buffers definitions and code generation scripts. |
-|   API Gateway    | [api-gateway](./services/api-gateway/) |     Go・Gin      | API gateway service.                                      |
-| Headless Service |        [auth](./services/auth/)        |    Rust・Axum    | Authentication and authorization service.                 |
-| Headless Service |       [notes](./services/notes/)       |   Ruby・Rails    | Note management service.                                  |
-| Headless Service |       [media](./services/media/)       |     Node.js      | Media and file management service.                        |
-| Headless Service |   [workflows](./services/workflows/)   |  Python・Django  | Workflow management service.                              |
-|     Database     |                   db                   |   PostgresSQL    | ...                                                       |
-|      Cache       |                 redis                  |      Redis       | ...                                                       |
-|     Storage      |                 minio                  |        -         | ...                                                       |
+|     Category     |              Service Name              |    Main Skill    | Description                                       |
+| :--------------: | :------------------------------------: | :--------------: | ------------------------------------------------- |
+|   Application    |       [dashboard](./dashboard/)        |     Next.js      | Main frontend application.                        |
+|  Documentations  |        [document](./document/)         |        -         | ...                                               |
+|      Tools       |        [protobuf](./protobuf/)         | Protocol Buffers | Protocol Buffers definitions and code generators. |
+|   API Gateway    | [api-gateway](./services/api-gateway/) |     Go・Gin      | API gateway service.                              |
+| Headless Service |        [auth](./services/auth/)        |    Rust・Axum    | Authentication and authorization service.         |
+| Headless Service |       [notes](./services/notes/)       |     Node.js      | Note management service.                          |
+| Headless Service |      [medias](./services/medias/)      |   Ruby・Rails    | Media and file management service.                |
+| Headless Service |   [workflows](./services/workflows/)   |  Python・Django  | Workflow management service.                      |
+|     Database     |                   db                   |   PostgresSQL    | ...                                               |
+|      Cache       |                 redis                  |      Redis       | ...                                               |
+|     Storage      |                 minio                  |        -         | ...                                               |
 
 ## Directory Structure
 
@@ -69,7 +69,7 @@ A multi-language microservices project for learning and demonstration purposes.
 │   │   ├── Dockerfile.[ENV]
 │   │   └── ...
 │   │
-│   ├── media/
+│   ├── medias/
 │   │   ├── Dockerfile.[ENV]
 │   │   └── ...
 │   │
