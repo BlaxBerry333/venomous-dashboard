@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package venomous_dashboard.notes;
+
+option go_package = "github.com/venomous-dashboard/api-gateway/internal/types/proto_generated/notes";
+
+
+// ====================================================================================================
+// Memo Types
+// ====================================================================================================
+
+enum MemoColor {
+  YELLOW = 0;
+  GREEN = 1;
+  BLUE = 2;
+  PINK = 3;
+  PURPLE = 4;
+  GRAY = 5;
+}
+
+message Memo {
+  string id = 1;
+  string user_id = 2;
+  string content = 3;
+  MemoColor color = 4;
+  bool is_pinned = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  optional string deleted_at = 8;
+}
+
+
+// ====================================================================================================
+// Article Types
+// ====================================================================================================
+
+enum ArticleStatus {
+  DRAFT = 0;
+  PUBLISHED = 1;
+  ARCHIVED = 2;
+}
+
+message Article {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  optional string description = 4;
+  optional string cover_image_url = 5;
+  optional string category = 6;
+  ArticleStatus status = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  optional string deleted_at = 10;
+}
+
+message ArticleChapter {
+  string id = 1;
+  string article_id = 2;
+  string title = 3;
+  string content = 4;
+  int32 chapter_number = 5;
+  int32 word_count = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  optional string deleted_at = 9;
+}

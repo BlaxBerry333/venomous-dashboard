@@ -1,23 +1,13 @@
-import type {
-  TAuthSigninRequest,
-  TAuthSigninResponse,
-  TAuthSignupRequest,
-  TAuthSignupResponse,
-  TAuthTokenInfoRequest,
-  TAuthTokenRefreshRequest,
-  TAuthTokenRefreshResponse,
-  TAuthTokenVerifyRequest,
-  TAuthTokenVerifyResponse,
-} from "@/types";
+import type * as Types from "@/types";
 import { toCamelCase } from "@/utils/helper";
 import { API_ENDPOINTS } from "../endpoints";
 
 export const AUTH_FETCHERS = {
   SIGNUP: async (
-    requestBody: TAuthSignupRequest,
+    requestBody: Types.TAuthSignupRequest,
   ): Promise<{
     response: Response;
-    data: TAuthSignupResponse;
+    data: Types.TAuthSignupResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.SIGNUP, {
       method: "POST",
@@ -25,7 +15,7 @@ export const AUTH_FETCHERS = {
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TAuthSignupResponse>(rawData);
+    const data = toCamelCase<Types.TAuthSignupResponse>(rawData);
     return {
       response,
       data,
@@ -33,10 +23,10 @@ export const AUTH_FETCHERS = {
   },
 
   SIGNIN: async (
-    requestBody: TAuthSigninRequest,
+    requestBody: Types.TAuthSigninRequest,
   ): Promise<{
     response: Response;
-    data: TAuthSigninResponse;
+    data: Types.TAuthSigninResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.SIGNIN, {
       method: "POST",
@@ -44,7 +34,7 @@ export const AUTH_FETCHERS = {
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TAuthSigninResponse>(rawData);
+    const data = toCamelCase<Types.TAuthSigninResponse>(rawData);
     return {
       response,
       data,
@@ -52,18 +42,21 @@ export const AUTH_FETCHERS = {
   },
 
   TOKEN_INFO: async (
-    requestBody: TAuthTokenInfoRequest,
+    requestBody: Types.TAuthTokenInfoRequest,
   ): Promise<{
     response: Response;
-    data: TAuthTokenRefreshResponse;
+    data: Types.TAuthTokenRefreshResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.TOKEN_INFO, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${requestBody.token}`,
+      },
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TAuthTokenRefreshResponse>(rawData);
+    const data = toCamelCase<Types.TAuthTokenRefreshResponse>(rawData);
     return {
       response,
       data,
@@ -71,18 +64,21 @@ export const AUTH_FETCHERS = {
   },
 
   TOKEN_VERIFY: async (
-    requestBody: TAuthTokenVerifyRequest,
+    requestBody: Types.TAuthTokenVerifyRequest,
   ): Promise<{
     response: Response;
-    data: TAuthTokenVerifyResponse;
+    data: Types.TAuthTokenVerifyResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.TOKEN_VERIFY, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${requestBody.token}`,
+      },
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TAuthTokenVerifyResponse>(rawData);
+    const data = toCamelCase<Types.TAuthTokenVerifyResponse>(rawData);
     return {
       response,
       data,
@@ -90,18 +86,21 @@ export const AUTH_FETCHERS = {
   },
 
   TOKEN_REFRESH: async (
-    requestBody: TAuthTokenRefreshRequest,
+    requestBody: Types.TAuthTokenRefreshRequest,
   ): Promise<{
     response: Response;
-    data: TAuthTokenRefreshResponse;
+    data: Types.TAuthTokenRefreshResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.AUTH.TOKEN_REFRESH, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${requestBody.token}`,
+      },
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TAuthTokenRefreshResponse>(rawData);
+    const data = toCamelCase<Types.TAuthTokenRefreshResponse>(rawData);
     return {
       response,
       data,

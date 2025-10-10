@@ -4,7 +4,7 @@ import { getAccessCookie, setAccessCookie } from "@/server/helpers";
 import { AUTH_FETCHERS } from "@/utils/api";
 import { trpc } from "../instance";
 
-const authMiddleware = trpc.middleware(async ({ ctx, next }) => {
+const authProtectedMiddleware = trpc.middleware(async ({ ctx, next }) => {
   try {
     const token = await getAccessCookie();
     if (!token?.value) {
@@ -29,7 +29,7 @@ const authMiddleware = trpc.middleware(async ({ ctx, next }) => {
         data: { data, success, error },
       } = await AUTH_FETCHERS.TOKEN_REFRESH({ token: token.value });
 
-      if (!response.ok || !success) {
+      if (!response.ok || !success || !data?.token) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           cause: {
@@ -41,22 +41,11 @@ const authMiddleware = trpc.middleware(async ({ ctx, next }) => {
       }
 
       const newToken = data?.token;
-      if (!newToken) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          cause: {
-            errorCode: error?.code,
-            errorMessage: error?.message,
-            statusCode: response.status,
-          },
-        });
-      }
-
       await setAccessCookie(newToken);
       return next({
         ctx: {
           ...ctx,
-          token,
+          token: newToken,
         },
       });
     }
@@ -64,7 +53,7 @@ const authMiddleware = trpc.middleware(async ({ ctx, next }) => {
     return next({
       ctx: {
         ...ctx,
-        token,
+        token: token.value,
       },
     });
   } catch (error) {
@@ -78,4 +67,4 @@ const authMiddleware = trpc.middleware(async ({ ctx, next }) => {
   }
 });
 
-export const TRPCAuthProtectedProcedure = trpc.procedure.use(authMiddleware);
+export const TRPCAuthProtectedProcedure = trpc.procedure.use(authProtectedMiddleware);

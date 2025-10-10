@@ -72,11 +72,7 @@ Makefile linguist-language=Makefile
 **/manage.sh linguist-language=Shell
 
 # Protocol Buffers
-*.proto linguist-vendored=false
-*.proto linguist-generated=false
-*.proto linguist-documentation=false
-*.proto linguist-detectable=true
-**/*.proto linguist-vendored=false
-**/*.proto linguist-generated=false
-**/*.proto linguist-documentation=false
-**/*.proto linguist-detectable=true
+**/*.proto linguist-vendored=false linguist-generated=false linguist-documentation=false linguist-detectable=true
+
+# Protocol Buffers Generated types
+**/proto_generated/**/*.ts linguist-generated=true

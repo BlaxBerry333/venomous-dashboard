@@ -11,7 +11,7 @@ A multi-language microservices project for learning and demonstration purposes.
 |      Tools       |        [protobuf](./protobuf/)         | Protocol Buffers | Protocol Buffers definitions and code generators. |
 |   API Gateway    | [api-gateway](./services/api-gateway/) |     Go・Gin      | API gateway service.                              |
 | Headless Service |        [auth](./services/auth/)        |    Rust・Axum    | Authentication and authorization service.         |
-| Headless Service |       [notes](./services/notes/)       |     Node.js      | Note management service.                          |
+| Headless Service |       [notes](./services/notes/)       | Node.js・Fastify | Note management service.                          |
 | Headless Service |      [medias](./services/medias/)      |   Ruby・Rails    | Media and file management service.                |
 | Headless Service |   [workflows](./services/workflows/)   |  Python・Django  | Workflow management service.                      |
 |     Database     |                   db                   |   PostgresSQL    | ...                                               |
@@ -66,7 +66,8 @@ A multi-language microservices project for learning and demonstration purposes.
 │   │   └── ...
 │   │
 │   ├── notes/
-│   │   ├── Dockerfile.[ENV]
+│   │   ├── docker/
+│   │   │   └── Dockerfile.[ENV]
 │   │   └── ...
 │   │
 │   ├── medias/

@@ -61,11 +61,17 @@ endef
 define call_proto_gen
 	@SERVICE="$(1)"; \
 	if [ "$$SERVICE" = "dashboard" ]; then \
-		cd protobuf && ./scripts/generate-ts.sh "./protos/auth/*.proto" "../dashboard/src/types/proto_generated"; \
+		cd protobuf && ./scripts/generate-ts.sh "./protos/**/*.proto" "../dashboard/src/types/proto_generated"; \
 		echo "✅ Generated TypeScript protobuf types for service: $$SERVICE"; \
 	elif [ "$$SERVICE" = "auth" ]; then \
-		cd protobuf && ./scripts/generate-rust.sh "./protos/auth/*.proto" "../services/auth/src/proto_generated"; \
+		cd protobuf && ./scripts/generate-rust.sh "./protos/_common/*.proto ./protos/auth/*.proto" "../services/auth/src/proto_generated"; \
 		echo "✅ Generated Rust protobuf types for service: $$SERVICE"; \
+	elif [ "$$SERVICE" = "api-gateway" ]; then \
+		cd protobuf && ./scripts/generate-go.sh "./protos/**/*.proto" "../services/api-gateway/internal/types/proto_generated"; \
+		echo "✅ Generated Go protobuf types for service: $$SERVICE"; \
+	elif [ "$$SERVICE" = "notes" ]; then \
+		cd protobuf && ./scripts/generate-ts.sh "./protos/_common/*.proto ./protos/notes/*.proto" "../services/notes/src/types/proto_generated"; \
+		echo "✅ Generated TypeScript protobuf types for service: $$SERVICE"; \
 	fi
 endef
 
@@ -77,6 +83,12 @@ define call_proto_clean
 	elif [ "$$SERVICE" = "auth" ]; then \
 		rm -rf services/auth/src/proto_generated/*; \
 		echo "✅ Cleaned Rust protobuf types for service: $$SERVICE"; \
+	elif [ "$$SERVICE" = "api-gateway" ]; then \
+		rm -rf services/api-gateway/internal/types/proto_generated/*; \
+		echo "✅ Cleaned Go protobuf types for service: $$SERVICE"; \
+	elif [ "$$SERVICE" = "notes" ]; then \
+		rm -rf services/notes/src/types/proto_generated/*; \
+		echo "✅ Cleaned TypeScript protobuf types for service: $$SERVICE"; \
 	fi
 endef
 
@@ -286,6 +298,8 @@ proto-gen-all:
 	@$(MAKE) proto-setup
 	@$(MAKE) proto-gen SERVICE=dashboard
 	@$(MAKE) proto-gen SERVICE=auth
+	@$(MAKE) proto-gen SERVICE=api-gateway
+	@$(MAKE) proto-gen SERVICE=notes
 
 proto-gen:
 	$(call check_service)
@@ -296,6 +310,8 @@ proto-clean-all:
 	@echo "Cleaning all generated protobuf types..."
 	@$(MAKE) proto-clean SERVICE=dashboard
 	@$(MAKE) proto-clean SERVICE=auth
+	@$(MAKE) proto-clean SERVICE=api-gateway
+	@$(MAKE) proto-clean SERVICE=notes
 
 proto-clean:
 	$(call check_service)

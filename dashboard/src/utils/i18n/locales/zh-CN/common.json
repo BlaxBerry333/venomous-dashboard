@@ -32,15 +32,50 @@
     }
   },
 
-  "NAVIGATION_PAGE_NAME": {
-    "MEDIA_LIST": "媒体列表",
-    "MEDIA_CREATE": "新建媒体",
-    "MEDIA_DETAIL": "媒体详情",
-    "NOTES_LIST": "笔记列表",
-    "NOTES_CREATE": "新建笔记",
-    "NOTES_DETAIL": "笔记详情",
-    "WORKFLOW_LIST": "工作流列表",
-    "WORKFLOW_CREATE": "新建工作流",
-    "WORKFLOW_DETAIL": "工作流详情"
+  "NAVIGATION_PAGE": {
+    "AUTH_SIGNIN": {
+      "TITLE": "登录",
+      "DESCRIPTION": "..."
+    },
+    "AUTH_SIGNUP": {
+      "TITLE": "注册",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_LIST": {
+      "TITLE": "媒体列表",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_CREATE": {
+      "TITLE": "新建媒体",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_DETAIL": {
+      "TITLE": "媒体详情",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_LIST": {
+      "TITLE": "笔记列表",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_CREATE": {
+      "TITLE": "新建笔记",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_DETAIL": {
+      "TITLE": "笔记详情",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_LIST": {
+      "TITLE": "工作流列表",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_CREATE": {
+      "TITLE": "新建工作流",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_DETAIL": {
+      "TITLE": "工作流详情",
+      "DESCRIPTION": "..."
+    }
   }
 }

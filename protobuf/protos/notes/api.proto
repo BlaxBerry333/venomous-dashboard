@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package venomous_dashboard.notes;
+
+option go_package = "github.com/venomous-dashboard/api-gateway/internal/types/proto_generated/notes";
+
+import "_common/interface.proto";
+import "notes/interface.proto";
+
+
+// ====================================================================================================
+// Memo API Request/Response Types
+// ====================================================================================================
+
+message MemoListRequest {
+  // No fields needed - user identified by JWT token
+}
+
+message MemoListResponse {
+  bool success = 1;
+  repeated Memo data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message MemoGetRequest {
+  string id = 1;
+}
+
+message MemoGetResponse {
+  bool success = 1;
+  optional Memo data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message MemoCreateRequest {
+  string content = 1;
+  MemoColor color = 2;
+  bool is_pinned = 3;
+}
+
+message MemoCreateResponse {
+  bool success = 1;
+  optional Memo data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message MemoUpdateRequest {
+  string id = 1;
+  optional string content = 2;
+  optional MemoColor color = 3;
+  optional bool is_pinned = 4;
+}
+
+message MemoUpdateResponse {
+  bool success = 1;
+  optional Memo data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message MemoDeleteRequest {
+  string id = 1;
+}
+
+message MemoDeleteResponse {
+  bool success = 1;
+  optional venomous_dashboard.common.ApiError error = 2;
+}
+
+
+// ====================================================================================================
+// Article API Request/Response Types
+// ====================================================================================================
+
+message ArticleListRequest {
+  // No fields needed - user identified by JWT token
+}
+
+message ArticleListResponse {
+  bool success = 1;
+  repeated ArticleWithChapterCount data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ArticleWithChapterCount {
+  Article article = 1;
+  int32 chapter_count = 2;
+}
+
+message ArticleGetRequest {
+  string id = 1;
+}
+
+message ArticleGetResponse {
+  bool success = 1;
+  optional ArticleWithChapters data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ArticleWithChapters {
+  Article article = 1;
+  repeated ArticleChapter chapters = 2;
+}
+
+message ArticleCreateRequest {
+  string title = 1;
+  optional string description = 2;
+  optional string category = 3;
+  optional string cover_image_url = 4;
+}
+
+message ArticleCreateResponse {
+  bool success = 1;
+  optional Article data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ArticleUpdateRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional string category = 4;
+  optional string cover_image_url = 5;
+  optional ArticleStatus status = 6;
+}
+
+message ArticleUpdateResponse {
+  bool success = 1;
+  optional Article data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ArticleDeleteRequest {
+  string id = 1;
+}
+
+message ArticleDeleteResponse {
+  bool success = 1;
+  optional venomous_dashboard.common.ApiError error = 2;
+}
+
+
+// ====================================================================================================
+// Chapter API Request/Response Types
+// ====================================================================================================
+
+message ChapterGetRequest {
+  string article_id = 1;
+  string chapter_id = 2;
+}
+
+message ChapterGetResponse {
+  bool success = 1;
+  optional ArticleChapter data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ChapterCreateRequest {
+  string article_id = 1;
+  string title = 2;
+  string content = 3;
+  int32 chapter_number = 4;
+  int32 word_count = 5;
+}
+
+message ChapterCreateResponse {
+  bool success = 1;
+  optional ArticleChapter data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ChapterUpdateRequest {
+  string article_id = 1;
+  string chapter_id = 2;
+  optional string title = 3;
+  optional string content = 4;
+  optional int32 word_count = 5;
+}
+
+message ChapterUpdateResponse {
+  bool success = 1;
+  optional ArticleChapter data = 2;
+  optional venomous_dashboard.common.ApiError error = 3;
+}
+
+message ChapterDeleteRequest {
+  string article_id = 1;
+  string chapter_id = 2;
+}
+
+message ChapterDeleteResponse {
+  bool success = 1;
+  optional venomous_dashboard.common.ApiError error = 2;
+}

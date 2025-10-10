@@ -32,15 +32,50 @@
     }
   },
 
-  "NAVIGATION_PAGE_NAME": {
-    "MEDIA_LIST": "Media List",
-    "MEDIA_CREATE": "Media Create",
-    "MEDIA_DETAIL": "Media Detail",
-    "NOTES_LIST": "Notes List",
-    "NOTES_CREATE": "Notes Create",
-    "NOTES_DETAIL": "Notes Detail",
-    "WORKFLOW_LIST": "Workflow List",
-    "WORKFLOW_CREATE": "Workflow Create",
-    "WORKFLOW_DETAIL": "Workflow Detail"
+  "NAVIGATION_PAGE": {
+    "AUTH_SIGNIN": {
+      "TITLE": "Signin",
+      "DESCRIPTION": "..."
+    },
+    "AUTH_SIGNUP": {
+      "TITLE": "Signup",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_LIST": {
+      "TITLE": "Media List",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_CREATE": {
+      "TITLE": "Media Create",
+      "DESCRIPTION": "..."
+    },
+    "MEDIAS_DETAIL": {
+      "TITLE": "Media Detail",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_LIST": {
+      "TITLE": "Notes List",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_CREATE": {
+      "TITLE": "Notes Create",
+      "DESCRIPTION": "..."
+    },
+    "NOTES_DETAIL": {
+      "TITLE": "Notes Detail",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_LIST": {
+      "TITLE": "Workflow List",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_CREATE": {
+      "TITLE": "Workflow Create",
+      "DESCRIPTION": "..."
+    },
+    "WORKFLOW_DETAIL": {
+      "TITLE": "Workflow Detail",
+      "DESCRIPTION": "..."
+    }
   }
 }

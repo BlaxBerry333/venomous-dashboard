@@ -3,13 +3,13 @@ import { TRPCError } from "@trpc/server";
 import { mapHttpStatusToTRPCCode, removeAccessCookie, setAccessCookie } from "@/server/helpers";
 import { AUTH_FETCHERS } from "@/utils/api";
 import { trpc } from "@/utils/trpc/index.server";
-import { AUTH_SIGNIN_SCHEMA, AUTH_SIGNUP_SCHEMA } from "@/utils/validation";
+import * as SCHEMAS from "@/utils/validation";
 
 export const AuthProcedures = {
   /**
    * Signup
    */
-  signup: trpc.procedure.input(AUTH_SIGNUP_SCHEMA).mutation(async ({ input }) => {
+  signup: trpc.procedure.input(SCHEMAS.AUTH_SIGNUP_SCHEMA).mutation(async ({ input }) => {
     try {
       const {
         response,
@@ -51,7 +51,7 @@ export const AuthProcedures = {
   /**
    * Signin
    */
-  signin: trpc.procedure.input(AUTH_SIGNIN_SCHEMA).mutation(async ({ input }) => {
+  signin: trpc.procedure.input(SCHEMAS.AUTH_SIGNIN_SCHEMA).mutation(async ({ input }) => {
     try {
       const {
         response,
@@ -95,16 +95,14 @@ export const AuthProcedures = {
    */
   logout: trpc.procedure.mutation(async () => {
     try {
-      await removeAccessCookie();
-      return undefined;
+      return { success: true };
     } catch (error) {
-      if (error instanceof TRPCError) {
-        throw error;
-      }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: String((error as Error).message),
       });
+    } finally {
+      await removeAccessCookie();
     }
   }),
 } as const;

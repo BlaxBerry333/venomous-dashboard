@@ -23,12 +23,12 @@ const DashboardNavMenu = React.memo(() => {
       case SERVICE_NAMES.MEDIAS:
         return [
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.MEDIA_LIST,
+            label: dictionary.common.NAVIGATION_PAGE.MEDIAS_LIST.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.MEDIA_LIST}`,
             icon: "solar:folder-with-files-line-duotone",
           },
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.MEDIA_CREATE,
+            label: dictionary.common.NAVIGATION_PAGE.MEDIAS_CREATE.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.MEDIA_CREATE}`,
             icon: "solar:add-folder-line-duotone",
           },
@@ -36,12 +36,12 @@ const DashboardNavMenu = React.memo(() => {
       case SERVICE_NAMES.NOTES:
         return [
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.NOTES_LIST,
+            label: dictionary.common.NAVIGATION_PAGE.NOTES_LIST.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_LIST}`,
             icon: "solar:documents-line-duotone",
           },
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.NOTES_CREATE,
+            label: dictionary.common.NAVIGATION_PAGE.NOTES_CREATE.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_CREATE}`,
             icon: "solar:document-add-line-duotone",
           },
@@ -49,12 +49,12 @@ const DashboardNavMenu = React.memo(() => {
       case SERVICE_NAMES.WORKFLOWS:
         return [
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.WORKFLOW_LIST,
+            label: dictionary.common.NAVIGATION_PAGE.WORKFLOW_LIST.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.WORKFLOW_LIST}`,
             icon: "solar:routing-3-line-duotone",
           },
           {
-            label: dictionary.common.NAVIGATION_PAGE_NAME.WORKFLOW_CREATE,
+            label: dictionary.common.NAVIGATION_PAGE.WORKFLOW_CREATE.TITLE,
             path: `/${currentLocale}${ROUTER_PATHS.DASHBOARD.WORKFLOW_CREATE}`,
             icon: "solar:widget-add-line-duotone",
           },

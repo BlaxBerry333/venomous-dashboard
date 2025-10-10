@@ -4,7 +4,7 @@ import { z } from "zod";
 import { mapHttpStatusToTRPCCode } from "@/server/helpers";
 import { USER_FETCHERS } from "@/utils/api";
 import { TRPCAuthProtectedProcedure } from "@/utils/trpc/index.server";
-import { USER_UPDATE_PROFILE_SCHEMA } from "@/utils/validation";
+import * as SCHEMAS from "@/utils/validation";
 
 export const UserProcedures = {
   /**
@@ -12,19 +12,10 @@ export const UserProcedures = {
    */
   getProfile: TRPCAuthProtectedProcedure.query(async ({ ctx }) => {
     try {
-      const token = ctx.token?.value;
-
-      if (!token) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User not authenticated",
-        });
-      }
-
       const {
         response,
         data: { data, success, error },
-      } = await USER_FETCHERS.GET_PROFILE(token);
+      } = await USER_FETCHERS.GET_PROFILE(ctx.token);
 
       if (!response.ok || !success) {
         throw new TRPCError({
@@ -52,21 +43,12 @@ export const UserProcedures = {
   /**
    * Update user basic information
    */
-  updateProfile: TRPCAuthProtectedProcedure.input(z.object(USER_UPDATE_PROFILE_SCHEMA.shape)).mutation(async ({ ctx, input }) => {
+  updateProfile: TRPCAuthProtectedProcedure.input(z.object(SCHEMAS.USER_UPDATE_PROFILE_SCHEMA.shape)).mutation(async ({ ctx, input }) => {
     try {
-      const token = ctx.token?.value;
-
-      if (!token) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User not authenticated",
-        });
-      }
-
       const {
         response,
         data: { data, success, error },
-      } = await USER_FETCHERS.UPDATE_PROFILE(input, token);
+      } = await USER_FETCHERS.UPDATE_PROFILE(input, ctx.token);
 
       if (!response.ok || !success) {
         throw new TRPCError({

@@ -18,27 +18,38 @@ func main() {
 	// Create router instance
 	r := gin.New()
 
-	// Add middleware
-	r.Use(gin.Logger())
+	// Add middleware - custom logger that skips /health requests
+	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		SkipPaths: []string{"/health"},
+	}))
 	r.Use(middleware.CORS())
 	r.Use(gin.Recovery())
-
-	// Health check endpoint
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  "healthy",
-			"service": "api-gateway",
-			"version": "1.0.0",
-		})
-	})
 
 	// Initialize proxies
 	authServiceURL := "http://auth:8080"
 	authProxy := proxy.NewAuthProxy(authServiceURL)
 
+	notesServiceURL := "http://notes:8200"
+	notesProxy := proxy.NewNotesProxy(notesServiceURL)
+
+	// Add JWT authentication middleware
+	r.Use(middleware.JWTAuth(authServiceURL))
+
+	// Health check endpoint (support both GET and HEAD)
+	healthHandler := func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "healthy",
+			"service": "api-gateway",
+			"version": "1.0.0",
+		})
+	}
+	r.GET("/health", healthHandler)
+	r.HEAD("/health", healthHandler)
+
 	// Setup routes - pure proxy mode
 	router.SetupAuthRoutes(r, authProxy)
 	router.SetupUserRoutes(r, authProxy)
+	router.SetupNotesRoutes(r, notesProxy)
 
 	// Start server
 	port := ":8080"

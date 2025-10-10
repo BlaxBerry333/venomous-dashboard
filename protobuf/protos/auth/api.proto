@@ -2,7 +2,9 @@ syntax = "proto3";
 
 package venomous_dashboard.auth;
 
-import "auth/common.proto";
+option go_package = "github.com/venomous-dashboard/api-gateway/internal/types/proto_generated/auth";
+
+import "_common/interface.proto";
 import "auth/interface.proto";
 
 
@@ -20,7 +22,7 @@ message AuthSignupRequest {
 message AuthSignupResponse {
   bool success = 1;
   optional AuthSignupData data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message AuthSignupData {
@@ -37,7 +39,7 @@ message AuthSigninRequest {
 message AuthSigninResponse {
   bool success = 1;
   optional AuthSigninData data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message AuthSigninData {
@@ -52,7 +54,7 @@ message AuthLogoutRequest {
 
 message AuthLogoutResponse {
   bool success = 1;
-  optional ApiError error = 2;
+  optional venomous_dashboard.common.ApiError error = 2;
 }
 
 
@@ -68,7 +70,7 @@ message AuthTokenVerifyRequest {
 message AuthTokenVerifyResponse {
   bool success = 1;
   optional AuthTokenInfo data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message AuthTokenInfoRequest {
@@ -78,7 +80,7 @@ message AuthTokenInfoRequest {
 message AuthTokenInfoResponse {
   bool success = 1;
   optional AuthTokenInfo data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message AuthTokenRefreshRequest {
@@ -88,7 +90,7 @@ message AuthTokenRefreshRequest {
 message AuthTokenRefreshResponse {
   bool success = 1;
   optional AuthTokenRefreshData data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message AuthTokenRefreshData {
@@ -109,7 +111,7 @@ message UserGetProfileRequest {
 message UserGetProfileResponse {
   bool success = 1;
   optional UserProfile data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }
 
 message UserUpdateProfileRequest {
@@ -120,5 +122,5 @@ message UserUpdateProfileRequest {
 message UserUpdateProfileResponse {
   bool success = 1;
   optional User data = 2;
-  optional ApiError error = 3;
+  optional venomous_dashboard.common.ApiError error = 3;
 }

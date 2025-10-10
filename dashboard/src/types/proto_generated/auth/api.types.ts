@@ -5,7 +5,7 @@
 // source: auth/api.proto
 
 /* eslint-disable */
-import type { TApiError } from "./common.types";
+import type { TApiError } from "../_common/interface.types";
 import type { TAuthTokenInfo, TUser, TUserProfile } from "./interface.types";
 
 export interface TAuthSignupRequest {

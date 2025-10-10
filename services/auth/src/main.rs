@@ -1,4 +1,5 @@
 use axum::{
+    http::Request,
     routing::{get, patch, post, put},
     Router,
 };
@@ -47,6 +48,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build application router with all handlers and shared state
     let app = Router::new()
+        // Health check route
+        .route(
+            "/health",
+            get(|| async { axum::Json(serde_json::json!({"status": "ok", "service": "auth"})) }),
+        )
         // Authentication routes
         .route("/signup", post(signup_handler))
         .route("/signin", post(signin_handler))
@@ -78,8 +84,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/user/profile", patch(update_profile_handler))
         // Add shared state (database connection pool)
         .with_state(database)
-        // Add logging middleware
-        .layer(TraceLayer::new_for_http());
+        // Add logging middleware - skip /health endpoint
+        .layer(
+            TraceLayer::new_for_http().make_span_with(|request: &Request<_>| {
+                let uri = request.uri().path();
+                if uri == "/health" {
+                    tracing::debug_span!("health_check")
+                } else {
+                    tracing::info_span!(
+                        "http_request",
+                        method = %request.method(),
+                        uri = %uri,
+                    )
+                }
+            }),
+        );
 
     // Start server
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));

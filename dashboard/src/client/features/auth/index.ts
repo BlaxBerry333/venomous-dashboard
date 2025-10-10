@@ -1,13 +1,5 @@
-syntax = "proto3";
-
-package venomous_dashboard.auth;
-
-
 // ====================================================================================================
-// Common Types
+// components
 // ====================================================================================================
-
-message ApiError {
-  string code = 1;
-  string message = 2;
-}
+export { default as AuthSigninForm } from "./components/AuthSigninForm";
+export { default as AuthSignupForm } from "./components/AuthSignupForm";

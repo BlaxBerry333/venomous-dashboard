@@ -1,4 +1,4 @@
-import type { TUserGetProfileResponse, TUserUpdateProfileRequest, TUserUpdateProfileResponse } from "@/types";
+import type * as Types from "@/types";
 import { toCamelCase } from "@/utils/helper";
 import { API_ENDPOINTS } from "../endpoints";
 
@@ -7,7 +7,7 @@ export const USER_FETCHERS = {
     token: string,
   ): Promise<{
     response: Response;
-    data: TUserGetProfileResponse;
+    data: Types.TUserGetProfileResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.USER.GET_PROFILE, {
       method: "GET",
@@ -17,7 +17,7 @@ export const USER_FETCHERS = {
       },
     });
     const rawData = await response.json();
-    const data = toCamelCase<TUserGetProfileResponse>(rawData);
+    const data = toCamelCase<Types.TUserGetProfileResponse>(rawData);
     return {
       response,
       data,
@@ -25,11 +25,11 @@ export const USER_FETCHERS = {
   },
 
   UPDATE_PROFILE: async (
-    requestBody: TUserUpdateProfileRequest,
+    requestBody: Types.TUserUpdateProfileRequest,
     token: string,
   ): Promise<{
     response: Response;
-    data: TUserUpdateProfileResponse;
+    data: Types.TUserUpdateProfileResponse;
   }> => {
     const response = await fetch(API_ENDPOINTS.API_GATEWAY_URL.USER.UPDATE_PROFILE, {
       method: "PATCH",
@@ -40,7 +40,7 @@ export const USER_FETCHERS = {
       body: JSON.stringify(requestBody),
     });
     const rawData = await response.json();
-    const data = toCamelCase<TUserUpdateProfileResponse>(rawData);
+    const data = toCamelCase<Types.TUserUpdateProfileResponse>(rawData);
     return {
       response,
       data,
