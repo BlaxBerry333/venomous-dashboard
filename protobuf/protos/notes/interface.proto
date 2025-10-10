@@ -9,20 +9,11 @@ option go_package = "github.com/venomous-dashboard/api-gateway/internal/types/pr
 // Memo Types
 // ====================================================================================================
 
-enum MemoColor {
-  YELLOW = 0;
-  GREEN = 1;
-  BLUE = 2;
-  PINK = 3;
-  PURPLE = 4;
-  GRAY = 5;
-}
-
 message Memo {
   string id = 1;
   string user_id = 2;
   string content = 3;
-  MemoColor color = 4;
+  string color = 4;        // Hex color string (e.g., "#FFF9C4")
   bool is_pinned = 5;
   string created_at = 6;
   string updated_at = 7;

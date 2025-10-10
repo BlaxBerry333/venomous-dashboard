@@ -110,7 +110,7 @@ psql -U "$DB_USER" -d "$NOTES_DB" -c "
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL,
         content TEXT NOT NULL,
-        color TEXT NOT NULL DEFAULT 'yellow',
+        color TEXT NOT NULL DEFAULT '#FFF9C4',
         is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

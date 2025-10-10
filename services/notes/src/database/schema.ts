@@ -7,7 +7,7 @@ export const memos = pgTable("memos", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull(),
   content: text("content").notNull(),
-  color: text("color").notNull().default("yellow"),
+  color: text("color").notNull().default("#FFF9C4"), // Light Yellow - 默认淡黄色
   isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

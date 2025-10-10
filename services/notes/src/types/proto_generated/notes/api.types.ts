@@ -6,16 +6,45 @@
 
 /* eslint-disable */
 import type { TApiError } from "../_common/interface.types";
-import type { TArticle, TArticleChapter, TArticleStatus, TMemo, TMemoColor } from "./interface.types";
+import type { TArticle, TArticleChapter, TArticleStatus, TMemo } from "./interface.types";
 
-/** No fields needed - user identified by JWT token */
 export interface TMemoListRequest {
+  /** Pagination */
+  page?:
+    | number
+    | undefined;
+  /** Items per page (default: 20, max: 100) */
+  pageSize?:
+    | number
+    | undefined;
+  /** Filtering */
+  color?:
+    | string
+    | undefined;
+  /** Filter by pinned status */
+  isPinned?:
+    | boolean
+    | undefined;
+  /** Search in content (fuzzy match) */
+  search?:
+    | string
+    | undefined;
+  /** Sorting */
+  sortBy?:
+    | string
+    | undefined;
+  /** Sort order: asc, desc (default: desc) */
+  sortOrder?: string | undefined;
 }
 
 export interface TMemoListResponse {
   success: boolean;
   data: TMemo[];
-  error?: TApiError | undefined;
+  error?:
+    | TApiError
+    | undefined;
+  /** Pagination metadata */
+  meta?: TPaginationMeta | undefined;
 }
 
 export interface TMemoGetRequest {
@@ -30,8 +59,12 @@ export interface TMemoGetResponse {
 
 export interface TMemoCreateRequest {
   content: string;
-  color: TMemoColor;
-  isPinned: boolean;
+  /** Hex color string (default: "#FFF9C4") */
+  color?:
+    | string
+    | undefined;
+  /** Default: false */
+  isPinned?: boolean | undefined;
 }
 
 export interface TMemoCreateResponse {
@@ -42,8 +75,11 @@ export interface TMemoCreateResponse {
 
 export interface TMemoUpdateRequest {
   id: string;
-  content?: string | undefined;
-  color?: TMemoColor | undefined;
+  content?:
+    | string
+    | undefined;
+  /** Hex color string */
+  color?: string | undefined;
   isPinned?: boolean | undefined;
 }
 
@@ -62,14 +98,43 @@ export interface TMemoDeleteResponse {
   error?: TApiError | undefined;
 }
 
-/** No fields needed - user identified by JWT token */
 export interface TArticleListRequest {
+  /** Pagination */
+  page?:
+    | number
+    | undefined;
+  /** Items per page (default: 20, max: 100) */
+  pageSize?:
+    | number
+    | undefined;
+  /** Filtering */
+  status?:
+    | TArticleStatus
+    | undefined;
+  /** Filter by category */
+  category?:
+    | string
+    | undefined;
+  /** Search in title and description */
+  search?:
+    | string
+    | undefined;
+  /** Sorting */
+  sortBy?:
+    | string
+    | undefined;
+  /** Sort order: asc, desc (default: desc) */
+  sortOrder?: string | undefined;
 }
 
 export interface TArticleListResponse {
   success: boolean;
   data: TArticleWithChapterCount[];
-  error?: TApiError | undefined;
+  error?:
+    | TApiError
+    | undefined;
+  /** Pagination metadata */
+  meta?: TPaginationMeta | undefined;
 }
 
 export interface TArticleWithChapterCount {
@@ -145,7 +210,8 @@ export interface TChapterCreateRequest {
   title: string;
   content: string;
   chapterNumber: number;
-  wordCount: number;
+  /** Optional, auto-calculated from content */
+  wordCount?: number | undefined;
 }
 
 export interface TChapterCreateResponse {
@@ -158,7 +224,14 @@ export interface TChapterUpdateRequest {
   articleId: string;
   chapterId: string;
   title?: string | undefined;
-  content?: string | undefined;
+  content?:
+    | string
+    | undefined;
+  /** Support reordering */
+  chapterNumber?:
+    | number
+    | undefined;
+  /** Optional, auto-calculated from content */
   wordCount?: number | undefined;
 }
 
@@ -176,4 +249,15 @@ export interface TChapterDeleteRequest {
 export interface TChapterDeleteResponse {
   success: boolean;
   error?: TApiError | undefined;
+}
+
+export interface TPaginationMeta {
+  /** Total number of items */
+  total: number;
+  /** Current page number */
+  page: number;
+  /** Items per page */
+  pageSize: number;
+  /** Total number of pages */
+  totalPages: number;
 }

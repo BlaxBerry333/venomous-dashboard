@@ -1,11 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import * as articlesHandlers from "../handlers/articles";
-import { extractUserMiddleware } from "../middleware/auth";
 
 export const articlesRoutes: FastifyPluginAsync = async (app) => {
-  // Add authentication middleware to all routes in this group
-  app.addHook("onRequest", extractUserMiddleware);
-
   // Articles
   app.get("/", articlesHandlers.getListArticles);
   app.get("/:id", articlesHandlers.getArticle);

@@ -23,7 +23,17 @@ const (
 )
 
 type MemoListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Pagination
+	Page     *int32 `protobuf:"varint,1,opt,name=page,proto3,oneof" json:"page,omitempty"`                         // Page number (default: 1)
+	PageSize *int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3,oneof" json:"page_size,omitempty"` // Items per page (default: 20, max: 100)
+	// Filtering
+	Color    *string `protobuf:"bytes,3,opt,name=color,proto3,oneof" json:"color,omitempty"`                        // Filter by hex color
+	IsPinned *bool   `protobuf:"varint,4,opt,name=is_pinned,json=isPinned,proto3,oneof" json:"is_pinned,omitempty"` // Filter by pinned status
+	Search   *string `protobuf:"bytes,5,opt,name=search,proto3,oneof" json:"search,omitempty"`                      // Search in content (fuzzy match)
+	// Sorting
+	SortBy        *string `protobuf:"bytes,6,opt,name=sort_by,json=sortBy,proto3,oneof" json:"sort_by,omitempty"`          // Sort field: created_at, updated_at, is_pinned
+	SortOrder     *string `protobuf:"bytes,7,opt,name=sort_order,json=sortOrder,proto3,oneof" json:"sort_order,omitempty"` // Sort order: asc, desc (default: desc)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,11 +68,61 @@ func (*MemoListRequest) Descriptor() ([]byte, []int) {
 	return file_notes_api_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *MemoListRequest) GetPage() int32 {
+	if x != nil && x.Page != nil {
+		return *x.Page
+	}
+	return 0
+}
+
+func (x *MemoListRequest) GetPageSize() int32 {
+	if x != nil && x.PageSize != nil {
+		return *x.PageSize
+	}
+	return 0
+}
+
+func (x *MemoListRequest) GetColor() string {
+	if x != nil && x.Color != nil {
+		return *x.Color
+	}
+	return ""
+}
+
+func (x *MemoListRequest) GetIsPinned() bool {
+	if x != nil && x.IsPinned != nil {
+		return *x.IsPinned
+	}
+	return false
+}
+
+func (x *MemoListRequest) GetSearch() string {
+	if x != nil && x.Search != nil {
+		return *x.Search
+	}
+	return ""
+}
+
+func (x *MemoListRequest) GetSortBy() string {
+	if x != nil && x.SortBy != nil {
+		return *x.SortBy
+	}
+	return ""
+}
+
+func (x *MemoListRequest) GetSortOrder() string {
+	if x != nil && x.SortOrder != nil {
+		return *x.SortOrder
+	}
+	return ""
+}
+
 type MemoListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	Data          []*Memo                `protobuf:"bytes,2,rep,name=data,proto3" json:"data,omitempty"`
 	Error         *__common.ApiError     `protobuf:"bytes,3,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	Meta          *PaginationMeta        `protobuf:"bytes,4,opt,name=meta,proto3,oneof" json:"meta,omitempty"` // Pagination metadata
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -114,6 +174,13 @@ func (x *MemoListResponse) GetData() []*Memo {
 func (x *MemoListResponse) GetError() *__common.ApiError {
 	if x != nil {
 		return x.Error
+	}
+	return nil
+}
+
+func (x *MemoListResponse) GetMeta() *PaginationMeta {
+	if x != nil {
+		return x.Meta
 	}
 	return nil
 }
@@ -225,8 +292,8 @@ func (x *MemoGetResponse) GetError() *__common.ApiError {
 type MemoCreateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
-	Color         MemoColor              `protobuf:"varint,2,opt,name=color,proto3,enum=venomous_dashboard.notes.MemoColor" json:"color,omitempty"`
-	IsPinned      bool                   `protobuf:"varint,3,opt,name=is_pinned,json=isPinned,proto3" json:"is_pinned,omitempty"`
+	Color         *string                `protobuf:"bytes,2,opt,name=color,proto3,oneof" json:"color,omitempty"`                        // Hex color string (default: "#FFF9C4")
+	IsPinned      *bool                  `protobuf:"varint,3,opt,name=is_pinned,json=isPinned,proto3,oneof" json:"is_pinned,omitempty"` // Default: false
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -268,16 +335,16 @@ func (x *MemoCreateRequest) GetContent() string {
 	return ""
 }
 
-func (x *MemoCreateRequest) GetColor() MemoColor {
-	if x != nil {
-		return x.Color
+func (x *MemoCreateRequest) GetColor() string {
+	if x != nil && x.Color != nil {
+		return *x.Color
 	}
-	return MemoColor_YELLOW
+	return ""
 }
 
 func (x *MemoCreateRequest) GetIsPinned() bool {
-	if x != nil {
-		return x.IsPinned
+	if x != nil && x.IsPinned != nil {
+		return *x.IsPinned
 	}
 	return false
 }
@@ -346,7 +413,7 @@ type MemoUpdateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Content       *string                `protobuf:"bytes,2,opt,name=content,proto3,oneof" json:"content,omitempty"`
-	Color         *MemoColor             `protobuf:"varint,3,opt,name=color,proto3,enum=venomous_dashboard.notes.MemoColor,oneof" json:"color,omitempty"`
+	Color         *string                `protobuf:"bytes,3,opt,name=color,proto3,oneof" json:"color,omitempty"` // Hex color string
 	IsPinned      *bool                  `protobuf:"varint,4,opt,name=is_pinned,json=isPinned,proto3,oneof" json:"is_pinned,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -396,11 +463,11 @@ func (x *MemoUpdateRequest) GetContent() string {
 	return ""
 }
 
-func (x *MemoUpdateRequest) GetColor() MemoColor {
+func (x *MemoUpdateRequest) GetColor() string {
 	if x != nil && x.Color != nil {
 		return *x.Color
 	}
-	return MemoColor_YELLOW
+	return ""
 }
 
 func (x *MemoUpdateRequest) GetIsPinned() bool {
@@ -567,7 +634,17 @@ func (x *MemoDeleteResponse) GetError() *__common.ApiError {
 }
 
 type ArticleListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Pagination
+	Page     *int32 `protobuf:"varint,1,opt,name=page,proto3,oneof" json:"page,omitempty"`                         // Page number (default: 1)
+	PageSize *int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3,oneof" json:"page_size,omitempty"` // Items per page (default: 20, max: 100)
+	// Filtering
+	Status   *ArticleStatus `protobuf:"varint,3,opt,name=status,proto3,enum=venomous_dashboard.notes.ArticleStatus,oneof" json:"status,omitempty"` // Filter by status
+	Category *string        `protobuf:"bytes,4,opt,name=category,proto3,oneof" json:"category,omitempty"`                                          // Filter by category
+	Search   *string        `protobuf:"bytes,5,opt,name=search,proto3,oneof" json:"search,omitempty"`                                              // Search in title and description
+	// Sorting
+	SortBy        *string `protobuf:"bytes,6,opt,name=sort_by,json=sortBy,proto3,oneof" json:"sort_by,omitempty"`          // Sort field: created_at, updated_at, title
+	SortOrder     *string `protobuf:"bytes,7,opt,name=sort_order,json=sortOrder,proto3,oneof" json:"sort_order,omitempty"` // Sort order: asc, desc (default: desc)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -602,11 +679,61 @@ func (*ArticleListRequest) Descriptor() ([]byte, []int) {
 	return file_notes_api_proto_rawDescGZIP(), []int{10}
 }
 
+func (x *ArticleListRequest) GetPage() int32 {
+	if x != nil && x.Page != nil {
+		return *x.Page
+	}
+	return 0
+}
+
+func (x *ArticleListRequest) GetPageSize() int32 {
+	if x != nil && x.PageSize != nil {
+		return *x.PageSize
+	}
+	return 0
+}
+
+func (x *ArticleListRequest) GetStatus() ArticleStatus {
+	if x != nil && x.Status != nil {
+		return *x.Status
+	}
+	return ArticleStatus_DRAFT
+}
+
+func (x *ArticleListRequest) GetCategory() string {
+	if x != nil && x.Category != nil {
+		return *x.Category
+	}
+	return ""
+}
+
+func (x *ArticleListRequest) GetSearch() string {
+	if x != nil && x.Search != nil {
+		return *x.Search
+	}
+	return ""
+}
+
+func (x *ArticleListRequest) GetSortBy() string {
+	if x != nil && x.SortBy != nil {
+		return *x.SortBy
+	}
+	return ""
+}
+
+func (x *ArticleListRequest) GetSortOrder() string {
+	if x != nil && x.SortOrder != nil {
+		return *x.SortOrder
+	}
+	return ""
+}
+
 type ArticleListResponse struct {
 	state         protoimpl.MessageState     `protogen:"open.v1"`
 	Success       bool                       `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	Data          []*ArticleWithChapterCount `protobuf:"bytes,2,rep,name=data,proto3" json:"data,omitempty"`
 	Error         *__common.ApiError         `protobuf:"bytes,3,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	Meta          *PaginationMeta            `protobuf:"bytes,4,opt,name=meta,proto3,oneof" json:"meta,omitempty"` // Pagination metadata
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -658,6 +785,13 @@ func (x *ArticleListResponse) GetData() []*ArticleWithChapterCount {
 func (x *ArticleListResponse) GetError() *__common.ApiError {
 	if x != nil {
 		return x.Error
+	}
+	return nil
+}
+
+func (x *ArticleListResponse) GetMeta() *PaginationMeta {
+	if x != nil {
+		return x.Meta
 	}
 	return nil
 }
@@ -1356,7 +1490,7 @@ type ChapterCreateRequest struct {
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	ChapterNumber int32                  `protobuf:"varint,4,opt,name=chapter_number,json=chapterNumber,proto3" json:"chapter_number,omitempty"`
-	WordCount     int32                  `protobuf:"varint,5,opt,name=word_count,json=wordCount,proto3" json:"word_count,omitempty"`
+	WordCount     *int32                 `protobuf:"varint,5,opt,name=word_count,json=wordCount,proto3,oneof" json:"word_count,omitempty"` // Optional, auto-calculated from content
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1420,8 +1554,8 @@ func (x *ChapterCreateRequest) GetChapterNumber() int32 {
 }
 
 func (x *ChapterCreateRequest) GetWordCount() int32 {
-	if x != nil {
-		return x.WordCount
+	if x != nil && x.WordCount != nil {
+		return *x.WordCount
 	}
 	return 0
 }
@@ -1492,7 +1626,8 @@ type ChapterUpdateRequest struct {
 	ChapterId     string                 `protobuf:"bytes,2,opt,name=chapter_id,json=chapterId,proto3" json:"chapter_id,omitempty"`
 	Title         *string                `protobuf:"bytes,3,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	Content       *string                `protobuf:"bytes,4,opt,name=content,proto3,oneof" json:"content,omitempty"`
-	WordCount     *int32                 `protobuf:"varint,5,opt,name=word_count,json=wordCount,proto3,oneof" json:"word_count,omitempty"`
+	ChapterNumber *int32                 `protobuf:"varint,5,opt,name=chapter_number,json=chapterNumber,proto3,oneof" json:"chapter_number,omitempty"` // Support reordering
+	WordCount     *int32                 `protobuf:"varint,6,opt,name=word_count,json=wordCount,proto3,oneof" json:"word_count,omitempty"`             // Optional, auto-calculated from content
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1553,6 +1688,13 @@ func (x *ChapterUpdateRequest) GetContent() string {
 		return *x.Content
 	}
 	return ""
+}
+
+func (x *ChapterUpdateRequest) GetChapterNumber() int32 {
+	if x != nil && x.ChapterNumber != nil {
+		return *x.ChapterNumber
+	}
+	return 0
 }
 
 func (x *ChapterUpdateRequest) GetWordCount() int32 {
@@ -1726,17 +1868,105 @@ func (x *ChapterDeleteResponse) GetError() *__common.ApiError {
 	return nil
 }
 
+type PaginationMeta struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`                             // Total number of items
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                               // Current page number
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`       // Items per page
+	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"` // Total number of pages
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaginationMeta) Reset() {
+	*x = PaginationMeta{}
+	mi := &file_notes_api_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaginationMeta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaginationMeta) ProtoMessage() {}
+
+func (x *PaginationMeta) ProtoReflect() protoreflect.Message {
+	mi := &file_notes_api_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaginationMeta.ProtoReflect.Descriptor instead.
+func (*PaginationMeta) Descriptor() ([]byte, []int) {
+	return file_notes_api_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *PaginationMeta) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
 var File_notes_api_proto protoreflect.FileDescriptor
 
 const file_notes_api_proto_rawDesc = "" +
 	"\n" +
-	"\x0fnotes/api.proto\x12\x18venomous_dashboard.notes\x1a\x17_common/interface.proto\x1a\x15notes/interface.proto\"\x11\n" +
-	"\x0fMemoListRequest\"\xaa\x01\n" +
+	"\x0fnotes/api.proto\x12\x18venomous_dashboard.notes\x1a\x17_common/interface.proto\x1a\x15notes/interface.proto\"\xbd\x02\n" +
+	"\x0fMemoListRequest\x12\x17\n" +
+	"\x04page\x18\x01 \x01(\x05H\x00R\x04page\x88\x01\x01\x12 \n" +
+	"\tpage_size\x18\x02 \x01(\x05H\x01R\bpageSize\x88\x01\x01\x12\x19\n" +
+	"\x05color\x18\x03 \x01(\tH\x02R\x05color\x88\x01\x01\x12 \n" +
+	"\tis_pinned\x18\x04 \x01(\bH\x03R\bisPinned\x88\x01\x01\x12\x1b\n" +
+	"\x06search\x18\x05 \x01(\tH\x04R\x06search\x88\x01\x01\x12\x1c\n" +
+	"\asort_by\x18\x06 \x01(\tH\x05R\x06sortBy\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"sort_order\x18\a \x01(\tH\x06R\tsortOrder\x88\x01\x01B\a\n" +
+	"\x05_pageB\f\n" +
+	"\n" +
+	"_page_sizeB\b\n" +
+	"\x06_colorB\f\n" +
+	"\n" +
+	"_is_pinnedB\t\n" +
+	"\a_searchB\n" +
+	"\n" +
+	"\b_sort_byB\r\n" +
+	"\v_sort_order\"\xf6\x01\n" +
 	"\x10MemoListResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x122\n" +
 	"\x04data\x18\x02 \x03(\v2\x1e.venomous_dashboard.notes.MemoR\x04data\x12>\n" +
-	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error\" \n" +
+	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01\x12A\n" +
+	"\x04meta\x18\x04 \x01(\v2(.venomous_dashboard.notes.PaginationMetaH\x01R\x04meta\x88\x01\x01B\b\n" +
+	"\x06_errorB\a\n" +
+	"\x05_meta\" \n" +
 	"\x0eMemoGetRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\xb7\x01\n" +
 	"\x0fMemoGetResponse\x12\x18\n" +
@@ -1744,21 +1974,24 @@ const file_notes_api_proto_rawDesc = "" +
 	"\x04data\x18\x02 \x01(\v2\x1e.venomous_dashboard.notes.MemoH\x00R\x04data\x88\x01\x01\x12>\n" +
 	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x01R\x05error\x88\x01\x01B\a\n" +
 	"\x05_dataB\b\n" +
-	"\x06_error\"\x85\x01\n" +
+	"\x06_error\"\x82\x01\n" +
 	"\x11MemoCreateRequest\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\x129\n" +
-	"\x05color\x18\x02 \x01(\x0e2#.venomous_dashboard.notes.MemoColorR\x05color\x12\x1b\n" +
-	"\tis_pinned\x18\x03 \x01(\bR\bisPinned\"\xba\x01\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\x12\x19\n" +
+	"\x05color\x18\x02 \x01(\tH\x00R\x05color\x88\x01\x01\x12 \n" +
+	"\tis_pinned\x18\x03 \x01(\bH\x01R\bisPinned\x88\x01\x01B\b\n" +
+	"\x06_colorB\f\n" +
+	"\n" +
+	"_is_pinned\"\xba\x01\n" +
 	"\x12MemoCreateResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x127\n" +
 	"\x04data\x18\x02 \x01(\v2\x1e.venomous_dashboard.notes.MemoH\x00R\x04data\x88\x01\x01\x12>\n" +
 	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x01R\x05error\x88\x01\x01B\a\n" +
 	"\x05_dataB\b\n" +
-	"\x06_error\"\xc8\x01\n" +
+	"\x06_error\"\xa3\x01\n" +
 	"\x11MemoUpdateRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\acontent\x18\x02 \x01(\tH\x00R\acontent\x88\x01\x01\x12>\n" +
-	"\x05color\x18\x03 \x01(\x0e2#.venomous_dashboard.notes.MemoColorH\x01R\x05color\x88\x01\x01\x12 \n" +
+	"\acontent\x18\x02 \x01(\tH\x00R\acontent\x88\x01\x01\x12\x19\n" +
+	"\x05color\x18\x03 \x01(\tH\x01R\x05color\x88\x01\x01\x12 \n" +
 	"\tis_pinned\x18\x04 \x01(\bH\x02R\bisPinned\x88\x01\x01B\n" +
 	"\n" +
 	"\b_contentB\b\n" +
@@ -1776,13 +2009,32 @@ const file_notes_api_proto_rawDesc = "" +
 	"\x12MemoDeleteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12>\n" +
 	"\x05error\x18\x02 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error\"\x14\n" +
-	"\x12ArticleListRequest\"\xc0\x01\n" +
+	"\x06_error\"\xea\x02\n" +
+	"\x12ArticleListRequest\x12\x17\n" +
+	"\x04page\x18\x01 \x01(\x05H\x00R\x04page\x88\x01\x01\x12 \n" +
+	"\tpage_size\x18\x02 \x01(\x05H\x01R\bpageSize\x88\x01\x01\x12D\n" +
+	"\x06status\x18\x03 \x01(\x0e2'.venomous_dashboard.notes.ArticleStatusH\x02R\x06status\x88\x01\x01\x12\x1f\n" +
+	"\bcategory\x18\x04 \x01(\tH\x03R\bcategory\x88\x01\x01\x12\x1b\n" +
+	"\x06search\x18\x05 \x01(\tH\x04R\x06search\x88\x01\x01\x12\x1c\n" +
+	"\asort_by\x18\x06 \x01(\tH\x05R\x06sortBy\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"sort_order\x18\a \x01(\tH\x06R\tsortOrder\x88\x01\x01B\a\n" +
+	"\x05_pageB\f\n" +
+	"\n" +
+	"_page_sizeB\t\n" +
+	"\a_statusB\v\n" +
+	"\t_categoryB\t\n" +
+	"\a_searchB\n" +
+	"\n" +
+	"\b_sort_byB\r\n" +
+	"\v_sort_order\"\x8c\x02\n" +
 	"\x13ArticleListResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12E\n" +
 	"\x04data\x18\x02 \x03(\v21.venomous_dashboard.notes.ArticleWithChapterCountR\x04data\x12>\n" +
-	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error\"{\n" +
+	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01\x12A\n" +
+	"\x04meta\x18\x04 \x01(\v2(.venomous_dashboard.notes.PaginationMetaH\x01R\x04meta\x88\x01\x01B\b\n" +
+	"\x06_errorB\a\n" +
+	"\x05_meta\"{\n" +
 	"\x17ArticleWithChapterCount\x12;\n" +
 	"\aarticle\x18\x01 \x01(\v2!.venomous_dashboard.notes.ArticleR\aarticle\x12#\n" +
 	"\rchapter_count\x18\x02 \x01(\x05R\fchapterCount\"#\n" +
@@ -1845,33 +2097,36 @@ const file_notes_api_proto_rawDesc = "" +
 	"\x04data\x18\x02 \x01(\v2(.venomous_dashboard.notes.ArticleChapterH\x00R\x04data\x88\x01\x01\x12>\n" +
 	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x01R\x05error\x88\x01\x01B\a\n" +
 	"\x05_dataB\b\n" +
-	"\x06_error\"\xab\x01\n" +
+	"\x06_error\"\xbf\x01\n" +
 	"\x14ChapterCreateRequest\x12\x1d\n" +
 	"\n" +
 	"article_id\x18\x01 \x01(\tR\tarticleId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12%\n" +
-	"\x0echapter_number\x18\x04 \x01(\x05R\rchapterNumber\x12\x1d\n" +
+	"\x0echapter_number\x18\x04 \x01(\x05R\rchapterNumber\x12\"\n" +
 	"\n" +
-	"word_count\x18\x05 \x01(\x05R\twordCount\"\xc7\x01\n" +
+	"word_count\x18\x05 \x01(\x05H\x00R\twordCount\x88\x01\x01B\r\n" +
+	"\v_word_count\"\xc7\x01\n" +
 	"\x15ChapterCreateResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12A\n" +
 	"\x04data\x18\x02 \x01(\v2(.venomous_dashboard.notes.ArticleChapterH\x00R\x04data\x88\x01\x01\x12>\n" +
 	"\x05error\x18\x03 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x01R\x05error\x88\x01\x01B\a\n" +
 	"\x05_dataB\b\n" +
-	"\x06_error\"\xd7\x01\n" +
+	"\x06_error\"\x96\x02\n" +
 	"\x14ChapterUpdateRequest\x12\x1d\n" +
 	"\n" +
 	"article_id\x18\x01 \x01(\tR\tarticleId\x12\x1d\n" +
 	"\n" +
 	"chapter_id\x18\x02 \x01(\tR\tchapterId\x12\x19\n" +
 	"\x05title\x18\x03 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x1d\n" +
-	"\acontent\x18\x04 \x01(\tH\x01R\acontent\x88\x01\x01\x12\"\n" +
+	"\acontent\x18\x04 \x01(\tH\x01R\acontent\x88\x01\x01\x12*\n" +
+	"\x0echapter_number\x18\x05 \x01(\x05H\x02R\rchapterNumber\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"word_count\x18\x05 \x01(\x05H\x02R\twordCount\x88\x01\x01B\b\n" +
+	"word_count\x18\x06 \x01(\x05H\x03R\twordCount\x88\x01\x01B\b\n" +
 	"\x06_titleB\n" +
 	"\n" +
-	"\b_contentB\r\n" +
+	"\b_contentB\x11\n" +
+	"\x0f_chapter_numberB\r\n" +
 	"\v_word_count\"\xc7\x01\n" +
 	"\x15ChapterUpdateResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12A\n" +
@@ -1887,7 +2142,13 @@ const file_notes_api_proto_rawDesc = "" +
 	"\x15ChapterDeleteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12>\n" +
 	"\x05error\x18\x02 \x01(\v2#.venomous_dashboard.common.ApiErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_errorBPZNgithub.com/venomous-dashboard/api-gateway/internal/types/proto_generated/notesb\x06proto3"
+	"\x06_error\"x\n" +
+	"\x0ePaginationMeta\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\x1f\n" +
+	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
+	"totalPagesBPZNgithub.com/venomous-dashboard/api-gateway/internal/types/proto_generated/notesb\x06proto3"
 
 var (
 	file_notes_api_proto_rawDescOnce sync.Once
@@ -1901,7 +2162,7 @@ func file_notes_api_proto_rawDescGZIP() []byte {
 	return file_notes_api_proto_rawDescData
 }
 
-var file_notes_api_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_notes_api_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_notes_api_proto_goTypes = []any{
 	(*MemoListRequest)(nil),         // 0: venomous_dashboard.notes.MemoListRequest
 	(*MemoListResponse)(nil),        // 1: venomous_dashboard.notes.MemoListResponse
@@ -1933,50 +2194,51 @@ var file_notes_api_proto_goTypes = []any{
 	(*ChapterUpdateResponse)(nil),   // 27: venomous_dashboard.notes.ChapterUpdateResponse
 	(*ChapterDeleteRequest)(nil),    // 28: venomous_dashboard.notes.ChapterDeleteRequest
 	(*ChapterDeleteResponse)(nil),   // 29: venomous_dashboard.notes.ChapterDeleteResponse
-	(*Memo)(nil),                    // 30: venomous_dashboard.notes.Memo
-	(*__common.ApiError)(nil),       // 31: venomous_dashboard.common.ApiError
-	(MemoColor)(0),                  // 32: venomous_dashboard.notes.MemoColor
-	(*Article)(nil),                 // 33: venomous_dashboard.notes.Article
-	(*ArticleChapter)(nil),          // 34: venomous_dashboard.notes.ArticleChapter
-	(ArticleStatus)(0),              // 35: venomous_dashboard.notes.ArticleStatus
+	(*PaginationMeta)(nil),          // 30: venomous_dashboard.notes.PaginationMeta
+	(*Memo)(nil),                    // 31: venomous_dashboard.notes.Memo
+	(*__common.ApiError)(nil),       // 32: venomous_dashboard.common.ApiError
+	(ArticleStatus)(0),              // 33: venomous_dashboard.notes.ArticleStatus
+	(*Article)(nil),                 // 34: venomous_dashboard.notes.Article
+	(*ArticleChapter)(nil),          // 35: venomous_dashboard.notes.ArticleChapter
 }
 var file_notes_api_proto_depIdxs = []int32{
-	30, // 0: venomous_dashboard.notes.MemoListResponse.data:type_name -> venomous_dashboard.notes.Memo
-	31, // 1: venomous_dashboard.notes.MemoListResponse.error:type_name -> venomous_dashboard.common.ApiError
-	30, // 2: venomous_dashboard.notes.MemoGetResponse.data:type_name -> venomous_dashboard.notes.Memo
-	31, // 3: venomous_dashboard.notes.MemoGetResponse.error:type_name -> venomous_dashboard.common.ApiError
-	32, // 4: venomous_dashboard.notes.MemoCreateRequest.color:type_name -> venomous_dashboard.notes.MemoColor
-	30, // 5: venomous_dashboard.notes.MemoCreateResponse.data:type_name -> venomous_dashboard.notes.Memo
-	31, // 6: venomous_dashboard.notes.MemoCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	32, // 7: venomous_dashboard.notes.MemoUpdateRequest.color:type_name -> venomous_dashboard.notes.MemoColor
-	30, // 8: venomous_dashboard.notes.MemoUpdateResponse.data:type_name -> venomous_dashboard.notes.Memo
-	31, // 9: venomous_dashboard.notes.MemoUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	31, // 10: venomous_dashboard.notes.MemoDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
+	31, // 0: venomous_dashboard.notes.MemoListResponse.data:type_name -> venomous_dashboard.notes.Memo
+	32, // 1: venomous_dashboard.notes.MemoListResponse.error:type_name -> venomous_dashboard.common.ApiError
+	30, // 2: venomous_dashboard.notes.MemoListResponse.meta:type_name -> venomous_dashboard.notes.PaginationMeta
+	31, // 3: venomous_dashboard.notes.MemoGetResponse.data:type_name -> venomous_dashboard.notes.Memo
+	32, // 4: venomous_dashboard.notes.MemoGetResponse.error:type_name -> venomous_dashboard.common.ApiError
+	31, // 5: venomous_dashboard.notes.MemoCreateResponse.data:type_name -> venomous_dashboard.notes.Memo
+	32, // 6: venomous_dashboard.notes.MemoCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	31, // 7: venomous_dashboard.notes.MemoUpdateResponse.data:type_name -> venomous_dashboard.notes.Memo
+	32, // 8: venomous_dashboard.notes.MemoUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	32, // 9: venomous_dashboard.notes.MemoDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
+	33, // 10: venomous_dashboard.notes.ArticleListRequest.status:type_name -> venomous_dashboard.notes.ArticleStatus
 	12, // 11: venomous_dashboard.notes.ArticleListResponse.data:type_name -> venomous_dashboard.notes.ArticleWithChapterCount
-	31, // 12: venomous_dashboard.notes.ArticleListResponse.error:type_name -> venomous_dashboard.common.ApiError
-	33, // 13: venomous_dashboard.notes.ArticleWithChapterCount.article:type_name -> venomous_dashboard.notes.Article
-	15, // 14: venomous_dashboard.notes.ArticleGetResponse.data:type_name -> venomous_dashboard.notes.ArticleWithChapters
-	31, // 15: venomous_dashboard.notes.ArticleGetResponse.error:type_name -> venomous_dashboard.common.ApiError
-	33, // 16: venomous_dashboard.notes.ArticleWithChapters.article:type_name -> venomous_dashboard.notes.Article
-	34, // 17: venomous_dashboard.notes.ArticleWithChapters.chapters:type_name -> venomous_dashboard.notes.ArticleChapter
-	33, // 18: venomous_dashboard.notes.ArticleCreateResponse.data:type_name -> venomous_dashboard.notes.Article
-	31, // 19: venomous_dashboard.notes.ArticleCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	35, // 20: venomous_dashboard.notes.ArticleUpdateRequest.status:type_name -> venomous_dashboard.notes.ArticleStatus
-	33, // 21: venomous_dashboard.notes.ArticleUpdateResponse.data:type_name -> venomous_dashboard.notes.Article
-	31, // 22: venomous_dashboard.notes.ArticleUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	31, // 23: venomous_dashboard.notes.ArticleDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
-	34, // 24: venomous_dashboard.notes.ChapterGetResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
-	31, // 25: venomous_dashboard.notes.ChapterGetResponse.error:type_name -> venomous_dashboard.common.ApiError
-	34, // 26: venomous_dashboard.notes.ChapterCreateResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
-	31, // 27: venomous_dashboard.notes.ChapterCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	34, // 28: venomous_dashboard.notes.ChapterUpdateResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
-	31, // 29: venomous_dashboard.notes.ChapterUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
-	31, // 30: venomous_dashboard.notes.ChapterDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
-	31, // [31:31] is the sub-list for method output_type
-	31, // [31:31] is the sub-list for method input_type
-	31, // [31:31] is the sub-list for extension type_name
-	31, // [31:31] is the sub-list for extension extendee
-	0,  // [0:31] is the sub-list for field type_name
+	32, // 12: venomous_dashboard.notes.ArticleListResponse.error:type_name -> venomous_dashboard.common.ApiError
+	30, // 13: venomous_dashboard.notes.ArticleListResponse.meta:type_name -> venomous_dashboard.notes.PaginationMeta
+	34, // 14: venomous_dashboard.notes.ArticleWithChapterCount.article:type_name -> venomous_dashboard.notes.Article
+	15, // 15: venomous_dashboard.notes.ArticleGetResponse.data:type_name -> venomous_dashboard.notes.ArticleWithChapters
+	32, // 16: venomous_dashboard.notes.ArticleGetResponse.error:type_name -> venomous_dashboard.common.ApiError
+	34, // 17: venomous_dashboard.notes.ArticleWithChapters.article:type_name -> venomous_dashboard.notes.Article
+	35, // 18: venomous_dashboard.notes.ArticleWithChapters.chapters:type_name -> venomous_dashboard.notes.ArticleChapter
+	34, // 19: venomous_dashboard.notes.ArticleCreateResponse.data:type_name -> venomous_dashboard.notes.Article
+	32, // 20: venomous_dashboard.notes.ArticleCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	33, // 21: venomous_dashboard.notes.ArticleUpdateRequest.status:type_name -> venomous_dashboard.notes.ArticleStatus
+	34, // 22: venomous_dashboard.notes.ArticleUpdateResponse.data:type_name -> venomous_dashboard.notes.Article
+	32, // 23: venomous_dashboard.notes.ArticleUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	32, // 24: venomous_dashboard.notes.ArticleDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
+	35, // 25: venomous_dashboard.notes.ChapterGetResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
+	32, // 26: venomous_dashboard.notes.ChapterGetResponse.error:type_name -> venomous_dashboard.common.ApiError
+	35, // 27: venomous_dashboard.notes.ChapterCreateResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
+	32, // 28: venomous_dashboard.notes.ChapterCreateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	35, // 29: venomous_dashboard.notes.ChapterUpdateResponse.data:type_name -> venomous_dashboard.notes.ArticleChapter
+	32, // 30: venomous_dashboard.notes.ChapterUpdateResponse.error:type_name -> venomous_dashboard.common.ApiError
+	32, // 31: venomous_dashboard.notes.ChapterDeleteResponse.error:type_name -> venomous_dashboard.common.ApiError
+	32, // [32:32] is the sub-list for method output_type
+	32, // [32:32] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_notes_api_proto_init() }
@@ -1985,12 +2247,15 @@ func file_notes_api_proto_init() {
 		return
 	}
 	file_notes_interface_proto_init()
+	file_notes_api_proto_msgTypes[0].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[1].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[3].OneofWrappers = []any{}
+	file_notes_api_proto_msgTypes[4].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[5].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[6].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[7].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[9].OneofWrappers = []any{}
+	file_notes_api_proto_msgTypes[10].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[11].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[14].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[16].OneofWrappers = []any{}
@@ -1999,6 +2264,7 @@ func file_notes_api_proto_init() {
 	file_notes_api_proto_msgTypes[19].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[21].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[23].OneofWrappers = []any{}
+	file_notes_api_proto_msgTypes[24].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[25].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[26].OneofWrappers = []any{}
 	file_notes_api_proto_msgTypes[27].OneofWrappers = []any{}
@@ -2009,7 +2275,7 @@ func file_notes_api_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notes_api_proto_rawDesc), len(file_notes_api_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

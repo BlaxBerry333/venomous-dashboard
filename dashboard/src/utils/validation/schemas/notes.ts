@@ -2,10 +2,20 @@ import { z } from "zod";
 
 import { VALIDATION_MESSAGE_I18N_KEYS } from "../validation-message-keys";
 
+export const MEMO_COLORS = {
+  LIGHT_YELLOW: "#FFF9C4",
+  LIGHT_GREEN: "#C8E6C9",
+  LIGHT_PINK: "#F8BBD0",
+} as const;
+
 const NOTES_MEMO_BASE_SCHEMA = z.object({
   id: z.uuid(VALIDATION_MESSAGE_I18N_KEYS.INVALID),
   content: z.string().min(1, VALIDATION_MESSAGE_I18N_KEYS.MEMO_CONTENT_REQUIRED),
-  color: z.number().int().min(0, VALIDATION_MESSAGE_I18N_KEYS.MEMO_COLOR_INVALID).max(5, VALIDATION_MESSAGE_I18N_KEYS.MEMO_COLOR_INVALID),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, VALIDATION_MESSAGE_I18N_KEYS.INVALID)
+    .optional()
+    .default(MEMO_COLORS.LIGHT_YELLOW),
   isPinned: z.boolean().optional().default(false),
 });
 
@@ -27,42 +37,23 @@ const NOTES_CHAPTER_BASE_SCHEMA = z.object({
   wordCount: z.number().int().min(0, VALIDATION_MESSAGE_I18N_KEYS.CHAPTER_WORD_COUNT_INVALID),
 });
 
-export const NOTES_MEMO_CREATE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.omit({
-  id: true,
-});
+export const NOTES_MEMO_GET_SCHEMA = NOTES_MEMO_BASE_SCHEMA.pick({ id: true });
 
-export const NOTES_MEMO_UPDATE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.partial().required({
-  id: true,
-});
+export const NOTES_MEMO_CREATE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.omit({ id: true });
 
-export const NOTES_MEMO_DELETE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.pick({
-  id: true,
-});
+export const NOTES_MEMO_UPDATE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.partial().required({ id: true });
 
-export const NOTES_MEMO_GET_SCHEMA = NOTES_MEMO_BASE_SCHEMA.pick({
-  id: true,
-});
+export const NOTES_MEMO_DELETE_SCHEMA = NOTES_MEMO_BASE_SCHEMA.pick({ id: true });
 
-export const NOTES_ARTICLE_CREATE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.omit({
-  id: true,
-  status: true,
-});
+export const NOTES_ARTICLE_GET_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.pick({ id: true });
 
-export const NOTES_ARTICLE_UPDATE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.partial().required({
-  id: true,
-});
+export const NOTES_ARTICLE_CREATE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.omit({ id: true, status: true });
 
-export const NOTES_ARTICLE_DELETE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.pick({
-  id: true,
-});
+export const NOTES_ARTICLE_UPDATE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.partial().required({ id: true });
 
-export const NOTES_ARTICLE_GET_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.pick({
-  id: true,
-});
+export const NOTES_CHAPTER_CREATE_SCHEMA = NOTES_CHAPTER_BASE_SCHEMA.omit({ chapterId: true });
 
-export const NOTES_CHAPTER_CREATE_SCHEMA = NOTES_CHAPTER_BASE_SCHEMA.omit({
-  chapterId: true,
-});
+export const NOTES_ARTICLE_DELETE_SCHEMA = NOTES_ARTICLE_BASE_SCHEMA.pick({ id: true });
 
 export const NOTES_CHAPTER_UPDATE_SCHEMA = NOTES_CHAPTER_BASE_SCHEMA.pick({
   articleId: true,

@@ -1,0 +1,1 @@
+export { registerCorsPlugin } from "./cors";

@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 // Extend FastifyRequest to include user information
 declare module "fastify" {
@@ -15,10 +15,7 @@ declare module "fastify" {
  * Middleware to extract user information from request headers
  * These headers are injected by API Gateway after JWT verification
  */
-export const extractUserMiddleware = async (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
+const extractUserMiddleware = async (request: FastifyRequest, reply: FastifyReply) => {
   // HTTP headers are case-insensitive, but different implementations may normalize differently
   // Try both uppercase and lowercase versions
   const userId = (request.headers["x-user-id"] || request.headers["X-User-ID"]) as string;
@@ -43,4 +40,20 @@ export const extractUserMiddleware = async (
     email,
     role,
   };
+};
+
+/**
+ * Register authentication middleware globally
+ * Extracts user info from API Gateway headers and skips public endpoints
+ */
+export const registerAuthMiddleware = (app: FastifyInstance) => {
+  app.addHook("onRequest", async (request, reply) => {
+    // Skip authentication for health check endpoint
+    if (request.url === "/health") {
+      return;
+    }
+
+    // Apply authentication middleware for all other routes
+    await extractUserMiddleware(request, reply);
+  });
 };

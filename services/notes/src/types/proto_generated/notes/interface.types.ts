@@ -6,16 +6,6 @@
 
 /* eslint-disable */
 
-export enum TMemoColor {
-  YELLOW = 0,
-  GREEN = 1,
-  BLUE = 2,
-  PINK = 3,
-  PURPLE = 4,
-  GRAY = 5,
-  UNRECOGNIZED = -1,
-}
-
 export enum TArticleStatus {
   DRAFT = 0,
   PUBLISHED = 1,
@@ -27,7 +17,8 @@ export interface TMemo {
   id: string;
   userId: string;
   content: string;
-  color: TMemoColor;
+  /** Hex color string (e.g., "#FFF9C4") */
+  color: string;
   isPinned: boolean;
   createdAt: string;
   updatedAt: string;

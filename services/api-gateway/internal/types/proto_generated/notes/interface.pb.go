@@ -21,64 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type MemoColor int32
-
-const (
-	MemoColor_YELLOW MemoColor = 0
-	MemoColor_GREEN  MemoColor = 1
-	MemoColor_BLUE   MemoColor = 2
-	MemoColor_PINK   MemoColor = 3
-	MemoColor_PURPLE MemoColor = 4
-	MemoColor_GRAY   MemoColor = 5
-)
-
-// Enum value maps for MemoColor.
-var (
-	MemoColor_name = map[int32]string{
-		0: "YELLOW",
-		1: "GREEN",
-		2: "BLUE",
-		3: "PINK",
-		4: "PURPLE",
-		5: "GRAY",
-	}
-	MemoColor_value = map[string]int32{
-		"YELLOW": 0,
-		"GREEN":  1,
-		"BLUE":   2,
-		"PINK":   3,
-		"PURPLE": 4,
-		"GRAY":   5,
-	}
-)
-
-func (x MemoColor) Enum() *MemoColor {
-	p := new(MemoColor)
-	*p = x
-	return p
-}
-
-func (x MemoColor) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (MemoColor) Descriptor() protoreflect.EnumDescriptor {
-	return file_notes_interface_proto_enumTypes[0].Descriptor()
-}
-
-func (MemoColor) Type() protoreflect.EnumType {
-	return &file_notes_interface_proto_enumTypes[0]
-}
-
-func (x MemoColor) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use MemoColor.Descriptor instead.
-func (MemoColor) EnumDescriptor() ([]byte, []int) {
-	return file_notes_interface_proto_rawDescGZIP(), []int{0}
-}
-
 type ArticleStatus int32
 
 const (
@@ -112,11 +54,11 @@ func (x ArticleStatus) String() string {
 }
 
 func (ArticleStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_notes_interface_proto_enumTypes[1].Descriptor()
+	return file_notes_interface_proto_enumTypes[0].Descriptor()
 }
 
 func (ArticleStatus) Type() protoreflect.EnumType {
-	return &file_notes_interface_proto_enumTypes[1]
+	return &file_notes_interface_proto_enumTypes[0]
 }
 
 func (x ArticleStatus) Number() protoreflect.EnumNumber {
@@ -125,7 +67,7 @@ func (x ArticleStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ArticleStatus.Descriptor instead.
 func (ArticleStatus) EnumDescriptor() ([]byte, []int) {
-	return file_notes_interface_proto_rawDescGZIP(), []int{1}
+	return file_notes_interface_proto_rawDescGZIP(), []int{0}
 }
 
 type Memo struct {
@@ -133,7 +75,7 @@ type Memo struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	Color         MemoColor              `protobuf:"varint,4,opt,name=color,proto3,enum=venomous_dashboard.notes.MemoColor" json:"color,omitempty"`
+	Color         string                 `protobuf:"bytes,4,opt,name=color,proto3" json:"color,omitempty"` // Hex color string (e.g., "#FFF9C4")
 	IsPinned      bool                   `protobuf:"varint,5,opt,name=is_pinned,json=isPinned,proto3" json:"is_pinned,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -193,11 +135,11 @@ func (x *Memo) GetContent() string {
 	return ""
 }
 
-func (x *Memo) GetColor() MemoColor {
+func (x *Memo) GetColor() string {
 	if x != nil {
 		return x.Color
 	}
-	return MemoColor_YELLOW
+	return ""
 }
 
 func (x *Memo) GetIsPinned() bool {
@@ -456,12 +398,12 @@ var File_notes_interface_proto protoreflect.FileDescriptor
 
 const file_notes_interface_proto_rawDesc = "" +
 	"\n" +
-	"\x15notes/interface.proto\x12\x18venomous_dashboard.notes\"\x92\x02\n" +
+	"\x15notes/interface.proto\x12\x18venomous_dashboard.notes\"\xed\x01\n" +
 	"\x04Memo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x18\n" +
-	"\acontent\x18\x03 \x01(\tR\acontent\x129\n" +
-	"\x05color\x18\x04 \x01(\x0e2#.venomous_dashboard.notes.MemoColorR\x05color\x12\x1b\n" +
+	"\acontent\x18\x03 \x01(\tR\acontent\x12\x14\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\x12\x1b\n" +
 	"\tis_pinned\x18\x05 \x01(\bR\bisPinned\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
@@ -504,16 +446,7 @@ const file_notes_interface_proto_rawDesc = "" +
 	"updated_at\x18\b \x01(\tR\tupdatedAt\x12\"\n" +
 	"\n" +
 	"deleted_at\x18\t \x01(\tH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
-	"\v_deleted_at*L\n" +
-	"\tMemoColor\x12\n" +
-	"\n" +
-	"\x06YELLOW\x10\x00\x12\t\n" +
-	"\x05GREEN\x10\x01\x12\b\n" +
-	"\x04BLUE\x10\x02\x12\b\n" +
-	"\x04PINK\x10\x03\x12\n" +
-	"\n" +
-	"\x06PURPLE\x10\x04\x12\b\n" +
-	"\x04GRAY\x10\x05*7\n" +
+	"\v_deleted_at*7\n" +
 	"\rArticleStatus\x12\t\n" +
 	"\x05DRAFT\x10\x00\x12\r\n" +
 	"\tPUBLISHED\x10\x01\x12\f\n" +
@@ -531,23 +464,21 @@ func file_notes_interface_proto_rawDescGZIP() []byte {
 	return file_notes_interface_proto_rawDescData
 }
 
-var file_notes_interface_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_notes_interface_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_notes_interface_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_notes_interface_proto_goTypes = []any{
-	(MemoColor)(0),         // 0: venomous_dashboard.notes.MemoColor
-	(ArticleStatus)(0),     // 1: venomous_dashboard.notes.ArticleStatus
-	(*Memo)(nil),           // 2: venomous_dashboard.notes.Memo
-	(*Article)(nil),        // 3: venomous_dashboard.notes.Article
-	(*ArticleChapter)(nil), // 4: venomous_dashboard.notes.ArticleChapter
+	(ArticleStatus)(0),     // 0: venomous_dashboard.notes.ArticleStatus
+	(*Memo)(nil),           // 1: venomous_dashboard.notes.Memo
+	(*Article)(nil),        // 2: venomous_dashboard.notes.Article
+	(*ArticleChapter)(nil), // 3: venomous_dashboard.notes.ArticleChapter
 }
 var file_notes_interface_proto_depIdxs = []int32{
-	0, // 0: venomous_dashboard.notes.Memo.color:type_name -> venomous_dashboard.notes.MemoColor
-	1, // 1: venomous_dashboard.notes.Article.status:type_name -> venomous_dashboard.notes.ArticleStatus
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: venomous_dashboard.notes.Article.status:type_name -> venomous_dashboard.notes.ArticleStatus
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_notes_interface_proto_init() }
@@ -563,7 +494,7 @@ func file_notes_interface_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notes_interface_proto_rawDesc), len(file_notes_interface_proto_rawDesc)),
-			NumEnums:      2,
+			NumEnums:      1,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,

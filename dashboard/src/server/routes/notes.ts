@@ -8,6 +8,9 @@ import * as SCHEMAS from "@/utils/validation/schemas/notes";
 export const NotesProcedures = {
   /**
    * Get list of memos
+   * TODO: Add support for pagination, filtering (color, isPinned), search, and sorting parameters
+   *       Backend API supports TMemoListRequest but not yet implemented.
+   *       When implementing, pass query params to NOTES_FETCHERS.GET_LIST_MEMOS()
    */
   getListMemos: TRPCAuthProtectedProcedure.query(async ({ ctx }) => {
     try {
@@ -173,6 +176,9 @@ export const NotesProcedures = {
 
   /**
    * Get list of articles
+   * TODO: Add support for pagination, filtering (status, category), search, and sorting parameters
+   *       Backend API supports TArticleListRequest but not yet implemented.
+   *       When implementing, pass query params to NOTES_FETCHERS.GET_LIST_ARTICLES()
    */
   getListArticles: TRPCAuthProtectedProcedure.query(async ({ ctx }) => {
     try {

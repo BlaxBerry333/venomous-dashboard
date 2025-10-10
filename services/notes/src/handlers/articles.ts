@@ -2,9 +2,9 @@ import { and, count, desc, eq, isNull } from "drizzle-orm";
 import type { RouteHandlerMethod } from "fastify";
 
 import { ErrorCode, ErrorMessage } from "../constants";
-import { articleChapters, articles, db } from "../database";
-import { CACHE_TTL, cacheKey, delCache, getCache, setCache } from "../lib/cache";
-import type { TArticleCreateRequest, TArticleUpdateRequest, TChapterCreateRequest, TChapterUpdateRequest } from "../types";
+import { articleChapters, articles, db, type Article } from "../database";
+import { CACHE_TTL, cacheKey, delCache, getCache, setCache } from "../lib";
+import type { TArticleCreateRequest, TArticleUpdateRequest, TArticleWithChapterCount, TChapterCreateRequest, TChapterUpdateRequest } from "../types";
 import { ApiResponse } from "../utils";
 
 // Enum to String mapping (for storing in DB)
@@ -22,35 +22,36 @@ const STRING_TO_ARTICLE_STATUS: Record<string, number> = {
   archived: 2,
 };
 
-/**
- * Transform database article to API response format
- * Converts status string to enum number
- */
-const transformArticleToResponse = (article: any) => ({
+// Transform database article to API response format. Converts status string to enum number
+const transformArticleToResponse = (article: Article) => ({
   ...article,
   status: STRING_TO_ARTICLE_STATUS[article.status] ?? 0,
 });
 
 /**
- * 获取用户所有 Articles
+ * Get list of articles
+ * TODO: Implement pagination, filtering (by status, category), search, and sorting parameters
+ *       Current API type defines TArticleListRequest with these fields but they are not used yet.
+ *       See protobuf definition: protobuf/protos/notes/api.proto
  */
 export const getListArticles: RouteHandlerMethod = async (request, reply) => {
   const userId = request.user?.userId;
   if (!userId) {
     return reply.status(401).send(ApiResponse.error(ErrorCode.UNAUTHORIZED, ErrorMessage.UNAUTHORIZED));
   }
-  const key = cacheKey.articleList(userId);
 
+  const key = cacheKey.articleList(userId);
   const cached = await getCache(key);
   if (cached && Array.isArray(cached)) {
-    const transformed = cached.map((item: any) => ({
-      article: transformArticleToResponse(item.article),
-      chapterCount: item.chapterCount,
-    }));
+    const transformed = (cached as TArticleWithChapterCount[])
+      .filter((item) => item.article !== undefined)
+      .map((item) => ({
+        article: transformArticleToResponse(item.article as unknown as Article),
+        chapterCount: item.chapterCount,
+      }));
     return reply.send(ApiResponse.success(transformed));
   }
 
-  // 使用 Drizzle 查询
   const result = await db
     .select({
       article: articles,
@@ -64,7 +65,6 @@ export const getListArticles: RouteHandlerMethod = async (request, reply) => {
 
   await setCache(key, result, CACHE_TTL.ARTICLE_LIST);
 
-  // 转换 article status 为 enum number
   const transformed = result.map((item) => ({
     article: transformArticleToResponse(item.article),
     chapterCount: item.chapterCount,
@@ -73,13 +73,19 @@ export const getListArticles: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 获取 Article 详情 (含章节)
+ * Get single article with chapters
  */
 export const getArticle: RouteHandlerMethod = async (request, reply) => {
   const { id } = request.params as { id: string };
   const userId = request.user?.userId;
   if (!userId) {
     return reply.status(401).send(ApiResponse.error(ErrorCode.UNAUTHORIZED, ErrorMessage.UNAUTHORIZED));
+  }
+
+  const key = cacheKey.article(id);
+  const cached = await getCache(key);
+  if (cached) {
+    return reply.send(ApiResponse.success(cached));
   }
 
   const articleResult = await db
@@ -98,16 +104,18 @@ export const getArticle: RouteHandlerMethod = async (request, reply) => {
     .where(and(eq(articleChapters.articleId, id), isNull(articleChapters.deletedAt)))
     .orderBy(articleChapters.chapterNumber);
 
-  return reply.send(
-    ApiResponse.success({
-      article: transformArticleToResponse(articleResult[0]),
-      chapters: chaptersResult,
-    }),
-  );
+  const data = {
+    article: transformArticleToResponse(articleResult[0]),
+    chapters: chaptersResult,
+  };
+
+  await setCache(key, data, CACHE_TTL.ARTICLE_DETAIL);
+
+  return reply.send(ApiResponse.success(data));
 };
 
 /**
- * 创建 Article
+ * Create article
  */
 export const createArticle: RouteHandlerMethod = async (request, reply) => {
   const { title, description, category, coverImageUrl } = request.body as TArticleCreateRequest;
@@ -115,8 +123,7 @@ export const createArticle: RouteHandlerMethod = async (request, reply) => {
   if (!userId) {
     return reply.status(401).send(ApiResponse.error(ErrorCode.UNAUTHORIZED, ErrorMessage.UNAUTHORIZED));
   }
-
-  if (!title || title.trim().length === 0) {
+  if (!title.trim().length) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.VALIDATION_ERROR, ErrorMessage.TITLE_REQUIRED));
   }
 
@@ -138,7 +145,7 @@ export const createArticle: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 更新 Article
+ * Update article
  */
 export const updateArticle: RouteHandlerMethod = async (request, reply) => {
   const { id } = request.params as { id: string };
@@ -161,13 +168,11 @@ export const updateArticle: RouteHandlerMethod = async (request, reply) => {
   const updateData: Partial<typeof articles.$inferInsert> = {
     updatedAt: new Date(),
   };
-
   if (title !== undefined) updateData.title = title;
   if (description !== undefined) updateData.description = description;
   if (category !== undefined) updateData.category = category;
   if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
   if (status !== undefined) updateData.status = ARTICLE_STATUS_TO_STRING[status] || ARTICLE_STATUS_TO_STRING[-1];
-
   if (Object.keys(updateData).length === 1) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.NO_FIELDS_TO_UPDATE, ErrorMessage.NO_FIELDS_TO_UPDATE));
   }
@@ -185,7 +190,7 @@ export const updateArticle: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 删除 Article (软删除)
+ * Delete article
  */
 export const deleteArticle: RouteHandlerMethod = async (request, reply) => {
   const { id } = request.params as { id: string };
@@ -206,12 +211,11 @@ export const deleteArticle: RouteHandlerMethod = async (request, reply) => {
 
   await delCache(cacheKey.articleList(userId), cacheKey.article(id));
 
-  // 使用 200 状态码并返回成功响应（而不是 204 No Content）
   return reply.status(200).send(ApiResponse.deleteSuccess());
 };
 
 /**
- * 获取 Chapter
+ * Get single chapter
  */
 export const getChapter: RouteHandlerMethod = async (request, reply) => {
   const { articleId, chapterId } = request.params as {
@@ -247,7 +251,7 @@ export const getChapter: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 创建 Chapter
+ * Create chapter
  */
 export const createChapter: RouteHandlerMethod = async (request, reply) => {
   const { articleId } = request.params as { articleId: string };
@@ -266,15 +270,12 @@ export const createChapter: RouteHandlerMethod = async (request, reply) => {
   if (articleResult.length === 0) {
     return reply.status(404).send(ApiResponse.error(ErrorCode.ARTICLE_NOT_FOUND, ErrorMessage.ARTICLE_NOT_FOUND));
   }
-
-  if (!title || title.trim().length === 0) {
+  if (!title.trim().length) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.VALIDATION_ERROR, ErrorMessage.TITLE_REQUIRED));
   }
-
-  if (!content || content.trim().length === 0) {
+  if (!content.trim().length) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.CONTENT_REQUIRED, ErrorMessage.CONTENT_REQUIRED));
   }
-
   if (chapterNumber === undefined || chapterNumber < 1) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.VALIDATION_ERROR, "Valid chapter number is required"));
   }
@@ -296,7 +297,7 @@ export const createChapter: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 更新 Chapter
+ * Update chapter
  */
 export const updateChapter: RouteHandlerMethod = async (request, reply) => {
   const { articleId, chapterId } = request.params as {
@@ -332,11 +333,9 @@ export const updateChapter: RouteHandlerMethod = async (request, reply) => {
   const updateData: Partial<typeof articleChapters.$inferInsert> = {
     updatedAt: new Date(),
   };
-
   if (title !== undefined) updateData.title = title;
   if (content !== undefined) updateData.content = content;
   if (wordCount !== undefined) updateData.wordCount = wordCount;
-
   if (Object.keys(updateData).length === 1) {
     return reply.status(400).send(ApiResponse.error(ErrorCode.NO_FIELDS_TO_UPDATE, ErrorMessage.NO_FIELDS_TO_UPDATE));
   }
@@ -353,7 +352,7 @@ export const updateChapter: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * 删除 Chapter (软删除)
+ * Delete chapter
  */
 export const deleteChapter: RouteHandlerMethod = async (request, reply) => {
   const { articleId, chapterId } = request.params as {
@@ -387,6 +386,5 @@ export const deleteChapter: RouteHandlerMethod = async (request, reply) => {
 
   await delCache(cacheKey.article(articleId), cacheKey.chapter(chapterId));
 
-  // 使用 200 状态码并返回成功响应（而不是 204 No Content）
   return reply.status(200).send(ApiResponse.deleteSuccess());
 };
