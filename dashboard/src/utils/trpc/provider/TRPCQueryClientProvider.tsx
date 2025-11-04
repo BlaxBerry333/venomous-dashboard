@@ -14,10 +14,10 @@ function createTanstackQueryClient(): TanstackQueryClient {
   return new TanstackQueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60, // 1 minute 内数据不会重新获取
+        staleTime: 0, // 数据立即变为 stale，允许重新获取
         gcTime: 1000 * 60 * 2, // 2 minutes 后未使用的数据会被垃圾回收
         refetchOnWindowFocus: true, // 窗口获得焦点时重新获取数据
-        refetchOnMount: false, // 组件挂载时重新获取数据
+        refetchOnMount: true, // 组件挂载时如果数据是 stale 则重新获取
         refetchOnReconnect: false, // 网络重新连接时重新获取数据
         retry: false, // 失败后不重试
       },

@@ -1,0 +1,10 @@
+{
+  "API_RESULTS": {
+    "CREATE_MEMO_SUCCESS": "Memo created successfully.",
+    "CREATE_MEMO_FAILED": "Failed to create memo.",
+    "UPDATE_MEMO_SUCCESS": "Memo updated successfully.",
+    "UPDATE_MEMO_FAILED": "Failed to update memo.",
+    "DELETE_MEMO_SUCCESS": "Memo deleted successfully.",
+    "DELETE_MEMO_FAILED": "Failed to delete memo."
+  }
+}

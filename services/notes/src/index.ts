@@ -15,6 +15,23 @@ const app = Fastify({
   disableRequestLogging: true, // Disable automatic request logging
 });
 
+// Error handler
+app.setErrorHandler((error, request, reply) => {
+  console.error("[Fastify Error Handler]", {
+    method: request.method,
+    url: request.url,
+    error: error.message,
+    stack: error.stack,
+  });
+  reply.status(error.statusCode || 500).send({
+    success: false,
+    error: {
+      code: "INTERNAL_ERROR",
+      message: error.message,
+    },
+  });
+});
+
 // Register middlewares
 registerLoggerMiddleware(app);
 registerAuthMiddleware(app);

@@ -101,10 +101,7 @@ export const NOTES_FETCHERS = {
   }> => {
     const response = await fetch(`${API_ENDPOINTS.API_GATEWAY_URL.NOTES.DELETE_MEMO}/${requestBody.id}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const rawData = await response.json();
     const data = toCamelCase<Types.TMemoDeleteResponse>(rawData);
@@ -212,10 +209,7 @@ export const NOTES_FETCHERS = {
   }> => {
     const response = await fetch(`${API_ENDPOINTS.API_GATEWAY_URL.NOTES.DELETE_ARTICLE}/${requestBody.id}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const rawData = await response.json();
     const data = toCamelCase<Types.TArticleDeleteResponse>(rawData);
@@ -302,10 +296,7 @@ export const NOTES_FETCHERS = {
   }> => {
     const response = await fetch(`${API_ENDPOINTS.API_GATEWAY_URL.NOTES.DELETE_CHAPTER}/${requestBody.articleId}/chapters/${requestBody.chapterId}`, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const rawData = await response.json();
     const data = toCamelCase<Types.TChapterDeleteResponse>(rawData);

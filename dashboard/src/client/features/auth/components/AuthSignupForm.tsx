@@ -36,7 +36,7 @@ const AuthSignupForm = React.memo(() => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
           type: "error",
-          title: dictionary.service_auth.apiResults?.[errorCode],
+          title: dictionary.service_auth.API_RESULTS?.[errorCode],
           description: errorMessage,
         });
       },

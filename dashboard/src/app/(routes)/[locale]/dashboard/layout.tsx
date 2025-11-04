@@ -37,7 +37,7 @@ const DashboardRootLayout = React.memo<React.PropsWithChildren>(({ children }) =
           <DashboardNavMenu />
         </Layout.Side>
 
-        <Layout.Content>{children}</Layout.Content>
+        <Layout.Content style={{ padding: "8px 0" }}>{children}</Layout.Content>
       </Container>
     </Layout.Provider>
   );

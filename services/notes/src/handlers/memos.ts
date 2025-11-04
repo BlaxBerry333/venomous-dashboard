@@ -138,7 +138,7 @@ export const updateMemo: RouteHandlerMethod = async (request, reply) => {
 };
 
 /**
- * Delete memo
+ * Delete memo (soft delete)
  */
 export const deleteMemo: RouteHandlerMethod = async (request, reply) => {
   const { id } = request.params as { id: string };
