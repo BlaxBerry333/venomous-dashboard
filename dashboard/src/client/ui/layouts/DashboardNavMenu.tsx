@@ -1,24 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
-import { Menu } from "venomous-ui-react/components";
+import { Icon, Menu } from "venomous-ui-react/components";
 
 import { getServiceNameFromPathname, ROUTER_PATHS } from "@/client/routes";
 import { SERVICE_NAMES } from "@/client/routes/paths";
 import { useI18nDictionary, useI18nLocale } from "@/utils/i18n/index.client";
 
-const DashboardNavMenu = React.memo(() => {
+const DashboardNavMenu = React.memo<{
+  isCollapsed: boolean;
+}>(({ isCollapsed }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const dictionary = useI18nDictionary();
   const { currentLocale } = useI18nLocale();
 
-  const pathname = usePathname();
-
   const currentServiceName = React.useMemo(() => getServiceNameFromPathname(pathname), [pathname]);
 
-  const navItems = React.useMemo(() => {
+  const navItems = React.useMemo<Array<{ label: string; path: string; icon: string }>>(() => {
     switch (currentServiceName) {
       case SERVICE_NAMES.MEDIAS:
         return [
@@ -65,21 +67,22 @@ const DashboardNavMenu = React.memo(() => {
   }, [dictionary, currentServiceName, currentLocale]);
 
   return (
-    <Menu.List style={{ padding: "8px" }}>
-      {navItems.map((item, index) => {
+    <Menu.List>
+      {navItems.map((item) => {
         const { label, path, icon } = item;
         const isSelected = pathname.startsWith(path);
         return (
-          <Link key={path} href={path}>
-            <Menu.Item
-              id={path}
-              text={label}
-              icon={icon}
-              iconStyle={{ margin: "0 8px" }}
-              isActive={isSelected}
-              style={{ marginBottom: index === navItems.length - 1 ? 0 : "8px", cursor: "pointer" }}
-            />
-          </Link>
+          <Menu.Item
+            key={path}
+            label={isCollapsed ? "" : label}
+            Icon={<Icon icon={icon} width={32} style={{ transform: "translateX(8px" }} />}
+            selected={isSelected}
+            onClick={() => {
+              if (isSelected) return;
+              router.push(path);
+            }}
+            style={{ gap: 20, transition: "none" }}
+          />
         );
       })}
     </Menu.List>

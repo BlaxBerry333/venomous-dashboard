@@ -7,9 +7,9 @@ import type { SERVICE_NAMES } from "@/client/routes/paths";
 
 const Logo = React.memo<{
   serviceName: (typeof SERVICE_NAMES)[keyof typeof SERVICE_NAMES];
-  size: number;
+  size?: number;
   style?: React.CSSProperties;
-}>(({ serviceName, size, style }) => {
+}>(({ serviceName, size = 40, style }) => {
   return (
     <Image
       src={`/assets/logos/${serviceName}.webp`}

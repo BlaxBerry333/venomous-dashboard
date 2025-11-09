@@ -2,24 +2,13 @@
 
 import React from "react";
 
-import { Icon, Theme } from "venomous-ui-react/components";
+import { IconButton } from "venomous-ui-react/components";
+import { useThemeMode } from "venomous-ui-react/hooks";
 
-const ThemeModeTrigger = React.memo<{
-  style?: React.CSSProperties;
-}>(({ style }) => {
-  const { isDarkThemeMode, toggleThemeMode } = Theme.useThemeMode();
+const ThemeModeTrigger = React.memo(() => {
+  const { isDarkMode, toggleThemeMode } = useThemeMode();
 
-  return (
-    <Icon
-      icon={isDarkThemeMode ? "solar:moon-bold" : "solar:sun-bold"}
-      width={24}
-      onClick={toggleThemeMode}
-      style={{
-        cursor: "pointer",
-        ...style,
-      }}
-    />
-  );
+  return <IconButton variant="text" icon={isDarkMode ? "solar:moon-bold" : "solar:sun-bold"} onClick={toggleThemeMode} />;
 });
 
 ThemeModeTrigger.displayName = "ThemeModeTrigger";

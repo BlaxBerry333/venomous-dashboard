@@ -14,7 +14,6 @@ export { default as Logo } from "./layouts/Logo";
 export { default as ServiceSwitcherPopover } from "./layouts/ServiceSwitcherPopover";
 
 // ====================================================================================================
-// custom components
+// guards
 // ====================================================================================================
-export { default as CustomModal } from "./custom/CustomModal";
-export { default as CustomPopover } from "./custom/CustomPopover";
+export { default as AuthGuard } from "./guards/AuthGuard";

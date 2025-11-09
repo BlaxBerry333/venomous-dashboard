@@ -31,17 +31,15 @@ const DashboardNotesListView = React.memo(() => {
   });
 
   return (
-    <Space.Grid columns={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing={16}>
+    <Space.Grid columns={{ XS: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 }} spacing={16}>
       {queryOfMemos.data?.map((memo) => (
         <Card
           key={memo.id}
           onClick={() => router.push(`/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_DETAIL}?id=${memo.id}`)}
-          style={{ height: 100, backgroundColor: String(memo.color), color: "#000000", position: "relative" }}
+          style={{ width: "100%", height: 100, backgroundColor: memo.color, color: "#000000" }}
         >
           {memo.isPinned && <Icon icon="solar:pin-bold-duotone" width={24} style={{ color: "inherit", position: "absolute", top: 4, right: 4 }} />}
-          <Typography.Paragraph ellipsis={3} style={{ color: "inherit" }}>
-            {memo.content}
-          </Typography.Paragraph>
+          <Typography.Paragraph ellipsis={3} style={{ color: "inherit" }} text={memo.content} />
         </Card>
       ))}
     </Space.Grid>

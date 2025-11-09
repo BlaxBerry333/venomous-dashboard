@@ -1,24 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
-import { Menu, Space, Typography } from "venomous-ui-react/components";
+import { Menu, Popover, Space, Typography } from "venomous-ui-react/components";
 
 import { getServiceNameFromPathname, ROUTER_PATHS } from "@/client/routes";
 import { SERVICE_NAMES } from "@/client/routes/paths";
 import { useI18nDictionary, useI18nLocale } from "@/utils/i18n/index.client";
-import CustomPopover from "../custom/CustomPopover";
+
 import Logo from "./Logo";
 
 const ServiceSwitcherPopover = React.memo<{
   triggerHeight?: number;
 }>(({ triggerHeight }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const dictionary = useI18nDictionary();
   const { currentLocale } = useI18nLocale();
-
-  const pathname = usePathname();
 
   const serviceItems = React.useMemo(() => {
     return [
@@ -53,37 +53,47 @@ const ServiceSwitcherPopover = React.memo<{
   }
 
   return (
-    <CustomPopover
-      alignment="start"
-      triggerStyle={{ height: triggerHeight ?? "100%", padding: "0 8px" }}
-      renderTrigger={() => (
-        <Space.Flex gap={8} style={{ alignItems: "center", padding: "0 8px" }}>
-          <Logo serviceName={currentService?.serviceName} size={40} />
-          <Typography.Text text={currentService.text} />
-        </Space.Flex>
-      )}
-    >
-      <React.Suspense>
+    <Popover
+      trigger="click"
+      placement="bottom"
+      content={
         <Menu.List style={{ minWidth: "200px" }}>
-          {serviceItems.map((currentItem, index) => {
-            const { serviceName, text, subText } = currentItem;
+          {serviceItems.map((currentItem) => {
+            const { serviceName, text } = currentItem;
             const isSelected = serviceName === currentService.serviceName;
             return (
-              <Link href={currentItem.path} key={serviceName}>
-                <Menu.Item
-                  id={serviceName}
-                  text={text}
-                  subText={` ( ${subText} )`}
-                  renderStartElement={() => <Logo serviceName={serviceName} size={40} />}
-                  isActive={isSelected}
-                  style={{ marginBottom: index === serviceItems.length - 1 ? 0 : "8px", cursor: "pointer" }}
-                />
-              </Link>
+              <Menu.Item
+                key={serviceName}
+                Icon={<Logo serviceName={serviceName} />}
+                label={text}
+                selected={isSelected}
+                onClick={() => {
+                  if (isSelected) return;
+                  router.push(currentItem.path);
+                }}
+              />
             );
           })}
         </Menu.List>
-      </React.Suspense>
-    </CustomPopover>
+      }
+    >
+      {({ ref }) => (
+        <Space.Flex
+          ref={ref}
+          spacing={8}
+          style={{
+            height: triggerHeight,
+            alignItems: "center",
+            padding: "0 8px",
+            width: "max-content",
+            cursor: "pointer",
+          }}
+        >
+          <Logo serviceName={currentService?.serviceName} size={40} />
+          <Typography.Text text={currentService.text} as="strong" />
+        </Space.Flex>
+      )}
+    </Popover>
   );
 });
 

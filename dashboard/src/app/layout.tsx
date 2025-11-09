@@ -7,10 +7,12 @@ import { FontFamilyVariableNames } from "@/client/styles/fonts";
 import { ThemeProvider } from "@/client/ui";
 import { TRPCQueryClientProvider } from "@/utils/trpc/index.client";
 
+const APP_NAME = "Venomous Dashboard";
+
 export const metadata: Metadata = {
   title: {
-    default: "Venomous Dashboard",
-    template: `%s | Venomous Dashboard (${process.env.NODE_ENV})`,
+    default: `${APP_NAME}`,
+    template: `%s | ${APP_NAME} (${process.env.NODE_ENV})`,
   },
   description: "...",
   icons: {

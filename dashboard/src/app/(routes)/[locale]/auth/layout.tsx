@@ -2,40 +2,50 @@
 
 import React from "react";
 
-import { Container, Layout } from "venomous-ui-react/components";
-import { useDesign } from "venomous-ui-react/hooks";
+import { Box, Layout, ScrollToTop, Space } from "venomous-ui-react/components";
 
 import { SERVICE_NAMES } from "@/client/routes/paths";
 import { LanguageSwitcherPopover, Logo, ThemeModeTrigger } from "@/client/ui";
 
+const HEADER_HEIGHT: number = 60;
+const LAYOUT_SPACE: number = 16;
+
 const AuthRootLayout = React.memo<React.PropsWithChildren>(({ children }) => {
-  const design = useDesign();
-
   return (
-    <Layout.Provider headerHeight={60}>
-      <Layout.Header style={{ borderBottom: `1px solid ${design.BorderColors.tertiary}` }}>
-        <Container
-          maxBreakpoint="md"
-          style={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "24px",
-            padding: "0 8px",
-          }}
-        >
-          <Logo serviceName={SERVICE_NAMES.DASHBOARD} size={40} />
-          <div style={{ flexGrow: 1 }} />
-          <LanguageSwitcherPopover triggerHeight={60} />
-          <ThemeModeTrigger />
-        </Container>
-      </Layout.Header>
+    <>
+      <Layout.Header
+        style={{
+          height: HEADER_HEIGHT,
+          padding: `0 ${LAYOUT_SPACE}px`,
+          backgroundColor: "transparent",
+          backdropFilter: "blur(10px)",
+        }}
+        Logo={<Logo serviceName={SERVICE_NAMES.DASHBOARD} size={HEADER_HEIGHT / 1.5} />}
+        Menu={
+          <Space.Flex spacing={24} style={{ height: "100%", justifyContent: "flex-end", flex: 1 }}>
+            <ThemeModeTrigger />
+            <LanguageSwitcherPopover triggerHeight={HEADER_HEIGHT} />
+          </Space.Flex>
+        }
+      />
 
-      <Container maxBreakpoint="md" style={{ padding: "40px 8px" }}>
-        <Layout.Content>{children}</Layout.Content>
-      </Container>
-    </Layout.Provider>
+      <Box
+        as="main"
+        style={{
+          minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+          flexGrow: 1,
+          padding: `${LAYOUT_SPACE}px ${LAYOUT_SPACE * 2}px`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {children}
+
+        <ScrollToTop distance={200} style={{ bottom: HEADER_HEIGHT }} />
+      </Box>
+    </>
   );
 });
 

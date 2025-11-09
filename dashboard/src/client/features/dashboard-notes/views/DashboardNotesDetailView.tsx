@@ -29,7 +29,7 @@ const DashboardNotesDetailView = React.memo(() => {
           exact: false,
         });
         notify({
-          type: "success",
+          type: "SUCCESS",
           title: dictionary.service_notes.API_RESULTS.DELETE_MEMO_SUCCESS,
         });
         router.replace(`/${currentLocale}${ROUTER_PATHS.DASHBOARD.NOTES_LIST}`);
@@ -37,7 +37,7 @@ const DashboardNotesDetailView = React.memo(() => {
       onError: (error) => {
         const { errorCode, errorMessage } = extractTRPCErrorInfo(error);
         notify({
-          type: "error",
+          type: "ERROR",
           title: dictionary.service_notes.API_RESULTS?.[errorCode],
           description: errorMessage,
         });
